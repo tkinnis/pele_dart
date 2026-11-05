@@ -193,18 +193,23 @@ dart format --output=none --set-exit-if-changed lib test tool example/lib
 
 Once all quality gates and the 787-diagram differential verification suite pass with 0 differences:
 
-1. **Pin `UPSTREAM.md` to the new release tag and commit SHA**:
+1. **Regenerate Standalone Diagram & Style Images**:
+   Ensure `docs/images/diagrams/*.svg`, `docs/images/styles/*.svg`, and [`docs/DIAGRAM_GALLERY.md`](DIAGRAM_GALLERY.md) reflect the latest pure-Dart renders of every diagram family (with zero host-app chrome):
+   ```bash
+   dart run tool/generate_doc_images.dart
+   ```
+2. **Pin `UPSTREAM.md` to the new release tag and commit SHA**:
    ```bash
    dart run tool/sync_upstream.dart --pin <new_tag>
    ```
-2. **Confirm `--check` reports `UP TO DATE`**:
+3. **Confirm `--check` reports `UP TO DATE`**:
    ```bash
    dart run tool/sync_upstream.dart --check
    ```
-3. **Bump Package Version & Changelog**:
+4. **Bump Package Version & Changelog**:
    - Update `version:` in `pubspec.yaml`.
    - Document the upstream sync tag, new diagram families, beta promotions, and bug fixes in `CHANGELOG.md`.
-4. **Commit, Tag & Push**:
+5. **Commit, Tag & Push**:
    ```bash
    git add -A
    git commit -m "feat(upstream): sync with obsidianmd/pele <new_tag>"

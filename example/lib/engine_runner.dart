@@ -22,6 +22,259 @@ enum ComparisonEngine {
   const ComparisonEngine(this.id, this.label, this.accent);
 }
 
+/// Example-app canned custom palettes demonstrating consumer-defined [PelePalette] instances.
+const PelePalette kFlexokiPalette = PelePalette(
+  bg: '#fffcf0',
+  fg: '#100f0f',
+  muted: '#6f6e69',
+  line: '#100f0f',
+  surface: '#f2f0e5',
+  surfaceAlt: '#e6e4d9',
+  border: '#cecdc3',
+  accent: '#205ea6',
+  critical: '#af3029',
+  radius: 4,
+  colors: <String>[
+    '#205ea6',
+    '#bc5215',
+    '#66800b',
+    '#af3029',
+    '#24837b',
+    '#ad8301',
+    '#5e409d',
+    '#a02f6f',
+  ],
+);
+
+const PelePalette kCatppuccinMochaPalette = PelePalette(
+  bg: '#1e1e2e',
+  fg: '#cdd6f4',
+  muted: '#a6adc8',
+  line: '#bac2de',
+  surface: '#313244',
+  surfaceAlt: '#45475a',
+  border: '#585b70',
+  accent: '#89b4fa',
+  critical: '#f38ba8',
+  radius: 8,
+  colors: <String>[
+    '#89b4fa',
+    '#fab387',
+    '#a6e3a1',
+    '#f38ba8',
+    '#94e2d5',
+    '#f9e2af',
+    '#cba6f7',
+    '#f5c2e7',
+  ],
+);
+
+const PelePalette kNordPalette = PelePalette(
+  bg: '#2e3440',
+  fg: '#eceff4',
+  muted: '#d8dee9',
+  line: '#e5e9f0',
+  surface: '#3b4252',
+  surfaceAlt: '#434c5e',
+  border: '#4c566a',
+  accent: '#88c0d0',
+  critical: '#bf616a',
+  radius: 5,
+  colors: <String>[
+    '#81a1c1',
+    '#d08770',
+    '#a3be8c',
+    '#bf616a',
+    '#88c0d0',
+    '#ebcb8b',
+    '#b48ead',
+    '#5e81ac',
+  ],
+);
+
+const PelePalette kSolarizedDarkPalette = PelePalette(
+  bg: '#002b36',
+  fg: '#eee8d5',
+  muted: '#93a1a1',
+  line: '#93a1a1',
+  surface: '#073642',
+  surfaceAlt: '#0b4654',
+  border: '#586e75',
+  accent: '#268bd2',
+  critical: '#dc322f',
+  radius: 4,
+  colors: <String>[
+    '#268bd2',
+    '#cb4b16',
+    '#859900',
+    '#dc322f',
+    '#2aa198',
+    '#b58900',
+    '#6c71c4',
+    '#d33682',
+  ],
+);
+
+/// Canned & custom style presets available in the Comparison Studio.
+enum PeleStylePreset {
+  dark('dark', 'Default Dark', PelePalette.dark, true),
+  light('light', 'Default Light', PelePalette.light, false),
+  flexoki('flexoki', 'Flexoki Paper', kFlexokiPalette, false),
+  catppuccin('catppuccin', 'Catppuccin Mocha', kCatppuccinMochaPalette, true),
+  nord('nord', 'Nord Blueprint', kNordPalette, true),
+  solarized('solarized', 'Solarized Dark', kSolarizedDarkPalette, true),
+  custom('custom', 'Custom CSS', PelePalette.dark, true);
+
+  final String id;
+  final String label;
+  final PelePalette palette;
+  final bool isDarkCanvas;
+  const PeleStylePreset(this.id, this.label, this.palette, this.isDarkCanvas);
+}
+
+/// Parses a CSS snippet containing `--pele-*` custom properties into a [PelePalette].
+PelePalette parsePaletteFromCss(
+  String css, {
+  PelePalette base = PelePalette.light,
+}) {
+  final cleaned = css.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
+  final vars = <String, String>{};
+  final declRe = RegExp(r'(--pele-[a-z0-9-]+)\s*:\s*([^;}\n]+)');
+  for (final m in declRe.allMatches(cleaned)) {
+    final k = m.group(1)!.trim();
+    final v = m.group(2)!.trim();
+    if (v.isNotEmpty) vars[k] = v;
+  }
+  if (vars.isEmpty) return base;
+
+  double? parsePx(String? raw) {
+    if (raw == null) return null;
+    final numStr =
+        raw.replaceAll(RegExp(r'px$', caseSensitive: false), '').trim();
+    return double.tryParse(numStr);
+  }
+
+  final seriesColors = List<String>.from(base.colors);
+  while (seriesColors.length < 8) {
+    seriesColors.add('#4c78a8');
+  }
+  for (var i = 0; i < 8; i++) {
+    final sVal = vars['--pele-series-${i + 1}'] ?? vars['--pele-c$i'];
+    if (sVal != null && sVal.isNotEmpty) {
+      seriesColors[i] = sVal;
+    }
+  }
+
+  return PelePalette(
+    bg: vars['--pele-bg'] ?? base.bg,
+    fg: vars['--pele-fg'] ?? base.fg,
+    fgOnLight: vars['--pele-fg-on-light'] ?? base.fgOnLight,
+    fgOnDark: vars['--pele-fg-on-dark'] ?? base.fgOnDark,
+    muted: vars['--pele-muted'] ?? base.muted,
+    line: vars['--pele-line'] ?? base.line,
+    surface: vars['--pele-surface'] ?? base.surface,
+    surfaceAlt: vars['--pele-surface-alt'] ?? base.surfaceAlt,
+    border: vars['--pele-border'] ?? base.border,
+    accent: vars['--pele-accent'] ?? base.accent,
+    code: vars['--pele-code'] ?? base.code,
+    critical: vars['--pele-critical'] ?? base.critical,
+    radius: parsePx(vars['--pele-radius']) ?? base.radius,
+    strokeWidth: parsePx(vars['--pele-stroke-width']) ?? base.strokeWidth,
+    thickStrokeWidth:
+        parsePx(vars['--pele-thick-stroke-width']) ?? base.thickStrokeWidth,
+    hairlineStrokeWidth:
+        parsePx(vars['--pele-hairline-stroke-width']) ??
+        base.hairlineStrokeWidth,
+    fontFamily: vars['--pele-font'] ?? base.fontFamily,
+    monoFontFamily: vars['--pele-font-mono'] ?? base.monoFontFamily,
+    colors: seriesColors,
+  );
+}
+
+/// Formats a [PelePalette] as a `.pele { --pele-*: ...; }` CSS block.
+String formatPaletteToCss(PelePalette p, {String selector = '.pele'}) {
+  String mixHex(String c1, String c2, double p1) {
+    List<int>? parseHex(String h) {
+      final s = h.trim().replaceFirst('#', '');
+      if (s.length == 3) {
+        final r = int.tryParse('${s[0]}${s[0]}', radix: 16);
+        final g = int.tryParse('${s[1]}${s[1]}', radix: 16);
+        final b = int.tryParse('${s[2]}${s[2]}', radix: 16);
+        if (r != null && g != null && b != null) return <int>[r, g, b];
+      } else if (s.length == 6) {
+        final r = int.tryParse(s.substring(0, 2), radix: 16);
+        final g = int.tryParse(s.substring(2, 4), radix: 16);
+        final b = int.tryParse(s.substring(4, 6), radix: 16);
+        if (r != null && g != null && b != null) return <int>[r, g, b];
+      }
+      return null;
+    }
+
+    final rgb1 = parseHex(c1) ?? const <int>[31, 31, 31];
+    final rgb2 = parseHex(c2) ?? const <int>[255, 255, 255];
+    final r = (rgb1[0] * p1 + rgb2[0] * (1 - p1)).round().clamp(0, 255);
+    final g = (rgb1[1] * p1 + rgb2[1] * (1 - p1)).round().clamp(0, 255);
+    final b = (rgb1[2] * p1 + rgb2[2] * (1 - p1)).round().clamp(0, 255);
+    return '#'
+        '${r.toRadixString(16).padLeft(2, '0')}'
+        '${g.toRadixString(16).padLeft(2, '0')}'
+        '${b.toRadixString(16).padLeft(2, '0')}';
+  }
+
+  final resolvedMuted = p.muted ?? mixHex(p.fg, p.bg, 0.60);
+  final resolvedLine = p.line ?? p.fg;
+  final resolvedSurface = p.surface ?? mixHex(p.fg, p.bg, 0.05);
+  final resolvedBorder = p.border ?? mixHex(p.fg, p.bg, 0.45);
+  final resolvedAccent = p.accent ?? '#5b7bd5';
+  final rad =
+      p.radius == p.radius.truncateToDouble()
+          ? '${p.radius.toInt()}px'
+          : '${p.radius}px';
+  final sb =
+      StringBuffer('$selector {\n')
+        ..writeln('  --pele-bg: ${p.bg};')
+        ..writeln('  --pele-fg: ${p.fg};');
+  if (p.fgOnLight != null) {
+    sb.writeln('  --pele-fg-on-light: ${p.fgOnLight};');
+  }
+  if (p.fgOnDark != null) {
+    sb.writeln('  --pele-fg-on-dark: ${p.fgOnDark};');
+  }
+  sb
+    ..writeln('  --pele-muted: $resolvedMuted;')
+    ..writeln('  --pele-line: $resolvedLine;')
+    ..writeln('  --pele-surface: $resolvedSurface;')
+    ..writeln('  --pele-surface-alt: ${p.surfaceAlt};')
+    ..writeln('  --pele-border: $resolvedBorder;')
+    ..writeln('  --pele-accent: $resolvedAccent;')
+    ..writeln('  --pele-critical: ${p.critical};')
+    ..writeln('  --pele-radius: $rad;');
+  for (var i = 0; i < p.colors.length; i++) {
+    sb.writeln('  --pele-series-${i + 1}: ${p.colors[i]};');
+  }
+  sb.write('}');
+  return sb.toString();
+}
+
+/// Parses a `#RRGGBB` or `#RGB` string into a Flutter [Color].
+Color parseHexColor(String hex, {Color fallback = const Color(0xFF14171F)}) {
+  final clean = hex.trim().replaceFirst('#', '');
+  if (clean.length == 3) {
+    final r = int.tryParse('${clean[0]}${clean[0]}', radix: 16);
+    final g = int.tryParse('${clean[1]}${clean[1]}', radix: 16);
+    final b = int.tryParse('${clean[2]}${clean[2]}', radix: 16);
+    if (r != null && g != null && b != null) {
+      return Color.fromARGB(255, r, g, b);
+    }
+  } else if (clean.length == 6) {
+    final val = int.tryParse(clean, radix: 16);
+    if (val != null) {
+      return Color(0xFF000000 | val);
+    }
+  }
+  return fallback;
+}
+
 /// Result of running a benchmarked operation using `pele.run/playground`'s
 /// exact timing methodology (`website/src/lib/timing.ts`):
 ///
@@ -215,12 +468,14 @@ Uint8List? tryCompileVectorBytes(String flattenedSvg, String debugName) {
 EngineRenderOutput renderWithPeleDart(
   String source, {
   required bool isDark,
+  PelePalette? customPalette,
   int maxRuns = 7,
   double budgetMs = 60.0,
 }) {
   final sw = Stopwatch()..start();
   try {
-    final palette = isDark ? PelePalette.dark : PelePalette.light;
+    final palette =
+        customPalette ?? (isDark ? PelePalette.dark : PelePalette.light);
     final options = RenderOptions(
       palette: palette,
       outputMode: SvgOutputMode.cssVariables,
@@ -338,6 +593,8 @@ class WebViewEngineCanvas extends StatefulWidget {
   final ComparisonEngine engine;
   final String source;
   final bool isDark;
+  final PelePalette? customPalette;
+  final String customCss;
   final bool isVisible;
   final int benchmarkNonce;
   final ValueChanged<EngineRenderOutput> onRendered;
@@ -347,6 +604,8 @@ class WebViewEngineCanvas extends StatefulWidget {
     required this.engine,
     required this.source,
     required this.isDark,
+    this.customPalette,
+    this.customCss = '',
     this.isVisible = true,
     this.benchmarkNonce = 0,
     required this.onRendered,
@@ -373,6 +632,7 @@ class _WebViewEngineCanvasState extends State<WebViewEngineCanvas> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.source != widget.source ||
         oldWidget.isDark != widget.isDark ||
+        oldWidget.customCss != widget.customCss ||
         oldWidget.engine != widget.engine ||
         oldWidget.benchmarkNonce != widget.benchmarkNonce) {
       if (_pageReady) {
@@ -517,6 +777,7 @@ class _WebViewEngineCanvasState extends State<WebViewEngineCanvas> {
     height: auto !important;
   }
 </style>
+<style id="custom-pele-style"></style>
 <script>
 (function () {
   var parts = [];
@@ -598,8 +859,17 @@ async function timedAsync(run, maxRuns, budgetMs) {
   };
 }
 
-async function runEngine(source, isDark, maxRuns, budgetMs) {
+async function runEngine(source, isDark, maxRuns, budgetMs, customCss, bgHex) {
   document.body.className = isDark ? 'dark-mode' : '';
+  if (bgHex) {
+    document.body.style.background = bgHex;
+  } else {
+    document.body.style.background = '';
+  }
+  const styleEl = document.getElementById('custom-pele-style');
+  if (styleEl) {
+    styleEl.textContent = customCss || '';
+  }
   const stage = document.getElementById('stage');
   try {
     let svg = '';
@@ -680,11 +950,22 @@ async function runEngine(source, isDark, maxRuns, budgetMs) {
     final encodedSource = jsonEncode(
       widget.source,
     ).replaceAll('\u2028', r'\u2028').replaceAll('\u2029', r'\u2029');
+    final palette =
+        widget.customPalette ??
+        (widget.isDark ? PelePalette.dark : PelePalette.light);
+    final effectiveCss =
+        widget.customCss.trim().isNotEmpty
+            ? widget.customCss
+            : formatPaletteToCss(palette, selector: 'body, .pele');
+    final encodedCss = jsonEncode(
+      effectiveCss,
+    ).replaceAll('\u2028', r'\u2028').replaceAll('\u2029', r'\u2029');
+    final encodedBg = jsonEncode(palette.bg);
     final isDarkLiteral = widget.isDark ? 'true' : 'false';
     final maxRuns = intensiveBenchmark ? 15 : 7;
     final budgetMs = intensiveBenchmark ? 250 : 60;
     await c.runJavaScript(
-      'runEngine($encodedSource, $isDarkLiteral, $maxRuns, $budgetMs);',
+      'runEngine($encodedSource, $isDarkLiteral, $maxRuns, $budgetMs, $encodedCss, $encodedBg);',
     );
   }
 
@@ -700,7 +981,9 @@ async function runEngine(source, isDark, maxRuns, budgetMs) {
       if (ok) {
         final svg = (map['svg'] as String?) ?? '';
         final (w, h) = parseSvgDimensions(svg);
-        final palette = widget.isDark ? PelePalette.dark : PelePalette.light;
+        final palette =
+            widget.customPalette ??
+            (widget.isDark ? PelePalette.dark : PelePalette.light);
         final flattened =
             widget.engine == ComparisonEngine.peleJs
                 ? flattenPeleSvg(svg, palette: palette)

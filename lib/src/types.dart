@@ -46,6 +46,8 @@ class PelePalette {
   const PelePalette({
     this.bg = '#ffffff',
     this.fg = '#24292e',
+    this.fgOnLight,
+    this.fgOnDark,
     this.muted,
     this.line,
     this.surface,
@@ -85,6 +87,8 @@ class PelePalette {
 
   final String bg;
   final String fg;
+  final String? fgOnLight;
+  final String? fgOnDark;
   final String? muted;
   final String? line;
   final String? surface;

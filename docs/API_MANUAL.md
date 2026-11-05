@@ -163,44 +163,75 @@ Clears any memoized text width caches in the built-in metrics measurer.
 
 ---
 
-## 5. Theming & Palettes (`PelePalette`)
+## 5. Theming, Styling & Customization
 
-When using `SvgOutputMode.flattened` (the default), `RenderOptions.palette` controls all diagram colors, stroke widths, corner radii, and font stacks.
+`pele_dart` is designed so library consumers can either use the clean built-in defaults (`PelePalette.light` / `PelePalette.dark`) or supply their own custom palette, CSS custom properties, or in-diagram Mermaid styles.
 
-### Built-in Presets
+> **Want to see all 33 diagram types rendered by `pele_dart`?**
+> Browse the [**Visual Diagram Gallery (`docs/DIAGRAM_GALLERY.md`)**](DIAGRAM_GALLERY.md) for clean, standalone SVG renders of every supported diagram family.
 
-- **`PelePalette.light`** *(default)*: Clean light theme (`bg: '#ffffff'`, `fg: '#24292e'`, `surfaceAlt: '#e6e6e6'`, `critical: '#e45756'`).
-- **`PelePalette.dark`**: Dark theme (`bg: '#1e1e1e'`, `fg: '#e1e4e8'`, `surfaceAlt: '#3f3f46'`, `critical: '#f87171'`).
+### 5.1 Built-in Default Palettes (`PelePalette.light` & `PelePalette.dark`)
 
-### Custom `PelePalette`
+Out of the box, `pele_dart` ships two default palettes in the core package:
+
+- **`PelePalette.light`** *(default)*: High-contrast light palette (`bg: '#ffffff'`, `fg: '#24292e'`, `surfaceAlt: '#e6e6e6'`, `critical: '#e45756'`).
+- **`PelePalette.dark`**: High-contrast dark palette (`bg: '#1e1e1e'`, `fg: '#e1e4e8'`, `surfaceAlt: '#3f3f46'`, `critical: '#f87171'`).
 
 ```dart
-const customPalette = PelePalette(
-  bg: '#0f172a',
-  fg: '#f8fafc',
-  muted: '#94a3b8',
-  line: '#cbd5e1',
-  surface: '#1e293b',
-  surfaceAlt: '#334155',
-  border: '#64748b',
-  accent: '#38bdf8',
-  code: '#e2e8f0',
-  critical: '#fb7185',
-  radius: 6,
+final lightSvg = render(
+  source,
+  const RenderOptions(palette: PelePalette.light),
+).svg;
+
+final darkSvg = render(
+  source,
+  const RenderOptions(palette: PelePalette.dark),
+).svg;
+```
+
+**`PelePalette.light` (Default Light):**
+
+![Default Light Palette](images/styles/style_light.svg)
+
+**`PelePalette.dark` (Default Dark):**
+
+![Default Dark Palette](images/styles/style_dark.svg)
+
+---
+
+### 5.2 Supplying Your Own Custom `PelePalette` (`SvgOutputMode.flattened`)
+
+When rendering to static, self-contained SVGs (`SvgOutputMode.flattened`, the default for Flutter `vector_graphics` and PDF/PNG exporters), construct a `PelePalette(...)` matching your application's theme tokens and pass it to `RenderOptions(palette: ...)`:
+
+```dart
+const myCustomPalette = PelePalette(
+  bg: '#1e1e2e',
+  fg: '#cdd6f4',
+  muted: '#a6adc8',
+  line: '#bac2de',
+  surface: '#313244',
+  surfaceAlt: '#45475a',
+  border: '#585b70',
+  accent: '#89b4fa',
+  code: '#cdd6f4',
+  critical: '#f38ba8',
+  fgOnLight: '#1e1e2e',
+  fgOnDark: '#cdd6f4',
+  radius: 8,
   strokeWidth: 1.25,
   thickStrokeWidth: 2.5,
   hairlineStrokeWidth: 0.5,
   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
   monoFontFamily: 'JetBrains Mono, SFMono-Regular, Menlo, monospace',
   colors: <String>[
-    '#4c78a8',
-    '#f58518',
-    '#54a24b',
-    '#e45756',
-    '#72b7b2',
-    '#eeca3b',
-    '#b279a2',
-    '#9d755d',
+    '#89b4fa',
+    '#fab387',
+    '#a6e3a1',
+    '#f38ba8',
+    '#94e2d5',
+    '#f9e2af',
+    '#cba6f7',
+    '#f5c2e7',
   ],
 );
 
@@ -208,27 +239,123 @@ final result = render(
   source,
   const RenderOptions(
     outputMode: SvgOutputMode.flattened,
-    palette: customPalette,
+    palette: myCustomPalette,
   ),
 );
 ```
 
-### Automatic Derived Palette Tokens
+Below are four examples of consumer-supplied custom `PelePalette` instances rendering the exact same Mermaid diagram:
 
-If `muted`, `line`, `surface`, `border`, or `accent` are omitted (`null`), `PelePalette` automatically derives them using the exact same perceptual color-mixing ratios as upstream `obsidianmd/pele`:
+#### Example A: Warm Paper Custom Palette (`bg: '#fffcf0'`, `accent: '#205ea6'`, `radius: 4`)
 
-| Property | Default / Derived Formula | Description |
-| :--- | :--- | :--- |
-| `bg` | `'#ffffff'` (light) / `'#1e1e1e'` (dark) | Canvas background color (`--pele-bg`) |
-| `fg` | `'#24292e'` (light) / `'#e1e4e8'` (dark) | Primary text and foreground color (`--pele-fg`) |
-| `muted` | `60% fg + 40% bg` | Secondary labels, captions, and axis ticks (`--pele-muted`) |
-| `line` | `fg` | Connector edges, lifelines, and borders (`--pele-line`) |
-| `surface` | `3% fg + 97% bg` | Default node/box fill (`--pele-surface`) |
-| `surfaceAlt` | `'#e6e6e6'` (light) / `'#3f3f46'` (dark) | Secondary container/header fill (`--pele-surface-alt`) |
-| `border` | `50% fg + 50% bg` | Node and cluster border stroke (`--pele-border`) |
-| `accent` | `'#5b7bd5'` (`colors[0]` / theme accent) | Primary highlight and active state color (`--pele-accent`) |
-| `critical` | `'#e45756'` (light) / `'#f87171'` (dark) | Critical path (Gantt) and error accents (`--pele-critical`) |
-| `colors` | 8 Tableau/Vega series colors (`--pele-c0`..`--pele-c7`) | Categorical palette for multi-series charts, mindmaps, pies, and sankeys |
+![Custom Warm Paper Palette](images/styles/style_flexoki.svg)
+
+#### Example B: Catppuccin Mocha Custom Palette (`bg: '#1e1e2e'`, `accent: '#89b4fa'`, `radius: 8`)
+
+![Custom Catppuccin Mocha Palette](images/styles/style_catppuccin_mocha.svg)
+
+#### Example C: Nord Blueprint Custom Palette (`bg: '#2e3440'`, `accent: '#88c0d0'`, `radius: 6`)
+
+![Custom Nord Blueprint Palette](images/styles/style_nord.svg)
+
+#### Example D: Solarized Dark Custom Palette (`bg: '#002b36'`, `accent: '#268bd2'`, `radius: 4`)
+
+![Custom Solarized Dark Palette](images/styles/style_solarized_dark.svg)
+
+---
+
+### 5.3 Categorical Series Colors (`PelePalette.colors`)
+
+Multi-branch and data-driven diagrams (`mindmap`, `pie`, `sankey`, `xychart`, `gantt`, `timeline`, `gitGraph`, `radar`, `treemap`, `sunburst`) cycle through the 8 categorical colors in `PelePalette.colors` (`--pele-series-1` through `--pele-series-8`).
+
+Supplying your own `colors: <String>[...]` list on `PelePalette` restyles every categorical diagram while maintaining automatic contrast on filled nodes:
+
+**Warm Earthy Series (`colors: ['#205ea6', '#bc5215', '#66800b', '#af3029', ...]`):**
+
+![Custom Warm Series Mindmap](images/styles/style_series_flexoki.svg)
+
+**Pastel Dark Series (`colors: ['#89b4fa', '#fab387', '#a6e3a1', '#f38ba8', ...]`):**
+
+![Custom Pastel Series Mindmap](images/styles/style_series_catppuccin.svg)
+
+---
+
+### 5.4 Automatic Derived Palette Tokens
+
+You only need to specify the tokens you want to customize. If `muted`, `line`, `surface`, `border`, or `accent` are omitted (`null`), `PelePalette` automatically derives them using the exact same perceptual color-mixing ratios as upstream `obsidianmd/pele`:
+
+| `PelePalette` Field | CSS Variable | Default / Derived Formula | Description |
+| :--- | :--- | :--- | :--- |
+| `bg` | `--pele-bg` | `'#ffffff'` (light) / `'#1e1e1e'` (dark) | Canvas background color used for label halos and color mixing |
+| `fg` | `--pele-fg` | `'#24292e'` (light) / `'#e1e4e8'` (dark) | Primary text and foreground color |
+| `muted` | `--pele-muted` | `60% fg + 40% bg` | Secondary labels, captions, cardinality, and axis ticks |
+| `line` | `--pele-line` | `fg` | Connector edges, arrows, lifelines, and dividers |
+| `surface` | `--pele-surface` | `3% fg + 97% bg` | Default node, box, and card fill |
+| `surfaceAlt` | `--pele-surface-alt` | `'#e6e6e6'` (light) / `'#3f3f46'` (dark) | Secondary container, cluster, and table header fill |
+| `border` | `--pele-border` | `50% fg + 50% bg` | Node, subgraph, and container border stroke |
+| `accent` | `--pele-accent` | `colors[0]` (`'#527fff'`) | Primary highlight, active state, and milestone accent |
+| `critical` | `--pele-critical` | `'#e45756'` (light) / `'#f87171'` (dark) | Critical path (Gantt) and danger/error accents |
+| `fgOnLight` | `--pele-fg-on-light` | `'#24292e'` | Contrast text color placed over bright categorical fills |
+| `fgOnDark` | `--pele-fg-on-dark` | `'#ffffff'` | Contrast text color placed over dark categorical fills |
+| `radius` | `--pele-radius` | `4` (`px`) | Default corner radius for rounded boxes and cards |
+| `strokeWidth` | `--pele-stroke` | `1.25` (`px`) | Standard node and edge stroke width |
+| `thickStrokeWidth` | `--pele-stroke-thick` | `2.5` (`px`) | Thick edge and highlighted border stroke width |
+| `hairlineStrokeWidth` | `--pele-stroke-hairline` | `0.5` (`px`) | Subtle gridline and divider stroke width |
+| `colors` | `--pele-series-1`..`8` | 8 categorical hex strings | Multi-series palette for charts, mindmaps, pies, and sankeys |
+
+---
+
+### 5.5 Styling via CSS Custom Properties (`SvgOutputMode.cssVariables`)
+
+When rendering for HTML, WebViews, or Markdown documents (`outputMode: SvgOutputMode.cssVariables`), `pele_dart` emits `<svg class="pele" ...>` referencing `var(--pele-*)` CSS custom properties with fallback values. You can style all diagrams on a page with standard CSS:
+
+```css
+.pele {
+  --pele-bg: #1e1e2e;
+  --pele-fg: #cdd6f4;
+  --pele-muted: #a6adc8;
+  --pele-line: #bac2de;
+  --pele-surface: #313244;
+  --pele-surface-alt: #45475a;
+  --pele-border: #585b70;
+  --pele-accent: #89b4fa;
+  --pele-critical: #f38ba8;
+  --pele-radius: 8px;
+  --pele-series-1: #89b4fa;
+  --pele-series-2: #fab387;
+  --pele-series-3: #a6e3a1;
+  --pele-series-4: #f38ba8;
+}
+```
+
+---
+
+### 5.6 In-Diagram Mermaid Styling (`classDef`, `style`, and `themeVariables`)
+
+In addition to host-level `PelePalette` and CSS theming, `pele_dart` supports standard Mermaid inline styling directives inside any diagram source:
+
+- **`classDef <name> fill:...,stroke:...,color:...,stroke-width:...,stroke-dasharray:...`** and **`nodeId:::<name>`** (or `class nodeA,nodeB <name>`)
+- **`style <nodeOrSubgraphId> fill:...,stroke:...,color:...`**
+- **Frontmatter / `%%{init: {'themeVariables': { ... }}}%%` overrides** (`primaryColor`, `primaryTextColor`, `primaryBorderColor`, `lineColor`, `secondaryColor`, `tertiaryColor`, `fontFamily`, `fontSize`)
+
+```mermaid
+flowchart LR
+  A([Order Placed]):::entry --> B{Fraud Check}:::decision
+  B -->|Approved| C[Fulfill & Ship]:::success
+  B -->|Flagged| D[Manual Review]:::warn
+  B -->|Rejected| E([Cancelled]):::danger
+
+  classDef entry fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+  classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+  classDef success fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+  classDef warn fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px,stroke-dasharray:4 3
+  classDef danger fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,stroke-width:2px
+```
+
+![In-Diagram Mermaid classDef Styling](images/styles/style_mermaid_classdef.svg)
+
+> **Interactive Style Playground in the Example App:**
+> Launch the macOS showcase app (`cd example && flutter run -d macos`) to switch between canned style presets in the top toolbar or open the **`Style (CSS)`** tab in the Playground Editor to type in your own `--pele-*` variables and preview them live across `pele_dart` and `obsidianmd/pele`.
 
 ---
 

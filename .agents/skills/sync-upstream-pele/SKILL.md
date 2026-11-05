@@ -90,26 +90,32 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 
 ---
 
-## 4. Verify 100% Parity & Quality Gates
+## 4. Regenerate Standalone Diagram Images & Verify 100% Parity
 
-Run the complete verification suite. **All gates must pass with 0 diffs and 0 issues**:
+Before cutting or pushing any release, regenerate all standalone diagram and style images and run the complete verification suite. **All gates must pass with 0 diffs and 0 issues**:
 
 ```bash
-# 1. Format and static analysis (0 warnings/errors/infos)
+# 1. Regenerate clean standalone SVG renders of every diagram family (docs/images/diagrams/*.svg),
+#    themed style previews (docs/images/styles/*.svg), and docs/DIAGRAM_GALLERY.md
+dart run tool/generate_doc_images.dart
+
+# 2. Format and static analysis (0 warnings/errors/infos)
 dart format lib test tool example/lib example/test
 dart analyze --fatal-infos lib test tool example
 
-# 2. Full unit, gallery corpus, and upstream differential test suite
+# 3. Full unit, gallery corpus, and upstream differential test suite
 dart test
 
-# 3. 787+ diagram differential & flattened-SVG verification against .upstream
+# 4. 787+ diagram differential & flattened-SVG verification against .upstream
 dart run tool/verify_against_upstream.dart
 ```
 
-Confirm that `tool/verify_against_upstream.dart` outputs `"status":"ok"` with:
-* `exactUpstreamMatches` == total canonical diagrams
-* `exactGalleryMatches` == `totalGallerySamples`
-* `exactCorpusMatches` == `totalCorpusSamples` (all 522+ `.upstream/tests/corpus/*.json` diagrams)
+Confirm that:
+* `tool/generate_doc_images.dart` generates clean standalone SVG renders (zero host-app UI chrome) for every diagram family in `docs/images/diagrams/` and every styled showcase sample in `docs/images/styles/`, and updates [`docs/DIAGRAM_GALLERY.md`](../../../docs/DIAGRAM_GALLERY.md).
+* `tool/verify_against_upstream.dart` outputs `"status":"ok"` with:
+  * `exactUpstreamMatches` == total canonical diagrams
+  * `exactGalleryMatches` == `totalGallerySamples`
+  * `exactCorpusMatches` == `totalCorpusSamples` (all 522+ `.upstream/tests/corpus/*.json` diagrams)
 
 ---
 

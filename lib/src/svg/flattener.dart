@@ -83,6 +83,8 @@ Map<String, String> _buildVarMap(PelePalette p) {
     '--_fm': p.monoFontFamily,
     '--pele-bg': p.bg,
     '--pele-fg': p.fg,
+    if (p.fgOnLight != null) '--pele-fg-on-light': p.fgOnLight!,
+    if (p.fgOnDark != null) '--pele-fg-on-dark': p.fgOnDark!,
     '--pele-muted': muted,
     '--pele-line': line,
     '--pele-surface': surface,

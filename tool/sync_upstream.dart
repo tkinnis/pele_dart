@@ -1091,6 +1091,25 @@ Future<void> _refreshAllAssets(String root, Directory upstreamDir) async {
       );
     }
   }
+
+  // 3. Regenerate clean standalone SVG diagram images (docs/images/diagrams/*.svg),
+  //    styled showcase images (docs/images/styles/*.svg), and docs/DIAGRAM_GALLERY.md.
+  final docGenScript = File('$root/tool/generate_doc_images.dart');
+  if (docGenScript.existsSync()) {
+    stdout.writeln(
+      '3. Regenerating standalone diagram & style images (tool/generate_doc_images.dart)...',
+    );
+    final imgRes = await Process.run(Platform.resolvedExecutable, <String>[
+      docGenScript.path,
+    ], workingDirectory: root);
+    if (imgRes.exitCode == 0) {
+      stdout.writeln(
+        '   ✓ Regenerated docs/images/diagrams/*.svg, docs/images/styles/*.svg, and docs/DIAGRAM_GALLERY.md',
+      );
+    } else {
+      stderr.writeln('   ⚠️ Failed to regenerate doc images: ${imgRes.stderr}');
+    }
+  }
 }
 
 void _updateUpstreamMd(
