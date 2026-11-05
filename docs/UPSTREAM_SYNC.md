@@ -198,21 +198,22 @@ Once all quality gates and the 787-diagram differential verification suite pass 
    ```bash
    dart run tool/generate_doc_images.dart
    ```
-2. **Pin `UPSTREAM.md` to the new release tag and commit SHA**:
+2. **Pin `UPSTREAM.md` & `pubspec.yaml` to the new release tag and commit SHA**:
+   Running `--pin` automatically updates `Target Release` in `UPSTREAM.md`, sets `version: <X.Y.Z>` in `pubspec.yaml` in 1:1 lockstep with `<new_tag>`, and updates the version references in `README.md` and `docs/API_MANUAL.md`:
    ```bash
    dart run tool/sync_upstream.dart --pin <new_tag>
    ```
-3. **Confirm `--check` reports `UP TO DATE`**:
+   > **1:1 Version Lockstep Policy:** `pele_dart`'s `major.minor.patch` version (`1.13.0`) always matches the synced `obsidianmd/pele` release (`v1.13.0`). If a Dart-only hotfix is needed between upstream releases, use a `+N` build suffix (`1.13.0+1`) so `X.Y.Z` never diverges from upstream.
+3. **Confirm `--check` reports `UP TO DATE` and `LOCKSTEP`**:
    ```bash
    dart run tool/sync_upstream.dart --check
    ```
-4. **Bump Package Version & Changelog**:
-   - Update `version:` in `pubspec.yaml`.
-   - Document the upstream sync tag, new diagram families, beta promotions, and bug fixes in `CHANGELOG.md`.
+4. **Update `CHANGELOG.md`**:
+   - Add a top-level `## <X.Y.Z>` entry matching `pubspec.yaml`'s `version:` (enforced by `tool/verify_against_upstream.dart` and `test/doc_examples_test.dart`).
 5. **Commit, Tag & Push**:
    ```bash
    git add -A
    git commit -m "feat(upstream): sync with obsidianmd/pele <new_tag>"
-   git tag -a v<version> -m "pele_dart v<version> (obsidianmd/pele <new_tag>)"
+   git tag -a <new_tag> -m "pele_dart <new_tag> (obsidianmd/pele <new_tag>)"
    git push origin main --tags
    ```

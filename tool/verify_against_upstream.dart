@@ -18,11 +18,48 @@ Future<void> main(List<String> args) async {
   }
 
   final md = upstreamMd.readAsStringSync();
+  final pinnedRelease = RegExp(
+    r'\*\*(?:Target Release|Pinned Upstream Tag)\*\*\s*\|\s*`([^`]+)`',
+  ).firstMatch(md)?.group(1);
+  if (pinnedRelease == null) {
+    stderr.writeln('Error: Missing Target Release in UPSTREAM.md');
+    exitCode = 1;
+    return;
+  }
   final pinnedSha = RegExp(
     r'\*\*(?:Target Commit SHA|Pinned Upstream Commit)\*\*\s*\|\s*`([^`]+)`',
   ).firstMatch(md)?.group(1);
   if (pinnedSha == null) {
     stderr.writeln('Error: Missing Target Commit SHA in UPSTREAM.md');
+    exitCode = 1;
+    return;
+  }
+
+  // Enforce 1:1 version lockstep between UPSTREAM.md (Target Release: vX.Y.Z),
+  // pubspec.yaml (version: X.Y.Z or X.Y.Z+N), and CHANGELOG.md (## X.Y.Z or ## X.Y.Z+N).
+  final pubspecFile = File('$root/pubspec.yaml');
+  final pubspecVer = RegExp(
+    r'^version:\s*(\S+)',
+    multiLine: true,
+  ).firstMatch(pubspecFile.readAsStringSync())?.group(1);
+  final expectedBaseVer = pinnedRelease.replaceFirst(RegExp(r'^v'), '');
+  final actualBaseVer = pubspecVer?.split('+').first;
+  if (pubspecVer == null || actualBaseVer != expectedBaseVer) {
+    stderr.writeln(
+      'Error: pubspec.yaml version ($pubspecVer) is not in 1:1 lockstep with UPSTREAM.md Target Release ($pinnedRelease; expected $expectedBaseVer or $expectedBaseVer+<hotfix>)',
+    );
+    exitCode = 1;
+    return;
+  }
+  final changelogFile = File('$root/CHANGELOG.md');
+  final topChangelogVer = RegExp(
+    r'^##\s+(\S+)',
+    multiLine: true,
+  ).firstMatch(changelogFile.readAsStringSync())?.group(1);
+  if (topChangelogVer != pubspecVer) {
+    stderr.writeln(
+      'Error: CHANGELOG.md top entry ($topChangelogVer) does not match pubspec.yaml version ($pubspecVer)',
+    );
     exitCode = 1;
     return;
   }
@@ -303,6 +340,9 @@ console.log(JSON.stringify(out));
 
   stdout.writeln(
     jsonEncode(<String, Object?>{
+      'packageVersion': pubspecVer,
+      'pinnedRelease': pinnedRelease,
+      'versionLockstep': true,
       'pinnedCommit': pinnedSha,
       'targetMermaidVersion': pinnedMermaidVer,
       'verifiedHeaders': verifiedHeaders,

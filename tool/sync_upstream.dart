@@ -99,6 +99,7 @@ Future<void> main(List<String> args) async {
     final mermaidInfo = _detectUpstreamMermaidInfo(upstreamDir);
     _updateUpstreamMd(
       upstreamMdFile,
+      root: root,
       tag: newTag,
       sha: resolvedSha,
       date: commitDate,
@@ -106,7 +107,7 @@ Future<void> main(List<String> args) async {
       mermaidParser: mermaidInfo.parserSpec,
     );
     stdout.writeln(
-      'Updated UPSTREAM.md -> $newTag ($resolvedSha) | Mermaid ${mermaidInfo.mermaidVersion}',
+      'Updated UPSTREAM.md & pubspec.yaml -> $newTag ($resolvedSha) | Mermaid ${mermaidInfo.mermaidVersion}',
     );
     return;
   }
@@ -202,6 +203,7 @@ Future<void> main(List<String> args) async {
     if (report.totalChangedFiles == 0 || args.contains('--pin')) {
       _updateUpstreamMd(
         upstreamMdFile,
+        root: root,
         tag: targetTagOrRef,
         sha: targetSha,
         date: targetDate,
@@ -209,7 +211,7 @@ Future<void> main(List<String> args) async {
         mermaidParser: mermaidInfo.parserSpec,
       );
       stdout.writeln(
-        '✅ Updated .upstream/ and pinned UPSTREAM.md to $targetTagOrRef ($targetSha).',
+        '✅ Updated .upstream/, UPSTREAM.md, and pubspec.yaml to $targetTagOrRef ($targetSha).',
       );
     } else {
       stdout.writeln(
@@ -314,6 +316,11 @@ Future<void> main(List<String> args) async {
       bundledMermaidVersion != upstreamMermaid.mermaidVersion ||
       uiMermaidVersion != upstreamMermaid.mermaidVersion;
 
+  final pubspecVersion = _extractPubspecVersion(root);
+  final expectedBaseVersion = pinnedTag.replaceFirst(RegExp(r'^v'), '');
+  final pubspecBaseVersion = pubspecVersion?.split('+').first;
+  final versionInLockstep = pubspecBaseVersion == expectedBaseVersion;
+
   final mapping = _collectUpstreamHeaders(Directory('$root/lib/src'), root);
 
   final targetCompareRef = hasNewRelease
@@ -344,6 +351,9 @@ Future<void> main(List<String> args) async {
     stdout.writeln(
       jsonEncode(<String, Object?>{
         'fetchedLiveFromGitHub': fetchedLive,
+        'packageVersion': pubspecVersion,
+        'expectedBaseVersion': expectedBaseVersion,
+        'versionInLockstep': versionInLockstep,
         'pinnedRelease': pinnedTag,
         'pinnedCommit': pinnedSha,
         'localUpstreamHead': headSha,
@@ -377,6 +387,9 @@ Future<void> main(List<String> args) async {
   stdout.writeln('═══════════════════════════════════════════════════════════');
   stdout.writeln(
     'Remote Fetch:           ${fetchedLive ? "Live from github.com/obsidianmd/pele" : "Cached (.upstream local refs)"}',
+  );
+  stdout.writeln(
+    'pele_dart Version:      ${pubspecVersion ?? "unknown"} (${versionInLockstep ? "LOCKSTEP with $pinnedTag" : "MISMATCH vs $pinnedTag"})',
   );
   stdout.writeln('Pinned Pele Release:    $pinnedTag ($pinnedSha)');
   stdout.writeln(
@@ -440,6 +453,21 @@ Future<void> main(List<String> args) async {
   } else {
     stdout.writeln(
       '✅ Bundled Mermaid.js (v${upstreamMermaid.mermaidVersion}) matches upstream Pele target.',
+    );
+  }
+
+  if (!versionInLockstep) {
+    stdout.writeln(
+      '\n❌ PACKAGE VERSION OUT OF LOCKSTEP:\n'
+      '   pubspec.yaml is version "${pubspecVersion ?? "unknown"}", '
+      'but UPSTREAM.md Target Release is "$pinnedTag" (expected "$expectedBaseVersion" or "$expectedBaseVersion+<hotfix>").\n'
+      '   Run this command to sync pubspec.yaml with UPSTREAM.md:\n'
+      '     dart run tool/sync_upstream.dart --pin $pinnedTag $pinnedSha',
+    );
+    exitCode = 1;
+  } else {
+    stdout.writeln(
+      '✅ pele_dart version ($pubspecVersion) is in 1:1 lockstep with upstream Pele ($pinnedTag).',
     );
   }
 }
@@ -1115,6 +1143,7 @@ Future<void> _refreshAllAssets(String root, Directory upstreamDir) async {
 
 void _updateUpstreamMd(
   File upstreamMdFile, {
+  required String root,
   required String tag,
   required String sha,
   required String date,
@@ -1151,6 +1180,56 @@ void _updateUpstreamMd(
     '| ✅ Ported | `$sha` |',
   );
   upstreamMdFile.writeAsStringSync(text);
+
+  // Enforce 1:1 version lockstep in pubspec.yaml and documentation when tag is semver (vX.Y.Z or X.Y.Z).
+  final semverMatch = RegExp(r'^v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$')
+      .firstMatch(tag.trim());
+  if (semverMatch != null) {
+    final semver = semverMatch.group(1)!;
+    final pubspecFile = File('$root/pubspec.yaml');
+    if (pubspecFile.existsSync()) {
+      final pubText = pubspecFile.readAsStringSync();
+      final updatedPub = pubText.replaceFirstMapped(
+        RegExp(r'^version:\s*\S+', multiLine: true),
+        (_) => 'version: $semver',
+      );
+      if (updatedPub != pubText) {
+        pubspecFile.writeAsStringSync(updatedPub);
+      }
+    }
+    for (final docRel in <String>['README.md', 'docs/API_MANUAL.md']) {
+      final docFile = File('$root/$docRel');
+      if (docFile.existsSync()) {
+        final docText = docFile.readAsStringSync();
+        final updatedDoc = docText
+            .replaceAll(
+              RegExp(r'pele_dart:\s*\^\d+\.\d+\.\d+'),
+              'pele_dart: ^$semver',
+            )
+            .replaceAll(
+              RegExp(r'obsidianmd%2Fpele%20v\d+\.\d+\.\d+'),
+              'obsidianmd%2Fpele%20v$semver',
+            )
+            .replaceAll(
+              RegExp(r'`obsidianmd/pele` \(`v\d+\.\d+\.\d+`\)'),
+              '`obsidianmd/pele` (`v$semver`)',
+            );
+        if (updatedDoc != docText) {
+          docFile.writeAsStringSync(updatedDoc);
+        }
+      }
+    }
+  }
+}
+
+String? _extractPubspecVersion(String root) {
+  final file = File('$root/pubspec.yaml');
+  if (!file.existsSync()) return null;
+  final m = RegExp(
+    r'^version:\s*(\S+)',
+    multiLine: true,
+  ).firstMatch(file.readAsStringSync());
+  return m?.group(1)?.trim();
 }
 
 String? _extractField(String markdown, String label) {

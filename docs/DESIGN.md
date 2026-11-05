@@ -1,6 +1,6 @@
 # `pele_dart` Architecture, Development & Maintenance Design Document
 
-* **Status**: Implemented (`v0.1.0` — All 33 Diagram Families Ported with 100% `787/787` Upstream Parity)
+* **Status**: Implemented (`v1.13.0` — Version-Locked 1:1 to Upstream `obsidianmd/pele v1.13.0`, All 33 Diagram Families Ported with 100% `787/787` Upstream Parity)
 * **Current Public API Reference**: See [`docs/API_MANUAL.md`](API_MANUAL.md) for the final 1:1 `obsidianmd/pele`-aligned API (`render`, `renderMermaid`, `parse`, `detectType`, `supports`, `RenderOptions`, `ParseOptions`, `RenderResult`, `PeleError`, `PelePalette`, `SvgOutputMode`)
 * **Upstream Tracking**: See [`UPSTREAM.md`](../UPSTREAM.md) (Single source of truth for the pinned [`obsidianmd/pele`](https://github.com/obsidianmd/pele) release and commit SHA) and [`docs/UPSTREAM_SYNC.md`](UPSTREAM_SYNC.md)
 * **Target SDK**: Pure Dart `^3.13.0` (Zero Flutter / `dart:ui` / Browser / JS Runtime dependencies in the core package)

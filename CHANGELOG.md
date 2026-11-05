@@ -1,6 +1,6 @@
-## 0.1.0
+## 1.13.0
 
-* Initial release of `pele_dart`, a 1:1 pure-Dart port of [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (`v1.13.0`) created by Steph Ango (`kepano`) and the Obsidian team.
+* Initial public release of `pele_dart`, version-locked 1:1 to upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (`v1.13.0`, commit `3a2f075ee0c3d914f0fad3545fc0f193693975ac`) created by Steph Ango (`kepano`) and the Obsidian team.
 * **33 Supported Diagram Families**:
   * Core Mermaid diagrams (`flowchart`, `sequence`, `class`, `state`, `er`, `gantt`, `gitGraph`, `mindmap`, `pie`, `info`).
   * Extended & architecture diagrams (`agentflow`, `architecture`, `block`, `c4`, `cynefin`, `eventmodeling`, `ishikawa`, `journey`, `kanban`, `packet`, `quadrantChart`, `radar`, `railroad`, `requirement`, `sankey`, `swimlane`, `timeline`, `treemap`, `treeView`, `usecase`, `venn`, `wardley`, `xychart`).

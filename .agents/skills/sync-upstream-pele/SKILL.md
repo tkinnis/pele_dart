@@ -119,18 +119,24 @@ Confirm that:
 
 ---
 
-## 5. Cut & Push the Updated Package Release
+## 5. Finalize 1:1 Lockstep Version, Tag & Push the Release
 
-1. Update `version:` in [`pubspec.yaml`](../../../pubspec.yaml) to match or track the upstream release version.
-2. Verify git author privacy before committing (must use `tkinnis <219582735+tkinnis@users.noreply.github.com>`, never a personal email address, and strictly **NO AI references** in commit messages):
+`pele_dart` enforces **strict 1:1 version lockstep** with upstream `obsidianmd/pele` (`version: X.Y.Z` in `pubspec.yaml` == `Target Release: vX.Y.Z` in `UPSTREAM.md` == git tag `vX.Y.Z`; Dart-only hotfixes between upstream releases use `X.Y.Z+1`).
+
+1. Pin `UPSTREAM.md`, `pubspec.yaml`, `README.md`, and `docs/API_MANUAL.md` to the synced release tag:
+   ```bash
+   dart run tool/sync_upstream.dart --pin v<version> <sha>
+   ```
+2. Add the matching `## <version>` entry at the top of [`CHANGELOG.md`](../../../CHANGELOG.md) (verified by `tool/verify_against_upstream.dart` and `test/doc_examples_test.dart`).
+3. Verify git author privacy before committing (must use `tkinnis <219582735+tkinnis@users.noreply.github.com>`, never a personal email address, and strictly **NO AI references** in commit messages):
    ```bash
    git config user.name "tkinnis"
    git config user.email "219582735+tkinnis@users.noreply.github.com"
    ```
-3. Commit with a Conventional Commit message (e.g., `feat(upstream): sync obsidianmd/pele v1.14.0`) and tag if releasing:
+4. Commit with a Conventional Commit message (e.g., `feat(upstream): sync obsidianmd/pele v1.14.0`) and tag in 1:1 lockstep with upstream:
    ```bash
    git add -A
    git commit -m "feat(upstream): sync obsidianmd/pele v<version>"
-   git tag v<version>
+   git tag -a v<version> -m "pele_dart v<version> (obsidianmd/pele v<version>)"
    git push origin main --tags
    ```

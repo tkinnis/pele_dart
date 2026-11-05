@@ -361,6 +361,54 @@ flowchart LR
       },
     );
 
+    test('Package version in pubspec.yaml, CHANGELOG.md, README.md, and docs/API_MANUAL.md is in 1:1 lockstep with UPSTREAM.md', () {
+      final upstreamMd = File('UPSTREAM.md').readAsStringSync();
+      final targetRelease = RegExp(r'\*\*Target Release\*\*\s*\|\s*`([^`]+)`')
+          .firstMatch(upstreamMd)
+          ?.group(1);
+      expect(targetRelease, isNotNull);
+      final expectedBaseVersion = targetRelease!.replaceFirst(
+        RegExp(r'^v'),
+        '',
+      );
+
+      final pubspecYaml = File('pubspec.yaml').readAsStringSync();
+      final pubspecVersion = RegExp(
+        r'^version:\s*(\S+)',
+        multiLine: true,
+      ).firstMatch(pubspecYaml)?.group(1);
+      expect(pubspecVersion, isNotNull);
+      expect(
+        pubspecVersion!.split('+').first,
+        expectedBaseVersion,
+        reason:
+            'pubspec.yaml version ($pubspecVersion) must match UPSTREAM.md Target Release ($targetRelease)',
+      );
+
+      final changelog = File('CHANGELOG.md').readAsStringSync();
+      final topChangelogVersion = RegExp(
+        r'^##\s+(\S+)',
+        multiLine: true,
+      ).firstMatch(changelog)?.group(1);
+      expect(
+        topChangelogVersion,
+        pubspecVersion,
+        reason:
+            'CHANGELOG.md top version ($topChangelogVersion) must match pubspec.yaml ($pubspecVersion)',
+      );
+
+      final readme = File('README.md').readAsStringSync();
+      expect(readme, contains('pele_dart: ^$expectedBaseVersion'));
+      expect(readme, contains('`obsidianmd/pele` (`v$expectedBaseVersion`)'));
+
+      final apiManual = File('docs/API_MANUAL.md').readAsStringSync();
+      expect(apiManual, contains('pele_dart: ^$expectedBaseVersion'));
+      expect(
+        apiManual,
+        contains('`obsidianmd/pele` (`v$expectedBaseVersion`)'),
+      );
+    });
+
     test('Every relative file link and image path in markdown docs resolves to an existing file', () {
       final mdFiles = <String>[
         'README.md',

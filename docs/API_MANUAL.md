@@ -37,7 +37,7 @@ Or in your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  pele_dart: ^0.1.0
+  pele_dart: ^1.13.0
 ```
 
 Or directly from GitHub:

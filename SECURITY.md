@@ -24,7 +24,7 @@ Security fixes are applied to the latest minor release line:
 
 | Version | Supported |
 | :--- | :---: |
-| `0.1.x` | Yes |
+| `1.13.x` | Yes |
 
 ---
 

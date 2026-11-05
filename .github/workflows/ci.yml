@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
     branches: [main]
 
@@ -36,8 +37,22 @@ jobs:
       - name: Run static analysis
         run: dart analyze --fatal-infos lib test tool
 
-      - name: Run test suite
+      - name: Run test suite (including 1:1 version lockstep & doc examples)
         run: dart test
+
+      - name: Verify upstream header & 1:1 version lockstep
+        run: dart run tool/verify_against_upstream.dart
+
+      - name: Verify git release tag matches pubspec.yaml and UPSTREAM.md
+        if: github.ref_type == 'tag'
+        run: |
+          PUBSPEC_VER=$(awk '/^version:/ {print $2}' pubspec.yaml)
+          EXPECTED_TAG="v${PUBSPEC_VER}"
+          if [ "${GITHUB_REF_NAME}" != "${EXPECTED_TAG}" ]; then
+            echo "Error: Git tag '${GITHUB_REF_NAME}' does not match pubspec.yaml version ('${EXPECTED_TAG}')."
+            exit 1
+          fi
+          echo "Verified tag ${GITHUB_REF_NAME} matches pubspec.yaml (${PUBSPEC_VER}) and UPSTREAM.md."
 
       - name: Verify pure-Dart example runs
         run: dart run example/main.dart
