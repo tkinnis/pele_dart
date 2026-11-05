@@ -63,14 +63,14 @@ class PelePalette {
     this.monoFontFamily =
         'ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace',
     this.colors = const <String>[
-      '#2563eb',
-      '#16a34a',
-      '#d97706',
-      '#9333ea',
-      '#dc2626',
-      '#0891b2',
-      '#db2777',
-      '#4f46e5',
+      '#4c78a8',
+      '#f58518',
+      '#54a24b',
+      '#e45756',
+      '#72b7b2',
+      '#eeca3b',
+      '#b279a2',
+      '#9d755d',
     ],
   });
 
@@ -81,16 +81,6 @@ class PelePalette {
     fg: '#e1e4e8',
     surfaceAlt: '#3f3f46',
     critical: '#f87171',
-    colors: <String>[
-      '#60a5fa',
-      '#4ade80',
-      '#fbbf24',
-      '#c084fc',
-      '#f87171',
-      '#22d3ee',
-      '#f472b6',
-      '#818cf8',
-    ],
   );
 
   final String bg;

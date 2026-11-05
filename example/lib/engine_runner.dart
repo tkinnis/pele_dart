@@ -338,6 +338,7 @@ class WebViewEngineCanvas extends StatefulWidget {
   final ComparisonEngine engine;
   final String source;
   final bool isDark;
+  final bool isVisible;
   final int benchmarkNonce;
   final ValueChanged<EngineRenderOutput> onRendered;
 
@@ -346,6 +347,7 @@ class WebViewEngineCanvas extends StatefulWidget {
     required this.engine,
     required this.source,
     required this.isDark,
+    this.isVisible = true,
     this.benchmarkNonce = 0,
     required this.onRendered,
   });
@@ -487,16 +489,17 @@ class _WebViewEngineCanvasState extends State<WebViewEngineCanvas> {
   }
   body.dark-mode {
     background: #14171f;
-    color: #e5e7eb;
+    color: #e1e4e8;
     color-scheme: dark;
-    --pele-bg: #14171f;
-    --pele-fg: #e5e7eb;
-    --pele-muted: #9ca3af;
-    --pele-line: #d1d5db;
-    --pele-surface: #1f2430;
-    --pele-surface-alt: #2a3040;
-    --pele-border: #6b7280;
-    --pele-accent: #60a5fa;
+    --pele-bg: #1e1e1e;
+    --pele-fg: #e1e4e8;
+    --pele-muted: rgb(159, 161, 163);
+    --pele-line: #e1e4e8;
+    --pele-surface: rgb(36, 36, 36);
+    --pele-surface-alt: #3f3f46;
+    --pele-border: rgb(127, 129, 130);
+    --pele-accent: #5b7bd5;
+    --pele-critical: #f87171;
   }
   #stage {
     display: flex;
@@ -537,17 +540,34 @@ class _WebViewEngineCanvasState extends State<WebViewEngineCanvas> {
 let mermaidSeq = 0;
 const warmedTypes = new Set();
 
-// Exact port of website/src/lib/timing.ts from https://pele.run/playground
+// Port of website/src/lib/timing.ts from https://pele.run/playground,
+// with adaptive batching to overcome WKWebView's 1.0 ms performance.now() quantization.
+function measureSyncBatch(run) {
+  let batch = 1;
+  while (true) {
+    const t0 = performance.now();
+    let res;
+    for (let i = 0; i < batch; i++) {
+      res = run();
+    }
+    const elapsed = performance.now() - t0;
+    if (elapsed >= 6.0 || batch >= 64) {
+      return { result: res, ms: elapsed / batch };
+    }
+    batch *= 2;
+  }
+}
+
 function timedSync(run, maxRuns, budgetMs) {
   const times = [];
   const started = performance.now();
-  const r0 = performance.now();
-  let result = run();
-  times.push(performance.now() - r0);
+  const s0 = measureSyncBatch(run);
+  let result = s0.result;
+  times.push(s0.ms);
   while (times.length < maxRuns && (performance.now() - started) < budgetMs) {
-    const tIter = performance.now();
-    result = run();
-    times.push(performance.now() - tIter);
+    const sIter = measureSyncBatch(run);
+    result = sIter.result;
+    times.push(sIter.ms);
   }
   times.sort((a, b) => a - b);
   return {
@@ -588,7 +608,7 @@ async function runEngine(source, isDark, maxRuns, budgetMs) {
     let runs = 1;
 
     if (${isPeleJs ? 'true' : 'false'}) {
-      const timed = timedSync(() => Pele.render(source), maxRuns, budgetMs);
+      const timed = timedSync(() => Pele.render(source, { measurer: globalThis.PeleMetricsMeasurer }), maxRuns, budgetMs);
       svg = timed.result.svg;
       medianMs = timed.medianMs;
       minMs = timed.minMs;
@@ -739,6 +759,9 @@ async function runEngine(source, isDark, maxRuns, budgetMs) {
     final c = _controller;
     if (c == null) {
       return const Center(child: CircularProgressIndicator());
+    }
+    if (!widget.isVisible) {
+      return const SizedBox.shrink();
     }
     return WebViewWidget(controller: c);
   }

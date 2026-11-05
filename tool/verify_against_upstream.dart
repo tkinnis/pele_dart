@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:pele_dart/pele_dart.dart';
 
+// ignore: avoid_relative_lib_imports
+import '../example/lib/gallery_samples.dart';
+
 /// Verifies `pele_dart` structural header mappings against `UPSTREAM.md` and `.upstream/`,
 /// and runs differential and flattened-SVG verification across registered diagrams.
 Future<void> main(List<String> args) async {
@@ -110,13 +113,51 @@ Future<void> main(List<String> args) async {
 
   // Optional differential check against .upstream/src/index.ts if bun is available.
   var exactUpstreamMatches = 0;
+  var exactGalleryMatches = 0;
+  final galleryCorpus = <String, String>{};
+  for (final family in gallerySamples) {
+    for (var i = 0; i < family.playgroundSamples.length; i++) {
+      galleryCorpus['${family.id}:playground:${i + 1}'] =
+          family.playgroundSamples[i].source;
+    }
+    for (var i = 0; i < family.showcaseSources.length; i++) {
+      galleryCorpus['${family.id}:showcase:${i + 1}'] =
+          family.showcaseSources[i];
+    }
+  }
+
+  for (final entry in galleryCorpus.entries) {
+    final cssRes = render(
+      entry.value,
+      const RenderOptions(outputMode: SvgOutputMode.cssVariables),
+    );
+    for (final palette in <PelePalette>[PelePalette.light, PelePalette.dark]) {
+      final flatSvg = flattenPeleSvg(cssRes.svg, palette: palette);
+      if (flatSvg.contains('var(--') ||
+          flatSvg.contains('color-mix(') ||
+          flatSvg.contains('currentColor') ||
+          flatSvg.contains('baseline-shift=')) {
+        stderr.writeln(
+          'Error: Flattened gallery SVG for ${entry.key} contains unflattened CSS!',
+        );
+        exitCode = 1;
+        return;
+      }
+    }
+  }
+
   final bunFile = File('/opt/homebrew/bin/bun');
   if (upstreamDir.existsSync() && bunFile.existsSync()) {
-    final payload = jsonEncode(_sampleCorpus);
+    final combined = <String, String>{..._sampleCorpus, ...galleryCorpus};
+    final tmpPayloadFile = File(
+      '${Directory.systemTemp.path}/pele_verify_corpus.json',
+    );
+    tmpPayloadFile.writeAsStringSync(jsonEncode(combined));
     final jsCode =
         '''
 import { render } from './src/index.ts';
-const corpus = $payload;
+import fs from 'node:fs';
+const corpus = JSON.parse(fs.readFileSync('${tmpPayloadFile.path}', 'utf8'));
 const out = {};
 for (const [k, src] of Object.entries(corpus)) {
   try {
@@ -132,6 +173,9 @@ console.log(JSON.stringify(out));
       '-e',
       jsCode,
     ], workingDirectory: upstreamDir.path);
+    if (tmpPayloadFile.existsSync()) {
+      tmpPayloadFile.deleteSync();
+    }
     if (bunRes.exitCode == 0) {
       final upstreamMap =
           jsonDecode((bunRes.stdout as String).trim()) as Map<String, dynamic>;
@@ -147,10 +191,30 @@ console.log(JSON.stringify(out));
         final up = upstreamMap[type] as Map<String, dynamic>?;
         if (up != null && up['svg'] == dartRes.svg) {
           exactUpstreamMatches++;
-        } else if (args.contains('--verbose') && up != null) {
-          stdout.writeln(
-            'Diff in $type: dart(${dartRes.width}x${dartRes.height}, ${dartRes.svg.length}B) vs upstream(${up['width']}x${up['height']}, ${(up['svg'] as String?)?.length}B)',
+        } else {
+          stderr.writeln(
+            'Diff in canonical $type: dart(${dartRes.width}x${dartRes.height}, ${dartRes.svg.length}B) vs upstream(${up?['width']}x${up?['height']}, ${(up?['svg'] as String?)?.length}B)',
           );
+          exitCode = 1;
+        }
+      }
+      for (final entry in galleryCorpus.entries) {
+        final key = entry.key;
+        final dartRes = render(
+          entry.value,
+          const RenderOptions(
+            outputMode: SvgOutputMode.cssVariables,
+            now: '2026-10-01T00:00:00Z',
+          ),
+        );
+        final up = upstreamMap[key] as Map<String, dynamic>?;
+        if (up != null && up['svg'] == dartRes.svg) {
+          exactGalleryMatches++;
+        } else {
+          stderr.writeln(
+            'Diff in gallery $key: dart(${dartRes.width}x${dartRes.height}, ${dartRes.svg.length}B) vs upstream(${up?['width']}x${up?['height']}, ${(up?['svg'] as String?)?.length}B)',
+          );
+          exitCode = 1;
         }
       }
     }
@@ -162,7 +226,9 @@ console.log(JSON.stringify(out));
       'verifiedHeaders': verifiedHeaders,
       'verifiedDiagrams': verifiedDiagrams,
       'exactUpstreamMatches': exactUpstreamMatches,
-      'status': 'ok',
+      'exactGalleryMatches': exactGalleryMatches,
+      'totalGallerySamples': galleryCorpus.length,
+      'status': exitCode == 0 ? 'ok' : 'failed',
     }),
   );
 }

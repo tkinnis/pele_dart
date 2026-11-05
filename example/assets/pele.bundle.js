@@ -43403,4 +43403,6 @@ but found: '${image(p)}'`);
 
   // ../pele_dart/.upstream/src/index.ts
   register(...all);
+  globalThis.Pele = exports_src;
+  globalThis.PeleMetricsMeasurer = metricsMeasurer;
 })();
