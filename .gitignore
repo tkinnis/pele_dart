@@ -1,0 +1,16 @@
+# Dart / Pub
+.dart_tool/
+.packages
+build/
+pubspec.lock
+coverage/
+doc/api/
+
+# Upstream reference checkout (used only by local sync/differential test tools)
+.upstream/
+
+# macOS / Editor
+.DS_Store
+*.iml
+.idea/
+.vscode/

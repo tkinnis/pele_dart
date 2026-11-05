@@ -1,0 +1,17 @@
+name: pele_dart
+description: "A fast, deterministic, zero-DOM pure Dart Mermaid diagram renderer ported from obsidianmd/pele, outputting both themeable CSS-variable SVG and flattened vector_graphics-ready SVG."
+repository: https://github.com/tkinnis/pele_dart
+publish_to: 'none'
+version: 0.1.0-dev.1
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  meta: ^1.16.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0
+  vector_graphics_compiler: ^1.3.0
+  xml: ^6.6.1

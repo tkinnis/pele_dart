@@ -1,0 +1,30 @@
+name: pele_dart_comparison_demo
+description: >-
+  macOS 3-way comparison and visual/SVG text diff demo application comparing
+  pele_dart, obsidianmd/pele (JS), and mermaid.js across all 33 diagram families.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  pele_dart:
+    path: ../
+  vector_graphics: ^1.1.19
+  vector_graphics_compiler: ^1.1.19
+  webview_flutter: ^4.13.0
+  webview_flutter_wkwebview: ^3.23.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/pele.bundle.js
+    - assets/mermaid.min.js
