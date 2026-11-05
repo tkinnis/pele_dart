@@ -1,0 +1,22 @@
+%% label: 1. subgraph Customer
+---
+config:
+  theme: default
+  look: classic
+---
+swimlane-beta LR
+  subgraph Customer
+    Browse[Browse catalog]
+    Pay[Pay]
+  end
+  subgraph Warehouse
+    Pick[Pick items]
+    Ship[Ship order]
+  end
+  subgraph Finance
+    Invoice[Raise invoice]
+  end
+  Browse --> Pay
+  Pay --> Pick
+  Pick --> Ship
+  Pay --> Invoice

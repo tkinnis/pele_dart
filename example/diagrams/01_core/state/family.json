@@ -1,0 +1,8 @@
+{
+  "id": "state",
+  "title": "State",
+  "description": "Show the states of a system and the transitions between them.",
+  "diagramType": "state",
+  "beta": false,
+  "tier": 1
+}

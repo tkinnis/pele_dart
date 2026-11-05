@@ -1,0 +1,8 @@
+{
+  "id": "treeview",
+  "title": "Tree view",
+  "description": "Show a hierarchy, such as files and folders.",
+  "diagramType": "treeview",
+  "beta": true,
+  "tier": 2
+}

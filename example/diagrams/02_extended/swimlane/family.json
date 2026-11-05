@@ -1,0 +1,8 @@
+{
+  "id": "swimlane",
+  "title": "Swimlane",
+  "description": "Show a process divided by who performs each step.",
+  "diagramType": "swimlane",
+  "beta": true,
+  "tier": 2
+}

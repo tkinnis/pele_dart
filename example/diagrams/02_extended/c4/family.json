@@ -1,0 +1,8 @@
+{
+  "id": "c4",
+  "title": "C4",
+  "description": "Show a software system as people, systems, containers, and components.",
+  "diagramType": "c4",
+  "beta": false,
+  "tier": 2
+}

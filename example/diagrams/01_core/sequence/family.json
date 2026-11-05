@@ -1,0 +1,8 @@
+{
+  "id": "sequence",
+  "title": "Sequence",
+  "description": "Show the messages that participants exchange over time.",
+  "diagramType": "sequence",
+  "beta": false,
+  "tier": 1
+}

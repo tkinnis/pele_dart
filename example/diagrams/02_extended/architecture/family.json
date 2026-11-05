@@ -1,0 +1,8 @@
+{
+  "id": "architecture",
+  "title": "Architecture",
+  "description": "Show services and the connections between them.",
+  "diagramType": "architecture",
+  "beta": true,
+  "tier": 2
+}

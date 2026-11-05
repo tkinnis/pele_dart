@@ -1,0 +1,8 @@
+{
+  "id": "xychart",
+  "title": "XY chart",
+  "description": "Plot data as bars and lines on two axes.",
+  "diagramType": "xychart",
+  "beta": false,
+  "tier": 2
+}

@@ -1,0 +1,8 @@
+{
+  "id": "treemap",
+  "title": "Treemap",
+  "description": "Show hierarchical data as nested rectangles, sized by value.",
+  "diagramType": "treemap",
+  "beta": true,
+  "tier": 2
+}

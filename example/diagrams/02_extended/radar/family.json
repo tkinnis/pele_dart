@@ -1,0 +1,8 @@
+{
+  "id": "radar",
+  "title": "Radar",
+  "description": "Compare values across several axes.",
+  "diagramType": "radar",
+  "beta": true,
+  "tier": 2
+}

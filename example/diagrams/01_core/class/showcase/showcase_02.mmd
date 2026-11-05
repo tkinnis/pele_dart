@@ -1,0 +1,26 @@
+---
+title: Reef animal example
+---
+classDiagram
+    note "From Turtle till Whale"
+    Animal <|-- Turtle
+    note for Turtle "can swim<br>can dive<br>can nest on beaches<br>can live for decades"
+    Animal <|-- Shark
+    Animal <|-- Whale
+    Animal : +int age
+    Animal : +String name
+    Animal: +isMammal()
+    Animal: +migrate()
+    class Turtle{
+        +String shellColor
+        +swim()
+        +nest()
+    }
+    class Shark{
+        -int sizeInFeet
+        -canHunt()
+    }
+    class Whale{
+        +bool is_humpback
+        +sing()
+    }

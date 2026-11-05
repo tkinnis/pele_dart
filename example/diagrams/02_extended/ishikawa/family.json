@@ -1,0 +1,8 @@
+{
+  "id": "ishikawa",
+  "title": "Ishikawa",
+  "description": "Show the causes that contribute to a problem.",
+  "diagramType": "ishikawa",
+  "beta": true,
+  "tier": 2
+}

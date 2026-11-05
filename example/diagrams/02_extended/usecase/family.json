@@ -1,0 +1,8 @@
+{
+  "id": "usecase",
+  "title": "Use case",
+  "description": "Show actors and the goals they reach with a system.",
+  "diagramType": "usecase",
+  "beta": true,
+  "tier": 2
+}

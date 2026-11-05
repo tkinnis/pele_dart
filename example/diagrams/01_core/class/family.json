@@ -1,0 +1,8 @@
+{
+  "id": "class",
+  "title": "Class",
+  "description": "Show classes, their members, and the relationships between them.",
+  "diagramType": "class",
+  "beta": false,
+  "tier": 1
+}

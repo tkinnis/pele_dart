@@ -1,0 +1,8 @@
+{
+  "id": "block",
+  "title": "Block",
+  "description": "Show blocks in a grid that you arrange yourself.",
+  "diagramType": "block",
+  "beta": false,
+  "tier": 2
+}

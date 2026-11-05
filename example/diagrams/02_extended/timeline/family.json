@@ -1,0 +1,8 @@
+{
+  "id": "timeline",
+  "title": "Timeline",
+  "description": "Show events in chronological order.",
+  "diagramType": "timeline",
+  "beta": false,
+  "tier": 2
+}

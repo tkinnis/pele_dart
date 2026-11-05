@@ -24,6 +24,44 @@ void main() {
       expect(render(playgroundDefaultSource).svg, contains('<svg'));
     });
 
+    test('dynamically discovers new .mmd and .mermaid files added to subfolders', () {
+      final originalDir = resolveDiagramsRootDir();
+      final tempRoot = Directory.systemTemp.createTempSync(
+        'pele_gallery_test_',
+      );
+      try {
+        final customSub = Directory('${tempRoot.path}/03_custom/my_feature')
+          ..createSync(recursive: true);
+        File('${customSub.path}/01_flow.mmd')
+            .writeAsStringSync('flowchart LR\n  A[Start] --> B[End]\n');
+        File('${customSub.path}/02_seq.mermaid').writeAsStringSync(
+          '%% label: Custom Sequence\nsequenceDiagram\n  Alice->>Bob: Hello\n',
+        );
+
+        final scanned = reloadGallerySamples(rootDir: tempRoot);
+        expect(scanned.length, 1);
+        expect(scanned.first.title, 'My feature');
+        expect(scanned.first.playgroundSamples.length, 2);
+        expect(scanned.first.playgroundSamples[0].fileName, '01_flow.mmd');
+        expect(scanned.first.playgroundSamples[0].label, '01 flow');
+        expect(scanned.first.playgroundSamples[1].fileName, '02_seq.mermaid');
+        expect(scanned.first.playgroundSamples[1].label, 'Custom Sequence');
+        expect(
+          render(scanned.first.playgroundSamples[0].source).svg,
+          contains('<svg'),
+        );
+        expect(
+          render(scanned.first.playgroundSamples[1].source).svg,
+          contains('<svg'),
+        );
+      } finally {
+        reloadGallerySamples(rootDir: originalDir);
+        if (tempRoot.existsSync()) {
+          tempRoot.deleteSync(recursive: true);
+        }
+      }
+    });
+
     test('flattenPeleSvg resolves upstream SERIES palette and root CSS variables identically in light and dark modes', () {
       const expectedSeries = <String>[
         '#4c78a8',

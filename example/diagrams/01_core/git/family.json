@@ -1,0 +1,8 @@
+{
+  "id": "git",
+  "title": "Git graph",
+  "description": "Show commits, branches, and merges.",
+  "diagramType": "git",
+  "beta": false,
+  "tier": 1
+}

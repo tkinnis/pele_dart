@@ -1,0 +1,8 @@
+{
+  "id": "pie",
+  "title": "Pie",
+  "description": "Show the parts of a whole.",
+  "diagramType": "pie",
+  "beta": false,
+  "tier": 1
+}

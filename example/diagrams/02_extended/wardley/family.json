@@ -1,0 +1,8 @@
+{
+  "id": "wardley",
+  "title": "Wardley map",
+  "description": "Plot components by their visibility to the user and their stage of evolution.",
+  "diagramType": "wardley",
+  "beta": true,
+  "tier": 2
+}

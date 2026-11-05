@@ -1,0 +1,8 @@
+{
+  "id": "railroad",
+  "title": "Railroad",
+  "description": "Show the syntax of a grammar.",
+  "diagramType": "railroad",
+  "beta": true,
+  "tier": 2
+}

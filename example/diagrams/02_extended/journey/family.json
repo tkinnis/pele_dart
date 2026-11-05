@@ -1,0 +1,8 @@
+{
+  "id": "journey",
+  "title": "User journey",
+  "description": "Show the steps of a task and how satisfying each one is.",
+  "diagramType": "journey",
+  "beta": false,
+  "tier": 2
+}

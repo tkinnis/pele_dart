@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -175,6 +176,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
           : gallerySamples.first.source;
   String _searchQuery = '';
   int? _tierFilter;
+  final Set<String> _expandedFamilyIds = <String>{gallerySamples.first.id};
 
   // Active diagram style preset and custom CSS
   PeleStylePreset _stylePreset = PeleStylePreset.dark;
@@ -302,13 +304,24 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
     });
   }
 
-  void _selectFamily(DiagramSample sample) {
+  void _selectFamily(DiagramSample sample, {bool toggleExpand = false}) {
     _debounceTimer?.cancel();
     final initialSource =
         sample.playgroundSamples.isNotEmpty
             ? sample.playgroundSamples.first.source
             : sample.source;
     setState(() {
+      if (toggleExpand) {
+        if (_expandedFamilyIds.contains(sample.id) &&
+            _selectedSample.id == sample.id &&
+            !_isAdHocCustom) {
+          _expandedFamilyIds.remove(sample.id);
+        } else {
+          _expandedFamilyIds.add(sample.id);
+        }
+      } else {
+        _expandedFamilyIds.add(sample.id);
+      }
       _selectedSample = sample;
       _selectedPlaygroundSampleIndex = 0;
       _isAdHocCustom = false;
@@ -316,6 +329,126 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       _editorController.text = initialSource;
     });
     _runPeleDartEngine();
+  }
+
+  void _selectFamilyAndFile(DiagramSample sample, int fileIndex) {
+    _debounceTimer?.cancel();
+    final item = sample.playgroundSamples[fileIndex];
+    setState(() {
+      _expandedFamilyIds.add(sample.id);
+      _selectedSample = sample;
+      _selectedPlaygroundSampleIndex = fileIndex;
+      _isAdHocCustom = false;
+      _activeSource = item.source;
+      _editorController.text = item.source;
+    });
+    _runPeleDartEngine();
+  }
+
+  void _rescanDiagramsFolder() {
+    final refreshed = reloadGallerySamples();
+    if (refreshed.isEmpty) return;
+    final match = refreshed.firstWhere(
+      (s) => s.id == _selectedSample.id,
+      orElse: () => refreshed.first,
+    );
+    setState(() {
+      _selectedSample = match;
+      if (_selectedPlaygroundSampleIndex >= match.playgroundSamples.length) {
+        _selectedPlaygroundSampleIndex = 0;
+      }
+    });
+    if (mounted) {
+      final totalFiles = refreshed.fold<int>(
+        0,
+        (sum, s) => sum + s.playgroundSamples.length,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 2),
+          content: Text(
+            'Rescanned ${resolveDiagramsRootDir().path}: '
+            '${refreshed.length} folders, $totalFiles .mmd/.mermaid files',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _openDiagramsFolderInFinder() async {
+    final dirPath = resolveDiagramsRootDir().path;
+    try {
+      await Process.run('open', <String>[dirPath]);
+    } catch (_) {
+      // Ignore if running on non-macOS host.
+    }
+  }
+
+  Future<void> _promptSaveAsMmd(BuildContext context) async {
+    final nameController = TextEditingController(text: 'custom_diagram.mmd');
+    final savedName = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text(
+            'Save Diagram to example/diagrams/03_custom/',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          ),
+          content: SizedBox(
+            width: 360,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'Enter a filename ending in .mmd or .mermaid:',
+                  style: TextStyle(fontSize: 12),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: nameController,
+                  autofocus: true,
+                  style: const TextStyle(fontFamily: 'Menlo', fontSize: 12),
+                  decoration: const InputDecoration(
+                    hintText: 'my_diagram.mmd',
+                    isDense: true,
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed:
+                  () => Navigator.of(ctx).pop(nameController.text.trim()),
+              child: const Text('Save .mmd'),
+            ),
+          ],
+        );
+      },
+    );
+    nameController.dispose();
+    if (savedName == null || savedName.isEmpty) return;
+    final savedFile = saveCustomMermaidDiagram(
+      fileName: savedName,
+      source: _activeSource,
+    );
+    final refreshed = gallerySamples;
+    final customFamily = refreshed.where((s) => s.tier == 3).firstOrNull;
+    if (customFamily != null) {
+      final idx = customFamily.playgroundSamples.indexWhere(
+        (item) => item.filePath == savedFile.path,
+      );
+      _selectFamilyAndFile(customFamily, idx >= 0 ? idx : 0);
+    } else {
+      setState(() {});
+    }
   }
 
   void _selectSubSampleSource(String source, int index) {
@@ -877,72 +1010,127 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
 
   Widget _buildGallerySidebar(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final allSamples = gallerySamples;
+    final coreCount = allSamples.where((s) => s.tier == 1).length;
+    final extCount = allSamples.where((s) => s.tier == 2).length;
+    final customCount = allSamples.where((s) => s.tier == 3).length;
+
     final filtered =
-        gallerySamples.where((s) {
+        allSamples.where((s) {
           if (_tierFilter != null && s.tier != _tierFilter) return false;
           if (_searchQuery.isEmpty) return true;
           final q = _searchQuery.toLowerCase();
+          final matchesFile = s.playgroundSamples.any(
+            (item) =>
+                item.fileName.toLowerCase().contains(q) ||
+                item.label.toLowerCase().contains(q),
+          );
           return s.title.toLowerCase().contains(q) ||
               s.diagramType.toLowerCase().contains(q) ||
-              s.description.toLowerCase().contains(q);
+              s.description.toLowerCase().contains(q) ||
+              matchesFile;
         }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              // Folder Browser Header Bar
               Row(
                 children: <Widget>[
+                  Icon(
+                    Icons.folder_special_outlined,
+                    size: 14,
+                    color: cs.primary,
+                  ),
+                  const SizedBox(width: 5),
                   Expanded(
-                    child: SizedBox(
-                      height: 30,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search 33 diagrams...',
-                          prefixIcon: const Icon(Icons.search, size: 15),
-                          prefixIconConstraints: const BoxConstraints(
-                            minWidth: 30,
-                          ),
-                          isDense: true,
-                          filled: true,
-                          fillColor: cs.surfaceContainerHighest.withValues(
-                            alpha: 0.45,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 6,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        style: const TextStyle(fontSize: 12),
-                        onChanged:
-                            (v) => setState(() => _searchQuery = v.trim()),
+                    child: Text(
+                      'example/diagrams/',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontFamily: 'Menlo',
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 4),
                   IconButton(
-                    tooltip: 'New Custom Diagram',
-                    icon: const Icon(Icons.add, size: 17),
+                    tooltip:
+                        'Rescan example/diagrams/ for new .mmd / .mermaid files',
+                    icon: const Icon(Icons.refresh, size: 15),
                     visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 24,
+                      minHeight: 24,
+                    ),
+                    onPressed: _rescanDiagramsFolder,
+                  ),
+                  IconButton(
+                    tooltip: 'Reveal example/diagrams/ folder in Finder',
+                    icon: const Icon(Icons.folder_open, size: 15),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 24,
+                      minHeight: 24,
+                    ),
+                    onPressed: _openDiagramsFolderInFinder,
+                  ),
+                  IconButton(
+                    tooltip: 'New Blank Diagram',
+                    icon: const Icon(Icons.add, size: 16),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 24,
+                      minHeight: 24,
+                    ),
                     onPressed: () => _startAdHocPlayground(initialText: ''),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
+              SizedBox(
+                height: 29,
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Filter folders or .mmd files...',
+                    prefixIcon: const Icon(Icons.search, size: 14),
+                    prefixIconConstraints: const BoxConstraints(minWidth: 28),
+                    isDense: true,
+                    filled: true,
+                    fillColor: cs.surfaceContainerHighest.withValues(
+                      alpha: 0.45,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(7),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  style: const TextStyle(fontSize: 11.5),
+                  onChanged: (v) => setState(() => _searchQuery = v.trim()),
+                ),
+              ),
+              const SizedBox(height: 6),
               Row(
                 children: <Widget>[
                   for (final entry in <(int?, String)>[
-                    (null, 'All (33)'),
-                    (1, 'Core (10)'),
-                    (2, 'Ext (23)'),
+                    (null, 'All (${allSamples.length})'),
+                    (1, 'Core ($coreCount)'),
+                    (2, 'Ext ($extCount)'),
+                    if (customCount > 0) (3, 'Custom ($customCount)'),
                   ]) ...<Widget>[
                     if (entry.$1 != null) const SizedBox(width: 4),
                     Expanded(
@@ -991,84 +1179,198 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
             itemCount: filtered.length,
             itemBuilder: (context, index) {
               final sample = filtered[index];
-              final isSelected =
+              final isSelectedFamily =
                   !_isAdHocCustom && sample.id == _selectedSample.id;
+              final isExpanded =
+                  _expandedFamilyIds.contains(sample.id) ||
+                  _searchQuery.isNotEmpty;
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 1),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(6),
-                  onTap: () => _selectFamily(sample),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          isSelected
-                              ? cs.primaryContainer.withValues(alpha: 0.55)
-                              : Colors.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    InkWell(
                       borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(
-                            sample.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight:
-                                  isSelected
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
+                      onTap: () => _selectFamily(sample, toggleExpand: true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              isSelectedFamily
+                                  ? cs.primaryContainer.withValues(alpha: 0.55)
+                                  : Colors.transparent,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          children: <Widget>[
+                            Icon(
+                              isExpanded
+                                  ? Icons.keyboard_arrow_down
+                                  : Icons.keyboard_arrow_right,
+                              size: 14,
+                              color: cs.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 3),
+                            Icon(
+                              isExpanded
+                                  ? Icons.folder_open
+                                  : Icons.folder_outlined,
+                              size: 14,
                               color:
-                                  isSelected
-                                      ? cs.onPrimaryContainer
-                                      : cs.onSurface,
+                                  isSelectedFamily
+                                      ? cs.primary
+                                      : cs.onSurfaceVariant,
                             ),
-                          ),
-                        ),
-                        if (sample.beta) ...<Widget>[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: cs.secondaryContainer.withValues(
-                                alpha: 0.7,
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                sample.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight:
+                                      isSelectedFamily
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                  color:
+                                      isSelectedFamily
+                                          ? cs.onPrimaryContainer
+                                          : cs.onSurface,
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(4),
                             ),
-                            child: Text(
-                              'beta',
+                            if (sample.beta) ...<Widget>[
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: cs.secondaryContainer.withValues(
+                                    alpha: 0.7,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'beta',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    color: cs.onSecondaryContainer,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                            Text(
+                              '${sample.playgroundSamples.length}',
                               style: TextStyle(
-                                fontSize: 9,
-                                color: cs.onSecondaryContainer,
+                                fontSize: 10.5,
+                                fontFamily: 'Menlo',
+                                color: cs.onSurfaceVariant.withValues(
+                                  alpha: 0.7,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                        Text(
-                          '${sample.playgroundSamples.length}',
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontFamily: 'Menlo',
-                            color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    if (isExpanded)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 20,
+                          top: 1,
+                          bottom: 3,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            for (
+                              var fIdx = 0;
+                              fIdx < sample.playgroundSamples.length;
+                              fIdx++
+                            )
+                              _buildMmdFileTreeRow(
+                                context,
+                                sample: sample,
+                                fileIndex: fIdx,
+                                isSelectedFile:
+                                    isSelectedFamily &&
+                                    _selectedPlaygroundSampleIndex == fIdx,
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
               );
             },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMmdFileTreeRow(
+    BuildContext context, {
+    required DiagramSample sample,
+    required int fileIndex,
+    required bool isSelectedFile,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final item = sample.playgroundSamples[fileIndex];
+    final displayFile =
+        item.fileName.isNotEmpty ? item.fileName : '${item.label}.mmd';
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 0.5),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(5),
+        onTap: () => _selectFamilyAndFile(sample, fileIndex),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+          decoration: BoxDecoration(
+            color:
+                isSelectedFile
+                    ? cs.primary.withValues(alpha: 0.16)
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Row(
+            children: <Widget>[
+              Icon(
+                Icons.description_outlined,
+                size: 12.5,
+                color:
+                    isSelectedFile
+                        ? cs.primary
+                        : cs.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  displayFile,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontFamily: 'Menlo',
+                    fontWeight:
+                        isSelectedFile ? FontWeight.w700 : FontWeight.w400,
+                    color:
+                        isSelectedFile
+                            ? cs.primary
+                            : cs.onSurfaceVariant.withValues(alpha: 0.9),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -1385,6 +1687,13 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
               ),
               const Spacer(),
               if (!isStyleTab) ...<Widget>[
+                IconButton(
+                  tooltip:
+                      'Save Diagram as .mmd to example/diagrams/03_custom/',
+                  icon: const Icon(Icons.save_alt, size: 14),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _promptSaveAsMmd(context),
+                ),
                 IconButton(
                   tooltip: 'Paste Mermaid from Clipboard',
                   icon: const Icon(Icons.content_paste, size: 14),

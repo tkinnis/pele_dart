@@ -1,0 +1,8 @@
+{
+  "id": "requirement",
+  "title": "Requirement",
+  "description": "Show requirements and how they relate to each other and to the elements that satisfy them.",
+  "diagramType": "requirement",
+  "beta": false,
+  "tier": 2
+}

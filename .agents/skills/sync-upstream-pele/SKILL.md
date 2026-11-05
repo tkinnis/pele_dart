@@ -76,7 +76,7 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 * When upstream promotes a diagram from `<name>-beta` to `<name>` (or adds an alias in `src/detect.ts`):
   1. Update `DETECTORS` in [`lib/src/detect.dart`](../../../lib/src/detect.dart) to match `src/detect.ts` 1:1.
   2. Update the diagram's `parse.dart` header regex if it strips the first-line keyword.
-  3. Update `beta: false` and any updated sample headers in [`example/lib/gallery_samples.dart`](../../../example/lib/gallery_samples.dart).
+  3. Update `"beta": false` in `example/diagrams/02_extended/<type>/family.json` and any updated `.mmd` sample headers in `example/diagrams/02_extended/<type>/*.mmd`.
 
 ### C. New Diagram Families (`A src/diagrams/<new_type>/...`)
 1. Create `lib/src/diagrams/<new_type>/` with 1:1 Dart counterparts for each `.ts` file (`model.dart`, `parse.dart`, `layout.dart`, `render.dart`, `index.dart`), each starting with `// Upstream: src/diagrams/<new_type>/<file>.ts`.
@@ -84,7 +84,7 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 3. Register the diagram in [`lib/src/diagrams/registry.dart`](../../../lib/src/diagrams/registry.dart) matching `src/diagrams/registry.ts`.
 4. Export the new diagram entrypoint if upstream exports it in `src/index.ts`.
 5. Add a canonical sample to `_sampleCorpus` in [`tool/verify_against_upstream.dart`](../../../tool/verify_against_upstream.dart).
-6. Add the diagram family (with at least 3 playground samples and showcase diagrams from `.upstream/website/src/lib/examples.ts` and `.upstream/tests/corpus/<new_type>-docs.json`) to [`example/lib/gallery_samples.dart`](../../../example/lib/gallery_samples.dart) and update the family/sample counts in [`test/gallery_corpus_test.dart`](../../../test/gallery_corpus_test.dart).
+6. Create `example/diagrams/02_extended/<new_type>/` with `family.json`, playground `.mmd` files (`01_*.mmd`..`06_*.mmd`), and `showcase/showcase_*.mmd` files from `.upstream/website/src/lib/examples.ts` and `.upstream/tests/corpus/<new_type>-docs.json`, and update the family/sample counts in [`test/gallery_corpus_test.dart`](../../../test/gallery_corpus_test.dart).
 7. Add dedicated unit tests in `test/diagrams/<new_type>_test.dart` testing both `SvgOutputMode.cssVariables` and `SvgOutputMode.flattened`.
 8. Add the new diagram row to the Module Sync Matrix in [`UPSTREAM.md`](../../../UPSTREAM.md) and the Supported Diagrams table in [`docs/API_MANUAL.md`](../../../docs/API_MANUAL.md).
 

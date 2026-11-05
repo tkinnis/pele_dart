@@ -1,0 +1,15 @@
+%% label: 4. global
+agentflow-beta TB
+  global
+    corpus["Shared corpus"]@{ shape: refdoc }
+  end
+
+  flow summarizer["Summarizer"]
+    summarize["Summarize"]@{ shape: task }
+    summarize -.- corpus
+  end
+
+  flow indexer["Indexer"]
+    index["Build index"]@{ shape: task }
+    index -.- corpus
+  end

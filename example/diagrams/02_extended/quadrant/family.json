@@ -1,0 +1,8 @@
+{
+  "id": "quadrant",
+  "title": "Quadrant chart",
+  "description": "Plot items on two axes that divide the chart into four sections.",
+  "diagramType": "quadrant",
+  "beta": false,
+  "tier": 2
+}

@@ -1,0 +1,8 @@
+{
+  "id": "venn",
+  "title": "Venn",
+  "description": "Show sets and where they overlap.",
+  "diagramType": "venn",
+  "beta": true,
+  "tier": 2
+}

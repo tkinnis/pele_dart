@@ -1,0 +1,8 @@
+{
+  "id": "info",
+  "title": "Info",
+  "description": "Display package version info.",
+  "diagramType": "info",
+  "beta": false,
+  "tier": 1
+}

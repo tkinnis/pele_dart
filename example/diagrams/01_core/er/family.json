@@ -1,0 +1,8 @@
+{
+  "id": "er",
+  "title": "Entity relationship",
+  "description": "Show entities, their attributes, and the relationships between them.",
+  "diagramType": "er",
+  "beta": false,
+  "tier": 1
+}

@@ -1,0 +1,8 @@
+{
+  "id": "cynefin",
+  "title": "Cynefin",
+  "description": "Sort items into the five domains of the Cynefin framework.",
+  "diagramType": "cynefin",
+  "beta": true,
+  "tier": 2
+}

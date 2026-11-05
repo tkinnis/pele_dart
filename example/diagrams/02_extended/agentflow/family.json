@@ -1,0 +1,8 @@
+{
+  "id": "agentflow",
+  "title": "Agentflow",
+  "description": "Show the tasks of AI agents and how work passes between them.",
+  "diagramType": "agentflow",
+  "beta": true,
+  "tier": 2
+}

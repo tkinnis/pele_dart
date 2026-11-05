@@ -1,0 +1,8 @@
+{
+  "id": "sankey",
+  "title": "Sankey",
+  "description": "Show flows between nodes, with widths proportional to quantity.",
+  "diagramType": "sankey",
+  "beta": false,
+  "tier": 2
+}

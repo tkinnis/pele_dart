@@ -1,0 +1,8 @@
+{
+  "id": "flowchart",
+  "title": "Flowchart",
+  "description": "Show the steps and decisions in a process.",
+  "diagramType": "flowchart",
+  "beta": false,
+  "tier": 1
+}

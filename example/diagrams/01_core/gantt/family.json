@@ -1,0 +1,8 @@
+{
+  "id": "gantt",
+  "title": "Gantt",
+  "description": "Show the tasks of a project on a timeline.",
+  "diagramType": "gantt",
+  "beta": false,
+  "tier": 1
+}

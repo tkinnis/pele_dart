@@ -1,0 +1,8 @@
+{
+  "id": "packet",
+  "title": "Packet",
+  "description": "Show the fields of a network packet.",
+  "diagramType": "packet",
+  "beta": false,
+  "tier": 2
+}

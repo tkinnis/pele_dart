@@ -1,0 +1,8 @@
+{
+  "id": "mindmap",
+  "title": "Mindmap",
+  "description": "Show ideas branching out from a central topic.",
+  "diagramType": "mindmap",
+  "beta": false,
+  "tier": 1
+}

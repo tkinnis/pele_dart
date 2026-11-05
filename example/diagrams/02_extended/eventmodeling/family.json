@@ -1,0 +1,8 @@
+{
+  "id": "eventmodeling",
+  "title": "Event modeling",
+  "description": "Show how commands, events, and views change a system over time.",
+  "diagramType": "eventmodeling",
+  "beta": false,
+  "tier": 2
+}
