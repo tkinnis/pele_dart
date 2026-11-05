@@ -1,0 +1,66 @@
+name: Bug Report
+description: Report a crash, exception, invalid SVG output, or API bug in pele_dart.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug in **`pele_dart`**!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what went wrong.
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagram_source
+    attributes:
+      label: Minimal Reproducible Mermaid Diagram
+      description: Paste the smallest Mermaid diagram input that triggers the bug.
+      render: mermaid
+      placeholder: |
+        flowchart TD
+          A[Start] --> B[End]
+    validations:
+      required: true
+
+  - type: textarea
+    id: dart_code
+    attributes:
+      label: Dart Invocation & RenderOptions
+      description: Show how you called `render()`, `renderWithErrors()`, or `parse()`.
+      render: dart
+      placeholder: |
+        final svg = render(
+          source,
+          const RenderOptions(
+            outputMode: SvgOutputMode.flattened,
+            palette: PelePalette.dark,
+          ),
+        );
+    validations:
+      required: false
+
+  - type: dropdown
+    id: output_mode
+    attributes:
+      label: SVG Output Mode
+      options:
+        - SvgOutputMode.flattened (Flutter / vector_graphics / flutter_svg)
+        - SvgOutputMode.cssVariables (Web / Upstream Pele default)
+        - Both / Not applicable
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Dart / Flutter SDK Version & Platform
+      description: "e.g., Dart 3.11.0, Flutter 3.41.0 on macOS / iOS / Android / Web / Linux"
+      placeholder: "Dart 3.11.0 / macOS 15"
+    validations:
+      required: true

@@ -1,6 +1,8 @@
 # `pele_dart` API User Manual
 
-`pele_dart` is a fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG rendering engine ported 1:1 from [`obsidianmd/pele`](https://github.com/obsidianmd/pele). It renders 33 Mermaid diagram families synchronously into clean SVG with zero browser (`WKWebView`), zero JavaScript engine (`QuickJS` / `JavaScriptCore`), and zero Flutter SDK dependency in the core package.
+`pele_dart` is a fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG rendering engine. It is a 1:1 pure-Dart port of [`obsidianmd/pele`](https://github.com/obsidianmd/pele) ([`pele.run`](https://pele.run)), created by Steph Ango (`kepano`) and the Obsidian team.
+
+`pele_dart` renders all 33 Mermaid and extended diagram families synchronously into clean SVG with zero browser (`WKWebView`), zero JavaScript engine (`QuickJS` / `JavaScriptCore`), and zero Flutter SDK dependency in the core package.
 
 ---
 
@@ -10,7 +12,7 @@
 2. [Quick Start](#2-quick-start)
 3. [Core API Functions](#3-core-api-functions)
 4. [Dual SVG Output Modes (`SvgOutputMode`)](#4-dual-svg-output-modes-svgoutputmode)
-5. [Theming & Palettes (`PelePalette`)](#5-theming--palettes-pelepalette)
+5. [Theming, Styling & Customization](#5-theming-styling--customization)
 6. [Configuration Options (`RenderOptions` & `ParseOptions`)](#6-configuration-options-renderoptions--parseoptions)
 7. [Return Types (`RenderResult` & `LinkInfo`)](#7-return-types-renderresult--linkinfo)
 8. [Error Handling (`PeleError`)](#8-error-handling-peleerror)
@@ -25,7 +27,20 @@
 
 ## 1. Installation
 
-Add `pele_dart` to your `pubspec.yaml`:
+Add `pele_dart` from `pub.dev`:
+
+```bash
+dart pub add pele_dart
+```
+
+Or in your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  pele_dart: ^0.1.0
+```
+
+Or directly from GitHub:
 
 ```yaml
 dependencies:
@@ -33,14 +48,6 @@ dependencies:
     git:
       url: https://github.com/tkinnis/pele_dart.git
       ref: main
-```
-
-Or for local path development:
-
-```yaml
-dependencies:
-  pele_dart:
-    path: ../pele_dart
 ```
 
 Import the library:
@@ -104,7 +111,7 @@ Parses, lays out, and renders a Mermaid diagram synchronously.
 - **`source`**: Either a raw Mermaid `String` (including optional YAML frontmatter or `%%{init: ...}%%` directives) **or** a pre-parsed model object previously returned by [`parse()`](#parsestring-text-parseoptions-options--const-parseoptions--dynamic).
 - **`options`**: Controls SVG output mode, color palette, typography, sizing, link/image security schemes, resource limits, and custom icon/math resolvers.
 - **Returns**: [`RenderResult`](#7-return-types-renderresult--linkinfo) containing `svg`, `width`, `height`, `type`, `mermaidType`, and `links`.
-- **Throws**: [`PeleError`](#8-error-handling-peleerror) on syntax errors, unsupported diagram types, or resource limit violations.
+- **Throws**: [`PeleError`](#8-error-handling-peleerror) on syntax errors, semantic validation errors, unsupported diagram types, or resource limit violations.
 
 ### `renderMermaid(String source, {RenderOptions options = const RenderOptions()}) → String`
 
@@ -112,7 +119,7 @@ Convenience wrapper around `render(source, options).svg`.
 
 ### `parse(String text, [ParseOptions options = const ParseOptions()]) → dynamic`
 
-Parses a Mermaid diagram source string into an internal immutable model and caches its metadata so it can be passed directly to `render(model, options)` multiple times (for example, to re-render across light/dark themes or different `maxWidth` breakpoints without re-parsing).
+Parses a Mermaid diagram source string into an internal model and caches its metadata so it can be passed directly to `render(model, options)` multiple times (for example, to re-render across light/dark themes or different `maxWidth` breakpoints without re-parsing).
 
 ```dart
 final model = parse(mermaidSource);
@@ -138,9 +145,9 @@ if (supports(codeBlock)) {
 }
 ```
 
-### `flattenPeleSvg(String rawSvg, {PelePalette palette = PelePalette.light}) → String`
+### `flattenPeleSvg(String svg, {PelePalette palette = PelePalette.light}) → String`
 
-Converts an upstream-style CSS-variable SVG (`SvgOutputMode.cssVariables`) into a static, `vector_graphics_compiler`-compatible SVG with resolved colors, explicit baseline offsets, and stamped arrowheads. Calling `render(..., RenderOptions(outputMode: SvgOutputMode.flattened))` invokes this automatically.
+Converts an upstream-style CSS-variable SVG (`SvgOutputMode.cssVariables`) into a static, `vector_graphics_compiler`-compatible SVG 1.1 document by resolving all `var(--_*)` and `var(--pele-*)` CSS custom properties, `color-mix(in srgb, ...)`, `calc(...)`, `currentColor`, `baseline-shift="sub|super"`, and inline `style="..."` presentation/geometry properties into explicit SVG XML attributes. Calling `render(..., RenderOptions(outputMode: SvgOutputMode.flattened))` invokes this automatically.
 
 ### `register(Iterable<AnyDiagram> list)` & `registered(DiagramType type) → bool`
 
@@ -148,7 +155,7 @@ All 33 built-in diagram families (`all`) are registered automatically on first u
 
 ### `forgetTextWidths()`
 
-Clears any memoized text width caches in the built-in metrics measurer.
+Clears any cached text width measurements (no-op for the stateless built-in `metricsMeasurer`; provided for 1:1 upstream API parity).
 
 ---
 
@@ -158,8 +165,8 @@ Clears any memoized text width caches in the built-in metrics measurer.
 
 | Mode | Enum Value | Best For | Behavior |
 | :--- | :--- | :--- | :--- |
-| **Flattened** *(Default)* | `SvgOutputMode.flattened` | Flutter desktop/mobile apps (`vector_graphics_compiler` / `vector_graphics`), static PDF/PNG rasterizers | Resolves all `--pele-*` and `--_*` CSS custom properties, `color-mix()` expressions, and `currentColor` into concrete hex/RGB attributes (`fill`, `fill-opacity`, `stroke`, `stroke-opacity`). Converts `<marker>` arrowheads into directly stamped `<path>` / `<polygon>` geometry and converts `dominant-baseline` into explicit `y` coordinates. |
-| **CSS Variables** *(Upstream Parity)* | `SvgOutputMode.cssVariables` | Web views, HTML/Markdown exports, differential testing against `obsidianmd/pele` | Emits byte-for-byte identical SVG markup to upstream `obsidianmd/pele`, styled via `var(--pele-*)` CSS custom properties and `<marker>` definitions so a single SVG adapts dynamically to light/dark CSS themes. |
+| **Flattened** *(Default)* | `SvgOutputMode.flattened` | Flutter desktop/mobile apps (`vector_graphics_compiler` / `vector_graphics`), static PDF/PNG rasterizers, standalone `.svg` files | Resolves all `--pele-*` and `--_*` CSS custom properties, `color-mix(in srgb, ...)` blends, `calc(...)` expressions, and `currentColor` against `RenderOptions.palette` into concrete `#rrggbb` and numeric SVG 1.1 attributes. Converts `<tspan>` `baseline-shift="sub\|super"` into explicit `dy` offsets and promotes inline `style="..."` properties (`rx`, `ry`, `fill`, `stroke`, `stroke-width`, etc.) to native SVG attributes. |
+| **CSS Variables** *(Upstream Parity)* | `SvgOutputMode.cssVariables` | Web views, HTML/Markdown exports, differential testing against `obsidianmd/pele` | Emits **100% byte-for-byte identical SVG markup** to upstream `obsidianmd/pele`, styled via `var(--pele-*)` CSS custom properties and `color-mix()` so a single SVG adapts dynamically to light/dark CSS themes without re-rendering. |
 
 ---
 
@@ -254,7 +261,7 @@ Below are four examples of consumer-supplied custom `PelePalette` instances rend
 
 ![Custom Catppuccin Mocha Palette](images/styles/style_catppuccin_mocha.svg)
 
-#### Example C: Nord Blueprint Custom Palette (`bg: '#2e3440'`, `accent: '#88c0d0'`, `radius: 6`)
+#### Example C: Nord Blueprint Custom Palette (`bg: '#2e3440'`, `accent: '#88c0d0'`, `radius: 5`)
 
 ![Custom Nord Blueprint Palette](images/styles/style_nord.svg)
 
@@ -266,7 +273,7 @@ Below are four examples of consumer-supplied custom `PelePalette` instances rend
 
 ### 5.3 Categorical Series Colors (`PelePalette.colors`)
 
-Multi-branch and data-driven diagrams (`mindmap`, `pie`, `sankey`, `xychart`, `gantt`, `timeline`, `gitGraph`, `radar`, `treemap`, `sunburst`) cycle through the 8 categorical colors in `PelePalette.colors` (`--pele-series-1` through `--pele-series-8`).
+Multi-branch and data-driven diagrams (`mindmap`, `pie`, `sankey`, `xychart`, `gantt`, `timeline`, `gitGraph`, `radar`, `treemap`, `journey`, `venn`, `cynefin`) cycle through the 8 categorical colors in `PelePalette.colors` (`--pele-series-1` through `--pele-series-8`).
 
 Supplying your own `colors: <String>[...]` list on `PelePalette` restyles every categorical diagram while maintaining automatic contrast on filled nodes:
 
@@ -282,7 +289,7 @@ Supplying your own `colors: <String>[...]` list on `PelePalette` restyles every 
 
 ### 5.4 Automatic Derived Palette Tokens
 
-You only need to specify the tokens you want to customize. If `muted`, `line`, `surface`, `border`, or `accent` are omitted (`null`), `PelePalette` automatically derives them using the exact same perceptual color-mixing ratios as upstream `obsidianmd/pele`:
+You only need to specify the tokens you want to customize. If `muted`, `line`, `surface`, `border`, `accent`, or `code` are omitted (`null`), `PelePalette` automatically derives them using the exact same sRGB color-mixing ratios as upstream `obsidianmd/pele`:
 
 | `PelePalette` Field | CSS Variable | Default / Derived Formula | Description |
 | :--- | :--- | :--- | :--- |
@@ -290,18 +297,21 @@ You only need to specify the tokens you want to customize. If `muted`, `line`, `
 | `fg` | `--pele-fg` | `'#24292e'` (light) / `'#e1e4e8'` (dark) | Primary text and foreground color |
 | `muted` | `--pele-muted` | `60% fg + 40% bg` | Secondary labels, captions, cardinality, and axis ticks |
 | `line` | `--pele-line` | `fg` | Connector edges, arrows, lifelines, and dividers |
-| `surface` | `--pele-surface` | `3% fg + 97% bg` | Default node, box, and card fill |
+| `surface` | `--pele-surface` | `5% fg + 95% bg` | Default node, box, and card fill |
 | `surfaceAlt` | `--pele-surface-alt` | `'#e6e6e6'` (light) / `'#3f3f46'` (dark) | Secondary container, cluster, and table header fill |
-| `border` | `--pele-border` | `50% fg + 50% bg` | Node, subgraph, and container border stroke |
-| `accent` | `--pele-accent` | `colors[0]` (`'#527fff'`) | Primary highlight, active state, and milestone accent |
+| `border` | `--pele-border` | `45% fg + 55% bg` | Node, subgraph, and container border stroke |
+| `accent` | `--pele-accent` | `'#5b7bd5'` | Primary highlight, active state, and milestone accent |
+| `code` | `--pele-code` | `8% fg + 92% bg` | Inline code pill background fill |
 | `critical` | `--pele-critical` | `'#e45756'` (light) / `'#f87171'` (dark) | Critical path (Gantt) and danger/error accents |
-| `fgOnLight` | `--pele-fg-on-light` | `'#24292e'` | Contrast text color placed over bright categorical fills |
-| `fgOnDark` | `--pele-fg-on-dark` | `'#ffffff'` | Contrast text color placed over dark categorical fills |
-| `radius` | `--pele-radius` | `4` (`px`) | Default corner radius for rounded boxes and cards |
-| `strokeWidth` | `--pele-stroke` | `1.25` (`px`) | Standard node and edge stroke width |
-| `thickStrokeWidth` | `--pele-stroke-thick` | `2.5` (`px`) | Thick edge and highlighted border stroke width |
-| `hairlineStrokeWidth` | `--pele-stroke-hairline` | `0.5` (`px`) | Subtle gridline and divider stroke width |
-| `colors` | `--pele-series-1`..`8` | 8 categorical hex strings | Multi-series palette for charts, mindmaps, pies, and sankeys |
+| `fgOnLight` | `--pele-fg-on-light` | `null` (upstream fallback `#24292e`) | Contrast text color placed over bright categorical fills |
+| `fgOnDark` | `--pele-fg-on-dark` | `null` (upstream fallback `#fff`) | Contrast text color placed over dark categorical fills |
+| `radius` | `--pele-radius` | `6` (`px`) | Default corner radius for rounded boxes and cards |
+| `strokeWidth` | `--pele-stroke-width` | `1.25` (`px`) | Standard node and edge stroke width |
+| `thickStrokeWidth` | `--pele-thick-stroke-width` | `2.5` (`px`) | Thick edge and highlighted border stroke width |
+| `hairlineStrokeWidth` | `--pele-hairline-stroke-width` | `0.5` (`px`) | Subtle gridline and divider stroke width |
+| `fontFamily` | `--pele-font` | System sans-serif stack | Primary diagram font family |
+| `monoFontFamily` | `--pele-font-mono` | System monospace stack | Monospace font family for code and railroad terminals |
+| `colors` | `--pele-series-1`..`8` | `['#4c78a8', '#f58518', '#54a24b', '#e45756', '#72b7b2', '#eeca3b', '#b279a2', '#9d755d']` | 8-color categorical series palette for charts, mindmaps, pies, and sankeys |
 
 ---
 
@@ -340,16 +350,17 @@ In addition to host-level `PelePalette` and CSS theming, `pele_dart` supports st
 
 ```mermaid
 flowchart LR
-  A([Order Placed]):::entry --> B{Fraud Check}:::decision
-  B -->|Approved| C[Fulfill & Ship]:::success
-  B -->|Flagged| D[Manual Review]:::warn
-  B -->|Rejected| E([Cancelled]):::danger
+  A([Ingress]):::entry --> B[Router]:::core
+  B --> C[(Analytics DB)]:::storage
+  B --> D{Rate Limit Exceeded?}:::warn
+  D -->|Block| E[429 Reject]:::danger
+  D -->|Pass| C
 
-  classDef entry fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
-  classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
-  classDef success fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
-  classDef warn fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px,stroke-dasharray:4 3
-  classDef danger fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,stroke-width:2px
+  classDef entry fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+  classDef core fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#4c1d95
+  classDef storage fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+  classDef warn fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+  classDef danger fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
 ```
 
 ![In-Diagram Mermaid classDef Styling](images/styles/style_mermaid_classdef.svg)
@@ -367,15 +378,15 @@ flowchart LR
 | :--- | :--- | :--- | :--- |
 | `outputMode` | `SvgOutputMode` | `SvgOutputMode.flattened` | `SvgOutputMode.flattened` or `SvgOutputMode.cssVariables`. |
 | `palette` | `PelePalette` | `PelePalette.light` | Palette used when `outputMode == SvgOutputMode.flattened`. |
-| `measurer` | `TextMeasurer?` | Built-in deterministic metrics table | Custom text width measurer for proportional and monospace fonts. |
+| `measurer` | `TextMeasurer?` | `metricsMeasurer` | Custom text width measurer for proportional and monospace fonts. |
 | `fontFamily` | `String?` | `null` | Override primary font family in `SvgOutputMode.cssVariables`. |
 | `fontFamilyMono` | `String?` | `null` | Override monospace font family in `SvgOutputMode.cssVariables`. |
 | `monospace` | `List<MonospacePart>?` | `null` | Diagram parts to render in monospace (e.g., `['code']`). |
-| `fontSize` | `double?` | `13` | Base font size in pixels. |
-| `idPrefix` | `String?` | `'pele'` | Prefix for generated SVG `id` attributes (markers, clips, gradients). |
+| `fontSize` | `double?` | Diagram default (`13`–`16`) | Base font size in pixels. |
+| `idPrefix` | `String?` | `null` | Prefix for generated SVG `id` attributes to prevent DOM collisions. |
 | `responsive` | `bool?` | `true` (unless `useMaxWidth: false`) | Emits `style="max-width: <W>px"` instead of fixed `width`/`height` attributes. |
-| `maxWidth` | `double?` | `null` | Target container width in pixels for auto-direction and wrapping. |
-| `autoDirection` | `bool?` | `false` | Automatically flips `LR` flowcharts to `TB` when wider than `directionBreakpoint`. |
+| `maxWidth` | `double?` | `null` | Target container width in pixels for auto-direction and layout tightening. |
+| `autoDirection` | `bool?` | `false` | Automatically flips `LR` flowcharts to `TB` when narrower than `directionBreakpoint`. |
 | `directionBreakpoint` | `double?` | `500` | Width threshold in pixels for `autoDirection`. |
 | `padding` | `double?` | `8` | Outer SVG viewBox padding in pixels. |
 | `limit` | `int?` | `50000` | Maximum input source length in characters. |
@@ -383,19 +394,29 @@ flowchart LR
 | `maxEdges` | `int?` | `5000` | Maximum number of edges/relations allowed during parsing. |
 | `links` | `bool?` | `true` | Whether `click` directives and node links emit `<a>` wrappers / `LinkInfo`. |
 | `linkSchemes` | `List<String>?` | `['http', 'https', 'mailto']` | Allowed URL schemes for clickable links. |
-| `linkRel` | `String?` | `'noopener noreferrer'` | `rel` attribute added to external `<a>` tags. |
+| `linkRel` | `String?` | `null` | Optional `rel` attribute added to generated `<a>` tags. |
 | `images` | `bool?` | `true` | Whether `<image>` elements are allowed in diagrams. |
-| `imageSchemes` | `List<String>?` | `['http', 'https', 'data']` | Allowed URL schemes for embedded `<image>` elements. |
+| `imageSchemes` | `List<String>?` | `['http', 'https']` | Allowed URL schemes for embedded `<image>` elements. |
 | `icons` | `IconResolver?` | Built-in icon pack | Callback `String? Function(String name)` returning inner SVG path markup for icon names. |
 | `math` | `MathResolver?` | Built-in TeX layout | Callback `MathMarkup? Function(String tex, double size)` for `$$...$$` math formulas. |
-| `config` | `Map<String, dynamic>?` | `null` | Extra Mermaid configuration merged with frontmatter / `%%{init}%%` directives. |
-| `now` | `Object?` | `null` | Fixed reference date (`DateTime` or ISO `String`) for deterministic `gantt` today-markers. |
+| `config` | `Config?` (`Map<String, YamlValue>?`) | `null` | Extra Mermaid configuration merged with frontmatter / `%%{init}%%` directives. |
+| `now` | `Object?` | `null` | Fixed reference date (`DateTime`, ISO `String`, or epoch ms `num`) for deterministic `gantt` today-markers. |
+
+### `ParseOptions`
+
+Passed to `parse(text, ParseOptions(...))` when pre-parsing a diagram model for repeated rendering:
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `limit` | `int?` | `50000` | Maximum allowed input source length in characters. |
+| `maxEdges` | `int?` | `5000` | Maximum number of edges/relations allowed during parsing. |
+| `config` | `Config?` (`Map<String, YamlValue>?`) | `null` | Extra Mermaid configuration merged with YAML frontmatter / `%%{init}%%` directives. |
 
 ---
 
 ## 7. Return Types (`RenderResult` & `LinkInfo`)
 
-### `RenderResult`
+### `RenderResult` (extends `Rendered`)
 
 Returned by `render()`:
 
@@ -420,13 +441,13 @@ Returned by `render()`:
 
 ## 8. Error Handling (`PeleError`)
 
-All syntax, unsupported-diagram, and resource-limit failures throw a structured `PeleError`:
+All syntax, semantic, unsupported-diagram, and resource-limit failures throw a structured `PeleError`:
 
 ```dart
 try {
   final result = render(userInput);
 } on PeleError catch (e) {
-  print('Error code: ${e.code}');          // 'syntax' | 'unsupported-diagram' | 'limit'
+  print('Error code: ${e.code}');          // 'syntax' | 'semantic' | 'unsupported-diagram' | 'limit'
   print('Diagram type: ${e.type}');        // e.g. 'flowchart' (or null if undetected)
   print('Mermaid type: ${e.mermaidType}'); // e.g. 'flowchart-v2'
   print('Location: line ${e.line}, column ${e.column}');
@@ -440,8 +461,9 @@ try {
 | Code | Meaning |
 | :--- | :--- |
 | `'syntax'` | Lexical or grammar error in the diagram source (`line`, `column`, and `snippet` point to the exact position in the original source, even across frontmatter and `%%{init}%%` directives). |
+| `'semantic'` | Structural or semantic validation error in a syntactically valid diagram (for example, referencing an undefined node/boundary in C4 or providing an XYChart with no plot series). |
 | `'unsupported-diagram'` | No known Mermaid diagram keyword was found, or the diagram type is not registered. |
-| `'limit'` | Diagram exceeded safety budgets (`limit` source characters, `maxEdges`, nesting depth, or `outputLimit` SVG characters). |
+| `'limit'` | Diagram exceeded safety budgets (`limit` source characters, `maxEdges`, recursion/nesting depth, or `outputLimit` SVG characters). |
 
 ---
 
@@ -449,25 +471,32 @@ try {
 
 ### Custom `TextMeasurer`
 
-By default, `pele_dart` uses a deterministic character-width metrics table ported 1:1 from `obsidianmd/pele` (`src/text/metrics.ts`). It requires zero platform font APIs and produces identical layouts across macOS, Linux, Windows, iOS, Android, and Web.
+By default, `pele_dart` uses `metricsMeasurer`, a deterministic character-width metrics table ported 1:1 from `obsidianmd/pele` (`src/text/metrics.ts`). It requires zero platform font APIs and produces identical layouts across macOS, Linux, Windows, iOS, Android, and Web.
 
-If you want layout boxes to size against a custom Flutter `TextPainter` or platform font engine, provide a `TextMeasurer`:
+If you want layout boxes to size against a custom Flutter `TextPainter` or platform font engine, implement `TextMeasurer` and inspect the `Style` bitmask flags (`Style.bold`, `Style.italic`, `Style.mono`, `Style.sub`, `Style.sup`, `Style.underline`):
 
 ```dart
-double myMeasure(String text, double fontSize, bool bold, bool mono, [bool italic = false]) {
-  // Return measured width of a single line in logical pixels
-  return text.length * fontSize * (mono ? 0.6 : 0.55);
+class CustomTextMeasurer implements TextMeasurer {
+  const CustomTextMeasurer();
+
+  @override
+  double width(String text, double size, [int style = 0]) {
+    final bool isMono = (style & Style.mono) != 0;
+    final bool isBold = (style & Style.bold) != 0;
+    final double factor = isMono ? 0.60 : (isBold ? 0.58 : 0.55);
+    return text.length * size * factor;
+  }
 }
 
 final result = render(
   source,
-  RenderOptions(measurer: myMeasure),
+  const RenderOptions(measurer: CustomTextMeasurer()),
 );
 ```
 
 ### Custom `IconResolver`
 
-Diagrams such as `architecture`, `flowchart`, and `mindmap` support icon references (e.g., `fa:fa-server`, `lucide:database`). `pele_dart` bundles upstream's built-in icon paths and also allows custom icon resolution:
+Diagrams such as `architecture`, `flowchart`, `mindmap`, and `treeView` support icon references (e.g., `fa:fa-server`, `lucide:database`, `logos:react`). `pele_dart` bundles upstream's built-in icon paths and also allows custom icon resolution:
 
 ```dart
 final result = render(
@@ -479,6 +508,26 @@ final result = render(
         return '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>';
       }
       return null; // Fall back to built-in icons
+    },
+  ),
+);
+```
+
+### Custom `MathResolver` (`MathMarkup.svg` / `MathMarkup.html`)
+
+Diagrams supporting LaTeX math expressions (`$$...$$`) use `pele_dart`'s built-in pure-Dart Unicode math layout by default. You can plug in an external TeX-to-SVG or TeX-to-MathML renderer via `RenderOptions.math`:
+
+```dart
+final result = render(
+  'flowchart LR\n  A["\$\$E = mc^2\$\$"] --> B["\$\$\\nabla \\cdot \\mathbf{E}\$\$"]',
+  RenderOptions(
+    math: (String tex, double fontSize) {
+      // Return pre-rendered SVG markup (or MathMarkup.html(...) for <foreignObject>):
+      return MathMarkup.svg(
+        svg: '<svg viewBox="0 0 60 20"><text x="0" y="15">$tex</text></svg>',
+        width: 60,
+        height: 20,
+      );
     },
   ),
 );
@@ -499,7 +548,7 @@ final result = render(
 | 5 | `er` | `er` | `erDiagram` | Entity-Relationship models, Crow's foot cardinality, typed attribute tables |
 | 6 | `gantt` | `gantt` | `gantt` | Project schedules, sections, milestones, dependencies, excludes, date formatting |
 | 7 | `pie` | `pie` | `pie` | Proportional pie charts with optional `showData` values and legend |
-| 8 | `mindmap` | `mindmap` | `mindmap` | Radial and hierarchical outline mindmaps with shapes and icons |
+| 8 | `mindmap` | `mindmap` | `mindmap` | Balanced hierarchical mindmaps with shapes and icons |
 | 9 | `timeline` | `timeline` | `timeline` | Chronological timelines with grouped sections and multi-event periods |
 | 10 | `gitGraph` | `gitGraph` | `gitGraph` | Git commit history, branches, merges, cherry-picks, and tags (`LR`, `TB`, `BT`) |
 | 11 | `journey` | `journey` | `journey` | User journey maps with satisfaction scores (1–5) and actor assignments |
@@ -520,7 +569,7 @@ final result = render(
 | 26 | `ishikawa` | `ishikawa` | `ishikawa`, `ishikawa-beta` | Fishbone (cause-and-effect) root-cause diagrams |
 | 27 | `venn` | `venn` | `venn-beta` | 1-, 2-, and 3-set proportional Venn diagrams with intersection labels |
 | 28 | `wardley` | `wardley` | `wardley-beta` | Wardley value-chain evolution maps, pipelines, and movement arrows |
-| 29 | `cynefin` | `cynefin` | `cynefin-beta` | Cynefin sense-making framework domains (Clear, Complicated, Complex, Chaotic, Confused) |
+| 29 | `cynefin` | `cynefin` | `cynefin-beta` | Cynefin sense-making framework domains (Clear, Complicated, Complex, Chaotic, Confusion) |
 | 30 | `railroad` | `railroad`, `railroadEbnf`, `railroadAbnf`, `railroadPeg` | `railroad-beta`, `railroad-ebnf-beta`, `railroad-abnf-beta`, `railroad-peg-beta` | Syntax railroad track diagrams from DSL, W3C/ISO EBNF, RFC 5234 ABNF, or PEG grammars |
 | 31 | `swimlane` | `swimlane` | `swimlane-beta` | Cross-functional swimlane process diagrams |
 | 32 | `usecase` | `usecase` | `usecase-beta` | UML Use Case diagrams with stick-figure actors, system boundaries, and `<<include>>`/`<<extend>>` |

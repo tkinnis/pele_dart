@@ -4,7 +4,6 @@ import 'package:pele_dart/src/diagrams/class/graph.dart';
 import 'package:pele_dart/src/diagrams/class/index.dart';
 import 'package:pele_dart/src/diagrams/class/members.dart';
 import 'package:pele_dart/src/diagrams/class/types.dart';
-import 'package:pele_dart/src/types.dart';
 import 'package:test/test.dart';
 
 ClassModel _parseClass(String src, [String? title]) => classDiagram.parse(

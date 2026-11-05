@@ -30,7 +30,7 @@
 | **Stage the latest upstream release, generate `.upstream/diff_report.md` & refresh JS bundles** | `dart run tool/sync_upstream.dart --update-to-latest` |
 | **Stage a specific tag, branch, or commit SHA** | `dart run tool/sync_upstream.dart --update-to <tag_or_ref>` |
 | **Inspect categorized upstream->Dart diffs for any git range** | `dart run tool/sync_upstream.dart --diff v1.12.0..v1.13.0` |
-| **Re-bundle `pele.bundle.js`, sync `mermaid.min.js`, and regenerate `gallery_samples.dart`** | `dart run tool/sync_upstream.dart --refresh-assets` |
+| **Re-bundle `pele.bundle.js`, sync `mermaid.min.js`, and regenerate `docs/images/` & `docs/DIAGRAM_GALLERY.md`** | `dart run tool/sync_upstream.dart --refresh-assets` |
 | **Run the 787-diagram 100% differential parity & Mermaid version check** | `dart run tool/verify_against_upstream.dart` |
 | **Finalize `UPSTREAM.md` pin after porting and verifying** | `dart run tool/sync_upstream.dart --pin <tag> <sha>` |
 
@@ -73,7 +73,7 @@ dart run tool/sync_upstream.dart
    - **New Diagram Families (`src/diagrams/<new>/`)**: Flags brand-new diagram directories not yet present in `lib/src/diagrams/`.
    - **Modified Diagram Families (`src/diagrams/<type>/`)**: Lists each modified diagram module alongside its exact Dart target file (`lib/src/diagrams/<type>/...`).
    - **Core / Shared Layout / SVG / Text Modules (`src/...`)**: Lists shared infrastructure changes and their mapped Dart files.
-   - **Gallery & Website Showcase (`website/gallery.js`)**: Flags changes to the 232 showcase samples.
+   - **Gallery & Website Showcase (`website/src/lib/examples.ts`)**: Flags changes to the showcase samples.
    - **Test Suite & Corpus (`tests/**`)**: Flags new or updated golden corpus cases.
 5. Prints a clear status banner (`UP TO DATE` or `UPSTREAM UPDATES AVAILABLE`) and the exact command to stage the update.
 
@@ -96,12 +96,12 @@ dart run tool/sync_upstream.dart --update-to v1.14.0
 ### What `--update-to-latest` Does Automatically
 
 1. **Checks out the target ref** in `.upstream/`.
-2. **Generates `.upstream/diff_report.md`** containing the full categorized file matrix, detector changes, Mermaid version status, and unified `git diff` patches for every changed file in `src/` and `website/gallery.js`.
+2. **Generates `.upstream/diff_report.md`** containing the full categorized file matrix, detector changes, Mermaid version status, and unified `git diff` patches for every changed file in `src/`.
 3. **Re-bundles `example/assets/pele.bundle.js`** from `.upstream/src/index.ts` (via `bun build`) and appends the `globalThis.Pele` and `globalThis.PeleMetricsMeasurer` exports required by both the macOS 3-Way Comparison App and the CLI differential test runner.
-4. **Regenerates `example/lib/gallery_samples.dart`** from `.upstream/website/gallery.js` so the macOS showcase app and differential suite immediately include any new or updated gallery diagrams.
-5. **Downloads the matching `mermaid.min.js`** from `https://unpkg.com/mermaid@<version>/dist/mermaid.min.js` into `example/assets/mermaid.min.js` and updates the engine label in `example/lib/engine_runner.dart` whenever the target Mermaid version changes.
+4. **Downloads the matching `mermaid.min.js`** from `https://unpkg.com/mermaid@<version>/dist/mermaid.min.js` into `example/assets/mermaid.min.js` and updates the engine label in `example/lib/engine_runner.dart` whenever the target Mermaid version changes.
+5. **Regenerates standalone documentation images** (`docs/images/diagrams/*.svg`, `docs/images/styles/*.svg`, and [`docs/DIAGRAM_GALLERY.md`](DIAGRAM_GALLERY.md)) via `tool/generate_doc_images.dart` from the `.mmd`/`.mermaid` files in `example/diagrams/`.
 
-> **Note:** `--update-to-latest` intentionally leaves `UPSTREAM.md` at the old pin until the Dart port Changes are complete and verified, so `dart run tool/sync_upstream.dart --diff` continues to know the exact `from..to` range being ported.
+> **Note:** When source files have changed (`totalChangedFiles > 0`), `--update-to-latest` stages `.upstream/` and leaves `UPSTREAM.md` at the old pin until the Dart port changes are complete and verified (unless `--pin` is also passed), so `dart run tool/sync_upstream.dart --diff` continues to know the exact `from..to` range being ported.
 
 ---
 
@@ -176,7 +176,7 @@ dart run tool/verify_against_upstream.dart
 This tool verifies:
 1. **Mermaid Version Consistency**: Confirms `UPSTREAM.md`, `.upstream/`, `example/assets/mermaid.min.js`, and `example/lib/engine_runner.dart` are aligned.
 2. **Canonical 33-Family Suite (`33/33`)**: Renders all 33 diagram families in both `pele_dart` (`SvgOutputMode.cssVariables`) and `obsidianmd/pele` (`example/assets/pele.bundle.js` via Bun) and asserts 100% byte-for-byte SVG equality.
-3. **Full Showcase Gallery Suite (`232/232`)**: Renders all 232 gallery diagrams from `example/lib/gallery_samples.dart` in both engines and asserts 100% byte-for-byte SVG equality.
+3. **Full Showcase Gallery Suite (`232/232`)**: Renders all 232 gallery `.mmd` diagrams scanned from `example/diagrams/` by `example/lib/gallery_samples.dart` in both engines and asserts 100% byte-for-byte SVG equality.
 4. **Full Upstream Corpus Suite (`522/522`)**: Renders every diagram across all 30 `.upstream/tests/corpus/*.json` files in both engines and asserts 100% byte-for-byte SVG equality.
 
 Then run the standard Dart quality gates:

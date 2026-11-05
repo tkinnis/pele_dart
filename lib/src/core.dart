@@ -12,9 +12,16 @@ import 'text/math.dart';
 import 'types.dart';
 
 export 'detect.dart' show DiagramType, MermaidType;
-export 'errors.dart' show PeleError, PeleErrorCode;
+export 'errors.dart' show PeleError, PeleErrorCode, PeleErrorInfo;
+export 'preprocess.dart' show Config;
 export 'svg/flattener.dart' show flattenPeleSvg;
-export 'text/measurer.dart' show TextMeasurer, forgetTextWidths;
+export 'text/measurer.dart'
+    show
+        Style,
+        TextMeasurer,
+        defaultMeasurer,
+        forgetTextWidths,
+        metricsMeasurer;
 export 'types.dart'
     show
         AnyDiagram,
@@ -24,10 +31,13 @@ export 'types.dart'
         MathMarkup,
         MathResolver,
         MonospacePart,
+        ParseLimits,
         PelePalette,
         RenderOptions,
         RenderResult,
+        Rendered,
         SvgOutputMode;
+export 'util/yaml.dart' show YamlValue;
 
 final Map<DiagramType, AnyDiagram> _diagrams = <DiagramType, AnyDiagram>{};
 bool _defaultsRegistered = false;
@@ -48,6 +58,7 @@ void register(Iterable<AnyDiagram> list) {
   }
 }
 
+/// Returns `true` if a renderer for [type] is currently registered.
 bool registered(DiagramType type) {
   _ensureDefaults();
   return _diagrams.containsKey(type);
@@ -185,11 +196,18 @@ _Parsed _parseSource(String text, int limit, int maxEdges, Config? extra) {
   };
 }
 
+/// Options controlling resource limits and extra configuration during [parse].
 class ParseOptions {
+  /// Maximum allowed input source length in characters (default `50000`).
   final int? limit;
+
+  /// Maximum allowed number of edges/relations in a diagram (default `5000`).
   final int? maxEdges;
+
+  /// Extra Mermaid configuration map merged with YAML frontmatter / `%%{init}%%` directives.
   final Config? config;
 
+  /// Creates [ParseOptions].
   const ParseOptions({this.limit, this.maxEdges, this.config});
 }
 
@@ -216,10 +234,14 @@ _Parsed _parsedFrom(
   return parsed;
 }
 
+/// Detects the canonical [DiagramType] of [text] after stripping YAML
+/// frontmatter and `%%{init}%%` directives, or returns `null` if unrecognized.
 DiagramType? detectType(String text) {
   return detectDiagram(preprocess(text).text)?.type;
 }
 
+/// Returns `true` if [text] has a recognized diagram header whose [DiagramType]
+/// is currently registered.
 bool supports(String text) {
   _ensureDefaults();
   try {
@@ -230,6 +252,12 @@ bool supports(String text) {
   }
 }
 
+/// Parses Mermaid diagram [text] into an opaque diagram model that can be
+/// passed directly to [render] to avoid re-parsing across theme or resize
+/// re-renders.
+///
+/// Throws a [PeleError] if [text] exceeds [ParseOptions.limit], has an
+/// unrecognized header, or contains syntax/semantic errors.
 dynamic parse(String text, [ParseOptions options = const ParseOptions()]) {
   return _guarded(() {
     final parsed = _parseSource(
@@ -243,6 +271,16 @@ dynamic parse(String text, [ParseOptions options = const ParseOptions()]) {
   });
 }
 
+/// Renders Mermaid diagram [source] (either a `String` or a pre-parsed model
+/// returned by [parse]) into a [RenderResult] containing the SVG string,
+/// intrinsic pixel dimensions, detected diagram type, and extracted links.
+///
+/// By default, [RenderOptions.outputMode] is [SvgOutputMode.flattened] using
+/// [PelePalette.light]. Pass [SvgOutputMode.cssVariables] to emit upstream
+/// `obsidianmd/pele`'s exact `--pele-*` CSS custom property SVG.
+///
+/// Throws a [PeleError] on syntax errors, semantic errors, unsupported diagram
+/// headers, or resource limit violations.
 RenderResult render(
   Object source, [
   RenderOptions options = const RenderOptions(),

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Upstream obsidianmd/pele Repository
+    url: https://github.com/obsidianmd/pele
+    about: Visit the upstream TypeScript Pele repository created by Steph Ango (kepano) and the Obsidian team.
+  - name: Upstream Pele Live Playground (pele.run)
+    url: https://pele.run
+    about: Test whether a diagram grammar or layout behavior originates in upstream obsidianmd/pele.
+  - name: Security Vulnerability Report
+    url: https://github.com/tkinnis/pele_dart/security/advisories/new
+    about: Privately report a security vulnerability in pele_dart.

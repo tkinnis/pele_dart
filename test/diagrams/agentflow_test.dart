@@ -3,7 +3,6 @@ import 'dart:math' as math;
 
 import 'package:pele_dart/pele_dart.dart';
 import 'package:pele_dart/src/diagrams/agentflow/index.dart';
-import 'package:pele_dart/src/text/measurer.dart';
 import 'package:test/test.dart';
 
 const RenderOptions _cssOptions = RenderOptions(

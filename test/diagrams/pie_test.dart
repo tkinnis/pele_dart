@@ -2,7 +2,6 @@ import 'package:pele_dart/pele_dart.dart';
 import 'package:pele_dart/src/diagrams/pie/index.dart';
 import 'package:pele_dart/src/diagrams/pie/model.dart';
 import 'package:pele_dart/src/diagrams/pie/parser.dart';
-import 'package:pele_dart/src/types.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,6 +1,11 @@
 // Upstream: src/detect.ts
 
+/// Canonical `pele_dart` diagram family identifier (for example `'flowchart'`,
+/// `'sequence'`, `'gitGraph'`, `'c4'`, or `'sankey'`).
 typedef DiagramType = String;
+
+/// Mermaid-compatible diagram subtype identifier (for example
+/// `'flowchart-v2'`, `'flowchart-elk'`, `'classDiagram'`, or `'railroadEbnf'`).
 typedef MermaidType = String;
 
 final List<(DiagramType, MermaidType, RegExp)> _detectors = [

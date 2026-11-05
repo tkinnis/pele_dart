@@ -1,6 +1,6 @@
 # `pele_dart` Visual Diagram Gallery (33 Diagram Families)
 
-Every image below is rendered directly by **`pele_dart`** in pure Dart (`SvgOutputMode.flattened`) with zero browser or JavaScript runtime.
+Every image below is rendered directly by **`pele_dart`**—a 1:1 pure-Dart port of [**`obsidianmd/pele`**](https://github.com/obsidianmd/pele) ([`pele.run`](https://pele.run))—using `SvgOutputMode.flattened` with zero browser or JavaScript runtime.
 
 > Regenerate this gallery at any time with:
 > ```bash

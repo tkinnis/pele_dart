@@ -7,7 +7,7 @@ import '../example/lib/gallery_samples.dart';
 
 /// Generates clean, standalone SVG images of:
 ///   1. All 33 Mermaid diagram families rendered by `pele_dart` (`docs/images/diagrams/<id>.svg`)
-///   2. 7 themed/styled diagram renders (`docs/images/styles/style_<name>.svg`)
+///   2. 9 themed/styled diagram renders (`docs/images/styles/style_<name>.svg`)
 ///   3. The visual catalog document (`docs/DIAGRAM_GALLERY.md`)
 ///
 /// Each SVG is a pure `pele_dart` diagram render (zero host-app chrome) wrapped
@@ -32,8 +32,9 @@ void main(List<String> args) {
     ..writeln('# `pele_dart` Visual Diagram Gallery (33 Diagram Families)')
     ..writeln()
     ..writeln(
-      'Every image below is rendered directly by **`pele_dart`** in pure Dart '
-      '(`SvgOutputMode.flattened`) with zero browser or JavaScript runtime.',
+      'Every image below is rendered directly by **`pele_dart`**—a 1:1 pure-Dart port '
+      'of [**`obsidianmd/pele`**](https://github.com/obsidianmd/pele) ([`pele.run`](https://pele.run))—using '
+      '`SvgOutputMode.flattened` with zero browser or JavaScript runtime.',
     )
     ..writeln()
     ..writeln('> Regenerate this gallery at any time with:')
@@ -270,7 +271,7 @@ flowchart LR
 flowchart LR
   A([Ingress]):::entry --> B[Router]:::core
   B --> C[(Analytics DB)]:::storage
-  B --> D{Rate LimitExceeded?}:::warn
+  B --> D{Rate Limit Exceeded?}:::warn
   D -->|Block| E[429 Reject]:::danger
   D -->|Pass| C
 

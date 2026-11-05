@@ -1,0 +1,42 @@
+# Dart / Pub / Flutter build & cache artifacts
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+pubspec.lock
+coverage/
+doc/api/
+
+# Upstream checkout & internal agent/maintainer tooling
+.upstream/
+.agents/
+.github/
+.ruby-lsp/
+AGENTS.md
+UPSTREAM.md
+tool/
+test/
+
+# Documentation SVGs & deep design docs (served on pub.dev via GitHub repository links)
+docs/
+
+# macOS Flutter 3-Way Comparison Studio app & multi-MB JS comparison bundles
+# (keep only example/README.md and example/main.dart in the published pub.dev archive)
+example/.dart_tool/
+example/.flutter-plugins-dependencies
+example/analysis_options.yaml
+example/assets/
+example/build/
+example/diagrams/
+example/lib/
+example/macos/
+example/pubspec.lock
+example/pubspec.yaml
+example/test/
+
+# macOS / Editor
+.DS_Store
+*.iml
+.idea/
+.vscode/

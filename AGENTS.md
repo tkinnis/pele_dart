@@ -29,17 +29,16 @@ This document defines the architectural invariants, directory conventions, trans
 * Each diagram family under `lib/src/diagrams/<type>/` (`parser.dart`, `model.dart`, `layout.dart`, `render.dart`) may import only from:
   * Its own directory (`lib/src/diagrams/<type>/`)
   * `lib/src/diagrams/common/`
-  * Shared core modules (`lib/src/layout/`, `lib/src/svg/`, `lib/src/text/`, `lib/src/util/`, `lib/src/models.dart`, `lib/src/types.dart`, `lib/src/errors.dart`)
+  * Shared core modules (`lib/src/layout/`, `lib/src/svg/`, `lib/src/text/`, `lib/src/util/`, `lib/src/preprocess.dart`, `lib/src/types.dart`, `lib/src/errors.dart`)
 * A diagram module must **never** import from another diagram module (unless explicitly delegating as upstream does), ensuring multiple agents can work on different diagram directories in parallel without conflicts.
 
 ### C. Dual SVG Emission (`SvgOutputMode`)
-* `lib/src/svg/` supports two deterministic emission modes controlled by `PeleRenderOptions.outputMode`:
-  1. **`SvgOutputMode.cssVariables`**: Emits upstream-compatible SVG using `var(--pele-*)` CSS custom properties, `<marker>` definitions, and `dominant-baseline`. Used for differential snapshot comparison against upstream `obsidianmd/pele` and `.svg` web export.
-  2. **`SvgOutputMode.flattened`**: Emits `vector_graphics_compiler`-compliant SVG directly from `svg/builder.dart`, `svg/edges.dart`, and `svg/palette.dart`:
-     * All `--pele-*` variables and `color-mix()` expressions are resolved against `PelePalette` into concrete `#RRGGBB` / `rgb(...)` fills and strokes plus explicit `fill-opacity` / `stroke-opacity`.
-     * No `<style>`, `<marker>`, `<foreignObject>`, or nested `<svg>` elements are emitted.
-     * Edge arrowheads (`marker-end`, `marker-start`) are stamped directly as transformed `<path>` / `<polygon>` elements at the edge path's start/end tangent.
-     * `<text>` and `<tspan>` `dominant-baseline` attributes are converted into explicit `x` and `y` coordinate offsets.
+* `lib/src/svg/` supports two deterministic emission modes controlled by `RenderOptions.outputMode`:
+  1. **`SvgOutputMode.cssVariables`**: Emits upstream `obsidianmd/pele`'s exact byte-for-byte SVG using `var(--pele-*)` and `var(--_*)` CSS custom properties and `color-mix(in srgb, ...)`. Used for differential snapshot comparison against upstream `obsidianmd/pele` and `.svg` web export.
+  2. **`SvgOutputMode.flattened`** (`lib/src/svg/flattener.dart`): Converts the rendered SVG into static SVG 1.1 compatible with `vector_graphics_compiler` (`encodeSvg`) and non-CSS SVG renderers:
+     * All `--pele-*` and `--_*` CSS custom properties, `color-mix(in srgb, ...)` blends, `calc(...)` expressions, and `currentColor` are resolved against `PelePalette` into concrete `#rrggbb` and numeric SVG attributes.
+     * `<tspan>` `baseline-shift="sub|super" font-size="smaller"` attributes are converted into explicit `dy="3|-4" font-size="10"` attributes.
+     * Inline `style="..."` presentation/geometry properties (`rx`, `ry`, `fill`, `stroke`, `stroke-width`, etc.) are promoted to native SVG 1.1 attributes, and `font-family` / `font-size` are attached directly to the root `<svg>`.
 
 ### D. TypeScript-to-Dart Semantic Fidelity
 When translating upstream TypeScript to Dart 3, respect these critical rules:

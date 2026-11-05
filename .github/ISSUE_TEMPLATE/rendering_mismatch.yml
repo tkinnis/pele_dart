@@ -1,0 +1,70 @@
+name: Rendering Parity or Layout Mismatch
+description: Report a visual difference between pele_dart, upstream obsidianmd/pele (pele.run), or mermaid.js.
+title: "[Rendering]: "
+labels: ["rendering"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        `pele_dart` is a 1:1 pure-Dart port of [**`obsidianmd/pele`**](https://github.com/obsidianmd/pele) ([`pele.run`](https://pele.run)).
+        Knowing whether a rendering issue is a **`pele_dart` divergence from `obsidianmd/pele`** or an **upstream difference between `obsidianmd/pele` and `mermaid.js`** helps us triage and fix it quickly.
+
+  - type: dropdown
+    id: diagram_type
+    attributes:
+      label: Diagram Type
+      options:
+        - flowchart
+        - sequence
+        - class
+        - state
+        - er
+        - gantt
+        - pie
+        - mindmap
+        - timeline
+        - gitGraph
+        - c4
+        - journey
+        - quadrant
+        - sankey
+        - xy
+        - block
+        - packet
+        - kanban
+        - architecture
+        - requirement
+        - treemap
+        - radar
+        -ishikawa / venn / treeview / wardley / dora / cynefin / other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: comparison_target
+    attributes:
+      label: Where does the mismatch occur?
+      options:
+        - "pele_dart differs from upstream obsidianmd/pele (pele.run)"
+        - "pele_dart matches obsidianmd/pele, but both differ from mermaid.js"
+        - "Only occurs in SvgOutputMode.flattened (Flutter vector_graphics / flutter_svg)"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagram_source
+    attributes:
+      label: Mermaid Diagram Source
+      description: Paste the Mermaid source text that exhibits the visual difference.
+      render: mermaid
+    validations:
+      required: true
+
+  - type: textarea
+    id: visual_difference
+    attributes:
+      label: Expected vs. Actual Visual Output
+      description: Describe the difference (or drag-and-drop screenshots from `pele.run`, GitHub Mermaid, or the `example/` 3-Way Comparison Studio).
+    validations:
+      required: true

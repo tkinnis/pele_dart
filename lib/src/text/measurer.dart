@@ -4,27 +4,53 @@ import 'dart:typed_data';
 
 import 'metrics.dart';
 
+/// Bitmask style flags passed to [TextMeasurer.width].
 abstract final class Style {
+  /// Bold font weight (`1`).
   static const int bold = 1;
+
+  /// Italic font style (`2`).
   static const int italic = 2;
+
+  /// Monospace font family (`4`).
   static const int mono = 4;
+
+  /// Subscript text (`8`).
   static const int sub = 8;
+
+  /// Superscript text (`16`).
   static const int sup = 16;
+
+  /// Underlined text (`32`).
   static const int underline = 32;
 
-  // Uppercase aliases matching TypeScript enum names.
+  /// Uppercase alias for [bold] matching upstream TypeScript enum naming.
   static const int Bold = 1;
+
+  /// Uppercase alias for [italic] matching upstream TypeScript enum naming.
   static const int Italic = 2;
+
+  /// Uppercase alias for [mono] matching upstream TypeScript enum naming.
   static const int Mono = 4;
+
+  /// Uppercase alias for [sub] matching upstream TypeScript enum naming.
   static const int Sub = 8;
+
+  /// Uppercase alias for [sup] matching upstream TypeScript enum naming.
   static const int Sup = 16;
+
+  /// Uppercase alias for [underline] matching upstream TypeScript enum naming.
   static const int Underline = 32;
 }
 
 /// Approximate divisor for CSS font-size="smaller".
 const double _smaller = 1.2;
 
+/// Interface for measuring single-line text advance widths during diagram layout.
 abstract interface class TextMeasurer {
+  /// Returns the estimated width in pixels of [text] rendered at [size] (in px)
+  /// with optional [Style] bitmask flags ([Style.bold], [Style.italic],
+  /// [Style.mono], [Style.sub], [Style.sup], [Style.underline]).
   double width(String text, double size, [int style = 0]);
 }
 
@@ -87,11 +113,15 @@ class _MetricsMeasurer implements TextMeasurer {
   }
 }
 
-/// Estimates widths from a table of Arial advances.
+/// Default pure-Dart [TextMeasurer] that estimates advance widths from bundled
+/// character width tables without requiring a DOM or platform font engine.
 const TextMeasurer metricsMeasurer = _MetricsMeasurer();
 
+/// Returns the default [TextMeasurer] ([metricsMeasurer]).
 TextMeasurer defaultMeasurer([String? fontFamily, String? monoFamily]) {
   return metricsMeasurer;
 }
 
+/// Clears any cached text width measurements (no-op for the stateless
+/// pure-Dart [metricsMeasurer]; provided for 1:1 upstream API parity).
 void forgetTextWidths() {}

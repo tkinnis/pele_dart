@@ -2,7 +2,6 @@ import 'package:pele_dart/pele_dart.dart';
 import 'package:pele_dart/src/diagrams/common/outline.dart';
 import 'package:pele_dart/src/diagrams/mindmap/db.dart';
 import 'package:pele_dart/src/diagrams/mindmap/index.dart';
-import 'package:pele_dart/src/types.dart';
 import 'package:test/test.dart';
 
 void main() {

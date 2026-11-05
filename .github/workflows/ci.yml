@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  analyze-and-test:
+    name: Analyze, Test & Validate Docs (Dart ${{ matrix.sdk }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [stable]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Verify code formatting
+        run: dart format --output=none --set-exit-if-changed lib test tool example/lib example/main.dart
+
+      - name: Run static analysis
+        run: dart analyze --fatal-infos lib test tool
+
+      - name: Run test suite
+        run: dart test
+
+      - name: Verify pure-Dart example runs
+        run: dart run example/main.dart
+
+      - name: Validate Dartdoc generation
+        run: dart doc --dry-run
+
+      - name: Validate pub.dev publish readiness
+        run: dart pub publish --dry-run

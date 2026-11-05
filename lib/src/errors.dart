@@ -2,9 +2,15 @@
 
 import 'dart:math' as math;
 
+/// Machine-readable error category code on a [PeleError] (`'syntax'`,
+/// `'semantic'`, `'unsupported-diagram'`, or `'limit'`).
 typedef PeleErrorCode = String;
 
+/// Structured exception thrown when diagram detection, parsing, validation, or
+/// resource limit enforcement fails.
 class PeleError implements Exception {
+  /// Creates a [PeleError] with a human-readable [message], machine-readable
+  /// [code], and optional source location [info].
   PeleError(
     this.message, [
     this.code = 'syntax',
@@ -15,20 +21,38 @@ class PeleError implements Exception {
        column = info.column ?? 0,
        snippet = info.snippet ?? '';
 
+  /// Human-readable error message (including a source snippet and caret for
+  /// syntax errors).
   String message;
+
+  /// Exception class name (`'PeleError'`).
   final String name = 'PeleError';
+
+  /// Error category (`'syntax'`, `'semantic'`, `'unsupported-diagram'`, or `'limit'`).
   final PeleErrorCode code;
+
+  /// Detected canonical diagram family identifier, if known.
   String? type;
+
+  /// Detected Mermaid subtype identifier, if known.
   String? mermaidType;
+
+  /// 1-based source line number where the error occurred (`0` if not line-specific).
   int line;
+
+  /// 1-based source column number where the error occurred (`0` if not column-specific).
   int column;
+
+  /// Two-line source excerpt with a `^` caret pointing to [column] on [line].
   String snippet;
 
   @override
   String toString() => 'PeleError: $message';
 }
 
+/// Optional diagram type and 1-based source location metadata attached to a [PeleError].
 class PeleErrorInfo {
+  /// Creates a [PeleErrorInfo] metadata container.
   const PeleErrorInfo({
     this.type,
     this.mermaidType,
@@ -37,10 +61,19 @@ class PeleErrorInfo {
     this.snippet,
   });
 
+  /// Canonical diagram family identifier.
   final String? type;
+
+  /// Mermaid subtype identifier.
   final String? mermaidType;
+
+  /// 1-based line number in the original source text.
   final int? line;
+
+  /// 1-based column number in the original source text.
   final int? column;
+
+  /// Source line and caret snippet.
   final String? snippet;
 }
 

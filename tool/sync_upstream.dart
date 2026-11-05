@@ -19,12 +19,13 @@ import 'dart:io';
 ///     Checks out the target upstream Pele release in `.upstream/`, generates
 ///     `.upstream/diff_report.md` from the previous pinned commit, refreshes
 ///     `example/assets/pele.bundle.js`, `example/assets/mermaid.min.js`,
-///     `example/lib/engine_runner.dart`, and `example/lib/gallery_samples.dart`.
+///     `example/lib/engine_runner.dart`, and standalone gallery SVGs via
+///     `tool/generate_doc_images.dart`.
 ///
 ///   `dart run tool/sync_upstream.dart --refresh-assets`
 ///     Rebuilds `example/assets/pele.bundle.js`, syncs `example/assets/mermaid.min.js`
 ///     and `example/lib/engine_runner.dart` to upstream's target Mermaid version,
-///     and regenerates `example/lib/gallery_samples.dart`.
+///     and regenerates `docs/images/` and `docs/DIAGRAM_GALLERY.md`.
 ///
 ///   `dart run tool/sync_upstream.dart --pin <tag> [sha]`
 ///     Updates `UPSTREAM.md` with the specified release tag, commit SHA, date,
@@ -453,7 +454,7 @@ Commands:
 
   dart run tool/sync_upstream.dart --update-to-latest
     Update .upstream/ to the latest tagged obsidianmd/pele release, generate .upstream/diff_report.md,
-    refresh pele.bundle.js, mermaid.min.js, and gallery_samples.dart, and update UPSTREAM.md.
+    refresh pele.bundle.js, mermaid.min.js, and docs/images/, and update UPSTREAM.md.
 
   dart run tool/sync_upstream.dart --update-to <tag_or_ref>
     Update .upstream/ to a specific release tag or commit SHA.
@@ -463,7 +464,7 @@ Commands:
 
   dart run tool/sync_upstream.dart --refresh-assets [ref]
     Rebuild example/assets/pele.bundle.js, sync example/assets/mermaid.min.js to upstream's target
-    Mermaid version, and regenerate example/lib/gallery_samples.dart.
+    Mermaid version, and regenerate docs/images/ and docs/DIAGRAM_GALLERY.md.
 
   dart run tool/sync_upstream.dart --pin <tag> [sha]
     Update UPSTREAM.md with the given release tag and commit SHA.

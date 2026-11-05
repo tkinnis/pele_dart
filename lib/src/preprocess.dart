@@ -6,6 +6,8 @@ import 'errors.dart';
 import 'util/chars.dart' as chars;
 import 'util/yaml.dart';
 
+/// Parsed Mermaid configuration map extracted from YAML frontmatter,
+/// `%%{init: ...}%%` directives, or passed via `RenderOptions.config`.
 typedef Config = Map<String, YamlValue>;
 
 class Preprocessed {

@@ -1,0 +1,32 @@
+name: Feature Request
+description: Suggest a Dart/Flutter integration enhancement, new API option, or upstream sync request.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Use Case / Problem Statement
+      description: What are you building with `pele_dart`, and what limitation did you encounter?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution or API
+      description: Describe the behavior, option, or API you would like to see.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Feature Scope
+      options:
+        - Dart / Flutter ecosystem integration (e.g., SvgOutputMode.flattened, PelePalette, TextMeasurer)
+        - Upstream obsidianmd/pele sync (new upstream Pele release or commit)
+        - Example app / 3-Way Comparison Studio / Documentation
+        - Other
+    validations:
+      required: true

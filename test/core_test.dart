@@ -5,7 +5,6 @@ import 'package:pele_dart/src/layout/layered.dart';
 import 'package:pele_dart/src/preprocess.dart';
 import 'package:pele_dart/src/text/entities.dart';
 import 'package:pele_dart/src/text/label.dart';
-import 'package:pele_dart/src/text/measurer.dart';
 import 'package:pele_dart/src/util/yaml.dart';
 import 'package:test/test.dart';
 
