@@ -317,9 +317,12 @@ Future<void> main(List<String> args) async {
       uiMermaidVersion != upstreamMermaid.mermaidVersion;
 
   final pubspecVersion = _extractPubspecVersion(root);
+  final infoRenderVersion = _extractInfoRenderVersion(root);
   final expectedBaseVersion = pinnedTag.replaceFirst(RegExp(r'^v'), '');
   final pubspecBaseVersion = pubspecVersion?.split('+').first;
-  final versionInLockstep = pubspecBaseVersion == expectedBaseVersion;
+  final versionInLockstep =
+      pubspecBaseVersion == expectedBaseVersion &&
+      infoRenderVersion == expectedBaseVersion;
 
   final mapping = _collectUpstreamHeaders(Directory('$root/lib/src'), root);
 
@@ -1181,7 +1184,7 @@ void _updateUpstreamMd(
   );
   upstreamMdFile.writeAsStringSync(text);
 
-  // Enforce 1:1 version lockstep in pubspec.yaml and documentation when tag is semver (vX.Y.Z or X.Y.Z).
+  // Enforce 1:1 version lockstep in pubspec.yaml and lib/src/diagrams/info/render.dart when tag is semver (vX.Y.Z or X.Y.Z).
   final semverMatch = RegExp(r'^v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$')
       .firstMatch(tag.trim());
   if (semverMatch != null) {
@@ -1197,26 +1200,15 @@ void _updateUpstreamMd(
         pubspecFile.writeAsStringSync(updatedPub);
       }
     }
-    for (final docRel in <String>['README.md', 'docs/API_MANUAL.md']) {
-      final docFile = File('$root/$docRel');
-      if (docFile.existsSync()) {
-        final docText = docFile.readAsStringSync();
-        final updatedDoc = docText
-            .replaceAll(
-              RegExp(r'pele_dart:\s*\^\d+\.\d+\.\d+'),
-              'pele_dart: ^$semver',
-            )
-            .replaceAll(
-              RegExp(r'obsidianmd%2Fpele%20v\d+\.\d+\.\d+'),
-              'obsidianmd%2Fpele%20v$semver',
-            )
-            .replaceAll(
-              RegExp(r'`obsidianmd/pele` \(`v\d+\.\d+\.\d+`\)'),
-              '`obsidianmd/pele` (`v$semver`)',
-            );
-        if (updatedDoc != docText) {
-          docFile.writeAsStringSync(updatedDoc);
-        }
+    final infoRenderFile = File('$root/lib/src/diagrams/info/render.dart');
+    if (infoRenderFile.existsSync()) {
+      final infoText = infoRenderFile.readAsStringSync();
+      final updatedInfo = infoText.replaceFirstMapped(
+        RegExp(r"const String peleVersion = '[^']+';"),
+        (_) => "const String peleVersion = '$semver';",
+      );
+      if (updatedInfo != infoText) {
+        infoRenderFile.writeAsStringSync(updatedInfo);
       }
     }
   }
@@ -1229,6 +1221,14 @@ String? _extractPubspecVersion(String root) {
     r'^version:\s*(\S+)',
     multiLine: true,
   ).firstMatch(file.readAsStringSync());
+  return m?.group(1)?.trim();
+}
+
+String? _extractInfoRenderVersion(String root) {
+  final file = File('$root/lib/src/diagrams/info/render.dart');
+  if (!file.existsSync()) return null;
+  final m = RegExp(r"const String peleVersion = '([^']+)';")
+      .firstMatch(file.readAsStringSync());
   return m?.group(1)?.trim();
 }
 

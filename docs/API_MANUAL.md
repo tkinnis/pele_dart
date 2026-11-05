@@ -33,13 +33,6 @@ Add `pele_dart` from `pub.dev`:
 dart pub add pele_dart
 ```
 
-Or in your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  pele_dart: ^1.13.0
-```
-
 Or directly from GitHub:
 
 ```yaml
@@ -537,7 +530,7 @@ final result = render(
 
 ## 10. Supported Diagram Families (33 Types)
 
-`pele_dart` supports all **33** diagram families from `obsidianmd/pele` (`v1.13.0`):
+`pele_dart` supports all **33** diagram families from `obsidianmd/pele` (see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned release):
 
 | # | `DiagramType` | `MermaidType` Variant(s) | Mermaid Header Keyword(s) | Description |
 | :- | :--- | :--- | :--- | :--- |

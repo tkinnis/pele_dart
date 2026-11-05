@@ -29,7 +29,7 @@
 | **Emit machine-readable JSON status for CI or agents** | `dart run tool/sync_upstream.dart --check --json` |
 | **Stage the latest upstream release, generate `.upstream/diff_report.md` & refresh JS bundles** | `dart run tool/sync_upstream.dart --update-to-latest` |
 | **Stage a specific tag, branch, or commit SHA** | `dart run tool/sync_upstream.dart --update-to <tag_or_ref>` |
-| **Inspect categorized upstream->Dart diffs for any git range** | `dart run tool/sync_upstream.dart --diff v1.12.0..v1.13.0` |
+| **Inspect categorized upstream->Dart diffs for any git range** | `dart run tool/sync_upstream.dart --diff <from_tag>..<to_tag>` |
 | **Re-bundle `pele.bundle.js`, sync `mermaid.min.js`, and regenerate `docs/images/` & `docs/DIAGRAM_GALLERY.md`** | `dart run tool/sync_upstream.dart --refresh-assets` |
 | **Run the 787-diagram 100% differential parity & Mermaid version check** | `dart run tool/verify_against_upstream.dart` |
 | **Finalize `UPSTREAM.md` pin after porting and verifying** | `dart run tool/sync_upstream.dart --pin <tag> <sha>` |
@@ -40,7 +40,7 @@
 
 [`UPSTREAM.md`](../UPSTREAM.md) is the single source of truth for the upstream baseline that `pele_dart` is synchronized against:
 
-- **Pinned Release Tag**: The exact `obsidianmd/pele` release tag (e.g., `v1.13.0`).
+- **Pinned Release Tag**: The exact `obsidianmd/pele` release tag (`v<X.Y.Z>`).
 - **Pinned Commit SHA**: The full 40-character commit hash corresponding to that release.
 - **Target Mermaid Version**: The `mermaid` npm version that upstream `obsidianmd/pele` benchmarks and matches against in `scripts/bench-mermaid.mjs` and `website/package.json` (e.g., `12.1.0`).
 - **Target Mermaid Parser**: The `@mermaid-js/parser` version in upstream `package.json` (e.g., `@mermaid-js/parser@2.0.1`).
@@ -198,12 +198,12 @@ Once all quality gates and the 787-diagram differential verification suite pass 
    ```bash
    dart run tool/generate_doc_images.dart
    ```
-2. **Pin `UPSTREAM.md` & `pubspec.yaml` to the new release tag and commit SHA**:
-   Running `--pin` automatically updates `Target Release` in `UPSTREAM.md`, sets `version: <X.Y.Z>` in `pubspec.yaml` in 1:1 lockstep with `<new_tag>`, and updates the version references in `README.md` and `docs/API_MANUAL.md`:
+2. **Pin `UPSTREAM.md`, `pubspec.yaml`, and `lib/src/diagrams/info/render.dart` to the new release tag and commit SHA**:
+   Running `--pin` automatically updates the three required version locations (`Target Release` in `UPSTREAM.md`, `version: <X.Y.Z>` in `pubspec.yaml`, and `peleVersion` in `lib/src/diagrams/info/render.dart`) in 1:1 lockstep with `<new_tag>`:
    ```bash
    dart run tool/sync_upstream.dart --pin <new_tag>
    ```
-   > **1:1 Version Lockstep Policy:** `pele_dart`'s `major.minor.patch` version (`1.13.0`) always matches the synced `obsidianmd/pele` release (`v1.13.0`). If a Dart-only hotfix is needed between upstream releases, use a `+N` build suffix (`1.13.0+1`) so `X.Y.Z` never diverges from upstream.
+   > **1:1 Version Lockstep Policy:** `pele_dart`'s `major.minor.patch` version (`<X.Y.Z>`) always matches the synced `obsidianmd/pele` release (`v<X.Y.Z>`). If a Dart-only hotfix is needed between upstream releases, use a `+N` build suffix (`<X.Y.Z>+1`) so `X.Y.Z` never diverges from upstream. Documentation prose never hardcodes version numbers.
 3. **Confirm `--check` reports `UP TO DATE` and `LOCKSTEP`**:
    ```bash
    dart run tool/sync_upstream.dart --check

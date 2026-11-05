@@ -63,6 +63,17 @@ Future<void> main(List<String> args) async {
     exitCode = 1;
     return;
   }
+  final infoRenderFile = File('$root/lib/src/diagrams/info/render.dart');
+  final infoRenderVer = RegExp(r"const String peleVersion = '([^']+)';")
+      .firstMatch(infoRenderFile.readAsStringSync())
+      ?.group(1);
+  if (infoRenderVer != expectedBaseVer) {
+    stderr.writeln(
+      'Error: peleVersion ($infoRenderVer) in lib/src/diagrams/info/render.dart does not match UPSTREAM.md Target Release ($expectedBaseVer)',
+    );
+    exitCode = 1;
+    return;
+  }
 
   final upstreamDir = Directory('$root/.upstream');
   if (upstreamDir.existsSync()) {

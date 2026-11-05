@@ -361,7 +361,7 @@ flowchart LR
       },
     );
 
-    test('Package version in pubspec.yaml, CHANGELOG.md, README.md, and docs/API_MANUAL.md is in 1:1 lockstep with UPSTREAM.md', () {
+    test('Version is in 1:1 lockstep across UPSTREAM.md, pubspec.yaml, peleVersion, and CHANGELOG.md (and not duplicated in docs prose)', () {
       final upstreamMd = File('UPSTREAM.md').readAsStringSync();
       final targetRelease = RegExp(r'\*\*Target Release\*\*\s*\|\s*`([^`]+)`')
           .firstMatch(upstreamMd)
@@ -385,6 +385,18 @@ flowchart LR
             'pubspec.yaml version ($pubspecVersion) must match UPSTREAM.md Target Release ($targetRelease)',
       );
 
+      final infoRender = File('lib/src/diagrams/info/render.dart')
+          .readAsStringSync();
+      final infoRenderVersion = RegExp(r"const String peleVersion = '([^']+)';")
+          .firstMatch(infoRender)
+          ?.group(1);
+      expect(
+        infoRenderVersion,
+        expectedBaseVersion,
+        reason:
+            'peleVersion ($infoRenderVersion) in lib/src/diagrams/info/render.dart must match UPSTREAM.md ($expectedBaseVersion)',
+      );
+
       final changelog = File('CHANGELOG.md').readAsStringSync();
       final topChangelogVersion = RegExp(
         r'^##\s+(\S+)',
@@ -397,16 +409,26 @@ flowchart LR
             'CHANGELOG.md top version ($topChangelogVersion) must match pubspec.yaml ($pubspecVersion)',
       );
 
-      final readme = File('README.md').readAsStringSync();
-      expect(readme, contains('pele_dart: ^$expectedBaseVersion'));
-      expect(readme, contains('`obsidianmd/pele` (`v$expectedBaseVersion`)'));
-
-      final apiManual = File('docs/API_MANUAL.md').readAsStringSync();
-      expect(apiManual, contains('pele_dart: ^$expectedBaseVersion'));
-      expect(
-        apiManual,
-        contains('`obsidianmd/pele` (`v$expectedBaseVersion`)'),
-      );
+      // Ensure documentation prose does not hardcode or duplicate the release version number.
+      for (final docPath in <String>[
+        'README.md',
+        'example/README.md',
+        'docs/API_MANUAL.md',
+        'docs/DESIGN.md',
+        'SECURITY.md',
+        'CONTRIBUTING.md',
+        'CODE_OF_CONDUCT.md',
+        'AGENTS.md',
+        'docs/UPSTREAM_SYNC.md',
+      ]) {
+        final docText = File(docPath).readAsStringSync();
+        expect(
+          docText,
+          isNot(contains(expectedBaseVersion)),
+          reason:
+              '$docPath should not hardcode release version $expectedBaseVersion; reference UPSTREAM.md or pubspec.yaml instead.',
+        );
+      }
     });
 
     test('Every relative file link and image path in markdown docs resolves to an existing file', () {

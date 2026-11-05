@@ -123,7 +123,7 @@ Confirm that:
 
 `pele_dart` enforces **strict 1:1 version lockstep** with upstream `obsidianmd/pele` (`version: X.Y.Z` in `pubspec.yaml` == `Target Release: vX.Y.Z` in `UPSTREAM.md` == git tag `vX.Y.Z`; Dart-only hotfixes between upstream releases use `X.Y.Z+1`).
 
-1. Pin `UPSTREAM.md`, `pubspec.yaml`, `README.md`, and `docs/API_MANUAL.md` to the synced release tag:
+1. Pin `UPSTREAM.md`, `pubspec.yaml`, and `lib/src/diagrams/info/render.dart` (`peleVersion`) to the synced release tag:
    ```bash
    dart run tool/sync_upstream.dart --pin v<version> <sha>
    ```

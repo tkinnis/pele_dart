@@ -20,11 +20,12 @@
 
 ## Supported Versions
 
-Security fixes are applied to the latest minor release line:
+Security fixes are applied to the latest release line (version-locked 1:1 to upstream `obsidianmd/pele`; see [`pubspec.yaml`](pubspec.yaml) and [`UPSTREAM.md`](UPSTREAM.md)):
 
 | Version | Supported |
 | :--- | :---: |
-| `1.13.x` | Yes |
+| Latest release | Yes |
+| Older releases | No |
 
 ---
 

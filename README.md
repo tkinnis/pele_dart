@@ -2,7 +2,7 @@
 
 [![pub package](https://img.shields.io/pub/v/pele_dart.svg)](https://pub.dev/packages/pele_dart)
 [![CI](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml/badge.svg)](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml)
-[![Upstream obsidianmd/pele](https://img.shields.io/badge/upstream-obsidianmd%2Fpele%20v1.13.0-7c3aed)](https://github.com/obsidianmd/pele)
+[![Upstream obsidianmd/pele](https://img.shields.io/badge/upstream-obsidianmd%2Fpele-7c3aed)](UPSTREAM.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG rendering engine.
@@ -14,7 +14,7 @@ A fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG ren
 ## Highlights
 
 * **Pure Dart 3 (`sdk: ^3.13.0`)**: Zero browser (`WKWebView` / `WebKitGTK` / `WebView2`), zero JavaScript runtime (`QuickJS` / `JavaScriptCore`), and zero Flutter SDK dependency in the core package. Runs synchronously in CLI tools, servers, background Dart isolates (`Isolate.run`), and Flutter apps.
-* **100% Byte-for-Byte Upstream Parity (`787/787`)**: Produces byte-for-byte identical SVG markup to upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (`v1.13.0`) across all 33 canonical diagram families, all 232 showcase/playground samples, and all 522 upstream test corpus diagrams.
+* **100% Byte-for-Byte Upstream Parity (`787/787`)**: Version-locked 1:1 to upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (see [`UPSTREAM.md`](UPSTREAM.md)) and produces byte-for-byte identical SVG markup across all 33 canonical diagram families, all 232 showcase/playground samples, and all 522 upstream test corpus diagrams.
 * **Dual SVG Output Modes (`SvgOutputMode`)**:
   1. **`SvgOutputMode.flattened`** *(Default)*: Resolves all `--pele-*` and `--_*` CSS custom properties, `color-mix(in srgb, ...)` blends, `calc(...)` expressions, `currentColor`, `<tspan>` `baseline-shift`, and inline `style="..."` properties against a `PelePalette` into static SVG 1.1 attributes—ready for immediate compilation with Flutter's `vector_graphics_compiler` (`encodeSvg`) or static PDF/PNG rasterizers.
   2. **`SvgOutputMode.cssVariables`** *(Upstream Parity Mode)*: Emits upstream `obsidianmd/pele`'s exact theme-reactive SVG styled via `var(--pele-*)` CSS custom properties so a single SVG adapts dynamically to light/dark CSS themes on the web.
@@ -55,13 +55,6 @@ Add `pele_dart` from `pub.dev`:
 
 ```bash
 dart pub add pele_dart
-```
-
-Or in your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  pele_dart: ^1.13.0
 ```
 
 ---
@@ -147,7 +140,7 @@ See [**Section 11 of the API User Manual**](docs/API_MANUAL.md#11-integration-gu
 
 ## Supported Diagram Families (33 Types)
 
-`pele_dart` supports all **33** diagram families from `obsidianmd/pele` (`v1.13.0`), targeting Mermaid `12.1.0` syntax plus Pele's extended architecture and systems-thinking diagrams:
+`pele_dart` supports all **33** diagram families from `obsidianmd/pele` (see [`UPSTREAM.md`](UPSTREAM.md) for the pinned upstream release and target Mermaid version):
 
 ### Core Mermaid Diagrams (10)
 

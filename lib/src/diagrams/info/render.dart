@@ -10,7 +10,8 @@ import '../../text/measurer.dart';
 import '../../types.dart';
 import 'model.dart';
 
-const String _version = '1.13.0';
+/// The synced upstream `obsidianmd/pele` release version rendered by `info` diagrams.
+const String peleVersion = '1.13.0';
 
 Rendered renderInfo(InfoModel model, Config config, RenderOptions options) {
   final size = options.fontSize ?? 16;
@@ -28,7 +29,7 @@ Rendered renderInfo(InfoModel model, Config config, RenderOptions options) {
     Style.bold,
   );
   final titleHeight = title.height > 0 ? title.height + 8 : 0.0;
-  final text = layoutLabel('Pele v$_version', false, measurer, size, 4000);
+  final text = layoutLabel('Pele v$peleVersion', false, measurer, size, 4000);
 
   final width = (math.max(title.width, text.width) + 2 * pad).ceilToDouble();
   final height = (titleHeight + text.height + 2 * pad).ceilToDouble();

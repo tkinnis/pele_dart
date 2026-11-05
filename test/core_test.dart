@@ -1,5 +1,6 @@
 import 'package:pele_dart/pele_dart.dart';
 import 'package:pele_dart/src/detect.dart';
+import 'package:pele_dart/src/diagrams/info/render.dart';
 import 'package:pele_dart/src/layout/compound.dart';
 import 'package:pele_dart/src/layout/layered.dart';
 import 'package:pele_dart/src/preprocess.dart';
@@ -122,7 +123,7 @@ flowchart TD
       );
       expect(cssRes.type, 'info');
       expect(cssRes.svg, contains('var(--_fg)'));
-      expect(cssRes.svg, contains('Pele v1.13.0'));
+      expect(cssRes.svg, contains('Pele v$peleVersion'));
       expect(
         cssRes.svg,
         contains('<title id="pele-title">Accessible Info</title>'),
@@ -135,7 +136,7 @@ flowchart TD
       expect(flatRes.svg, isNot(contains('var(--')));
       expect(flatRes.svg, isNot(contains('color-mix(')));
       expect(flatRes.svg, contains('fill="#24292e"'));
-      expect(flatRes.svg, contains('Pele v1.13.0'));
+      expect(flatRes.svg, contains('Pele v$peleVersion'));
     });
 
     test('flattenPeleSvg resolves color-mix, var, rx style, font weights, and baseline-shift', () {

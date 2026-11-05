@@ -18,9 +18,10 @@ This document defines the architectural invariants, directory conventions, trans
 
 ### A. Strict 1:1 Upstream Structural Parity & Lockstep Versioning
 * **[`UPSTREAM.md`](UPSTREAM.md) is the single source of truth** for the pinned `obsidianmd/pele` release tag, commit SHA, and per-module sync status.
-* **1:1 Version Lockstep (`pubspec.yaml` ↔ `UPSTREAM.md` ↔ Git Tag)**:
-  * `pele_dart`'s `major.minor.patch` version in `pubspec.yaml` must **always** match `Target Release` in `UPSTREAM.md` (e.g., `version: 1.13.0` for upstream `v1.13.0`, tagged as `v1.13.0`).
-  * If a Dart-only hotfix is required between upstream `obsidianmd/pele` releases, increment only the Dart build suffix (`1.13.0+1`, `1.13.0+2`, tagged as `v1.13.0+1`) so `major.minor.patch` remains strictly locked to the synced upstream release.
+* **1:1 Version Lockstep (`pubspec.yaml` ↔ `UPSTREAM.md` ↔ `lib/src/diagrams/info/render.dart` ↔ Git Tag)**:
+  * `pele_dart`'s `major.minor.patch` version in `pubspec.yaml` and `peleVersion` in `lib/src/diagrams/info/render.dart` must **always** match `Target Release` in `UPSTREAM.md` (i.e., `version: <X.Y.Z>` for upstream `v<X.Y.Z>`, tagged as `v<X.Y.Z>`).
+  * If a Dart-only hotfix is required between upstream `obsidianmd/pele` releases, increment only the Dart build suffix (`<X.Y.Z>+1`, `<X.Y.Z>+2`, tagged as `v<X.Y.Z>+1`) so `major.minor.patch` remains strictly locked to the synced upstream release.
+  * Never hardcode release version numbers in documentation prose (`README.md`, `docs/*.md`, `SECURITY.md`); all docs must reference `UPSTREAM.md` or `pubspec.yaml`.
   * This invariant is automatically enforced by `tool/sync_upstream.dart`, `tool/verify_against_upstream.dart`, and `test/doc_examples_test.dart`.
 * Every upstream file `src/<dir>/<name>.ts` in `obsidianmd/pele` maps to `lib/src/<dir>/<snake_name>.dart` in `pele_dart`.
 * Every file in `lib/src/` must begin with a static header comment recording its upstream counterpart path (without a commit SHA suffix):
