@@ -9,26 +9,26 @@ Every image below is rendered directly by **`pele_dart`** in pure Dart (`SvgOutp
 
 ## Quick Jump
 
-- [**Flowchart** (`flowchart`)](#flowchart) — Show the steps and decisions in a process.
-- [**Block** (`block`)](#block) — Show blocks in a grid that you arrange yourself.
-- [**C4** (`c4`)](#c4) — Show a software system as people, systems, containers, and components.
 - [**Class** (`class`)](#class) — Show classes, their members, and the relationships between them.
 - [**Entity relationship** (`er`)](#entity-relationship) — Show entities, their attributes, and the relationships between them.
-- [**Event modeling** (`eventmodeling`)](#event-modeling) — Show how commands, events, and views change a system over time.
+- [**Flowchart** (`flowchart`)](#flowchart) — Show the steps and decisions in a process.
 - [**Gantt** (`gantt`)](#gantt) — Show the tasks of a project on a timeline.
 - [**Git graph** (`git`)](#git-graph) — Show commits, branches, and merges.
 - [**Info** (`info`)](#info) — Display package version info.
-- [**User journey** (`journey`)](#user-journey) — Show the steps of a task and how satisfying each one is.
-- [**Kanban** (`kanban`)](#kanban) — Show tasks in columns by status.
 - [**Mindmap** (`mindmap`)](#mindmap) — Show ideas branching out from a central topic.
-- [**Packet** (`packet`)](#packet) — Show the fields of a network packet.
 - [**Pie** (`pie`)](#pie) — Show the parts of a whole.
+- [**Sequence** (`sequence`)](#sequence) — Show the messages that participants exchange over time.
+- [**State** (`state`)](#state) — Show the states of a system and the transitions between them.
+- [**Block** (`block`)](#block) — Show blocks in a grid that you arrange yourself.
+- [**C4** (`c4`)](#c4) — Show a software system as people, systems, containers, and components.
+- [**Event modeling** (`eventmodeling`)](#event-modeling) — Show how commands, events, and views change a system over time.
+- [**Kanban** (`kanban`)](#kanban) — Show tasks in columns by status.
+- [**Packet** (`packet`)](#packet) — Show the fields of a network packet.
 - [**Quadrant chart** (`quadrant`)](#quadrant-chart) — Plot items on two axes that divide the chart into four sections.
 - [**Requirement** (`requirement`)](#requirement) — Show requirements and how they relate to each other and to the elements that satisfy them.
 - [**Sankey** (`sankey`)](#sankey) — Show flows between nodes, with widths proportional to quantity.
-- [**Sequence** (`sequence`)](#sequence) — Show the messages that participants exchange over time.
-- [**State** (`state`)](#state) — Show the states of a system and the transitions between them.
 - [**Timeline** (`timeline`)](#timeline) — Show events in chronological order.
+- [**User journey** (`journey`)](#user-journey) — Show the steps of a task and how satisfying each one is.
 - [**XY chart** (`xychart`)](#xy-chart) — Plot data as bars and lines on two axes.
 - [**Agentflow** (`agentflow`)](#agentflow) — Show the tasks of AI agents and how work passes between them.
 - [**Architecture** (`architecture`)](#architecture) — Show services and the connections between them.
@@ -37,131 +37,11 @@ Every image below is rendered directly by **`pele_dart`** in pure Dart (`SvgOutp
 - [**Radar** (`radar`)](#radar) — Compare values across several axes.
 - [**Railroad** (`railroad`)](#railroad) — Show the syntax of a grammar.
 - [**Swimlane** (`swimlane`)](#swimlane) — Show a process divided by who performs each step.
-- [**Treemap** (`treemap`)](#treemap) — Show hierarchical data as nested rectangles, sized by value.
 - [**Tree view** (`treeview`)](#tree-view) — Show a hierarchy, such as files and folders.
+- [**Treemap** (`treemap`)](#treemap) — Show hierarchical data as nested rectangles, sized by value.
 - [**Use case** (`usecase`)](#use-case) — Show actors and the goals they reach with a system.
 - [**Venn** (`venn`)](#venn) — Show sets and where they overlap.
 - [**Wardley map** (`wardley`)](#wardley-map) — Plot components by their visibility to the user and their stage of evolution.
-
----
-
-## Flowchart
-
-**Type:** `flowchart` (`flowchart-v2`) · **Intrinsic Size:** `1046×225 px` · Show the steps and decisions in a process.
-
-![Flowchart](images/diagrams/flowchart.svg)
-
-<details>
-<summary>View Mermaid Source</summary>
-
-```mermaid
-flowchart LR
-  subgraph Client
-    UI[Web app]
-    Cache[(Local cache)]
-  end
-  subgraph Services
-    API[API gateway]
-    Auth[Auth service]
-    Orders[Order service]
-  end
-  subgraph Storage
-    DB[(Orders DB)]
-  end
-  UI --> API
-  UI --> Cache
-  API --> Auth
-  API --> Orders
-  Orders --> DB
-  Auth -. token .-> UI
-```
-</details>
-
----
-
-## Block
-
-**Type:** `block` (`block`) · **Intrinsic Size:** `695×424 px` · Show blocks in a grid that you arrange yourself.
-
-![Block](images/diagrams/block.svg)
-
-<details>
-<summary>View Mermaid Source</summary>
-
-```mermaid
-block
-columns 1
-  db(("DB"))
-  blockArrowId6<["&nbsp;&nbsp;&nbsp;"]>(down)
-  block:ID
-    A
-    B["A wide one in the middle"]
-    C
-  end
-  space
-  D
-  ID --> D
-  C --> D
-  style B fill:#969,stroke:#333,stroke-width:4px
-```
-</details>
-
----
-
-## C4
-
-**Type:** `c4` (`c4`) · **Intrinsic Size:** `1016×1382 px` · Show a software system as people, systems, containers, and components.
-
-![C4](images/diagrams/c4.svg)
-
-<details>
-<summary>View Mermaid Source</summary>
-
-```mermaid
-C4Context
-      title System Context diagram for Internet Banking System
-      Enterprise_Boundary(b0, "BankBoundary0") {
-        Person(customerA, "Banking Customer A", "A customer of the bank, with personal bank accounts.")
-        Person(customerB, "Banking Customer B")
-        Person_Ext(customerC, "Banking Customer C", "desc")
-
-        Person(customerD, "Banking Customer D", "A customer of the bank, <br/> with personal bank accounts.")
-
-        System(SystemAA, "Internet Banking System", "Allows customers to view information about their bank accounts, and make payments.")
-
-        Enterprise_Boundary(b1, "BankBoundary") {
-
-          SystemDb_Ext(SystemE, "Mainframe Banking System", "Stores all of the core banking information about customers, accounts, transactions, etc.")
-
-          System_Boundary(b2, "BankBoundary2") {
-            System(SystemA, "Banking System A")
-            System(SystemB, "Banking System B", "A system of the bank, with personal bank accounts. next line.")
-          }
-
-          System_Ext(SystemC, "E-mail system", "The internal Microsoft Exchange e-mail system.")
-          SystemDb(SystemD, "Banking System D Database", "A system of the bank, with personal bank accounts.")
-
-          Boundary(b3, "BankBoundary3", "boundary") {
-            SystemQueue(SystemF, "Banking System F Queue", "A system of the bank.")
-            SystemQueue_Ext(SystemG, "Banking System G Queue", "A system of the bank, with personal bank accounts.")
-          }
-        }
-      }
-
-      BiRel(customerA, SystemAA, "Uses")
-      BiRel(SystemAA, SystemE, "Uses")
-      Rel(SystemAA, SystemC, "Sends e-mails", "SMTP")
-      Rel(SystemC, customerA, "Sends e-mails to")
-
-      UpdateElementStyle(customerA, $fontColor="red", $bgColor="gray", $borderColor="red")
-      UpdateRelStyle(customerA, SystemAA, $textColor="blue", $lineColor="blue", $offsetX="5")
-      UpdateRelStyle(SystemAA, SystemE, $textColor="blue", $lineColor="blue", $offsetY="-10")
-      UpdateRelStyle(SystemAA, SystemC, $textColor="blue", $lineColor="blue", $offsetY="-40", $offsetX="-50")
-      UpdateRelStyle(SystemC, customerA, $textColor="red", $lineColor="red", $offsetX="-50", $offsetY="20")
-
-      UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
-```
-</details>
 
 ---
 
@@ -244,21 +124,35 @@ erDiagram
 
 ---
 
-## Event modeling
+## Flowchart
 
-**Type:** `eventmodeling` (`eventmodeling`) · **Intrinsic Size:** `482×273 px` · Show how commands, events, and views change a system over time.
+**Type:** `flowchart` (`flowchart-v2`) · **Intrinsic Size:** `1046×225 px` · Show the steps and decisions in a process.
 
-![Event modeling](images/diagrams/eventmodeling.svg)
+![Flowchart](images/diagrams/flowchart.svg)
 
 <details>
 <summary>View Mermaid Source</summary>
 
 ```mermaid
-eventmodeling
-
-timeframe 01 ui CartUI
-timeframe 02 command AddItem { description: string }
-timeframe 03 event ItemAdded { description: string }
+flowchart LR
+  subgraph Client
+    UI[Web app]
+    Cache[(Local cache)]
+  end
+  subgraph Services
+    API[API gateway]
+    Auth[Auth service]
+    Orders[Order service]
+  end
+  subgraph Storage
+    DB[(Orders DB)]
+  end
+  UI --> API
+  UI --> Cache
+  API --> Auth
+  API --> Orders
+  Orders --> DB
+  Auth -. token .-> UI
 ```
 </details>
 
@@ -290,7 +184,7 @@ gantt
 
 ## Git graph
 
-**Type:** `gitGraph` (`gitGraph`) · **Intrinsic Size:** `838×522 px` · Show commits, branches, and merges.
+**Type:** `gitGraph` (`gitGraph`) · **Intrinsic Size:** `619×226 px` · Show commits, branches, and merges.
 
 ![Git graph](images/diagrams/git.svg)
 
@@ -298,55 +192,23 @@ gantt
 <summary>View Mermaid Source</summary>
 
 ```mermaid
----
-config:
-  logLevel: 'debug'
-  theme: 'base'
-  gitGraph:
-    showBranches: false
----
-      gitGraph
-        commit
-        branch hotfix
-        checkout hotfix
-        commit
+gitGraph
+        commit id: "ZERO"
         branch develop
-        checkout develop
-        commit id:"ash" tag:"abc"
-        branch featureB
-        checkout featureB
-        commit type:HIGHLIGHT
-        checkout main
-        checkout hotfix
-        commit type:NORMAL
-        checkout develop
-        commit type:REVERSE
-        checkout featureB
-        commit
-        checkout main
-        merge hotfix
-        checkout featureB
-        commit
-        checkout develop
-        branch featureA
-        commit
-        checkout develop
-        merge hotfix
-        checkout featureA
-        commit
-        checkout featureB
-        commit
-        checkout develop
-        merge featureA
         branch release
-        checkout release
-        commit
+        commit id:"A"
         checkout main
-        commit
-        checkout release
-        merge main
+        commit id:"ONE"
         checkout develop
-        merge release
+        commit id:"B"
+        checkout main
+        merge develop id:"MERGE"
+        commit id:"TWO"
+        checkout release
+        cherry-pick id:"MERGE" parent:"B"
+        commit id:"THREE"
+        checkout develop
+        commit id:"C"
 ```
 </details>
 
@@ -363,48 +225,6 @@ config:
 
 ```mermaid
 info
-```
-</details>
-
----
-
-## User journey
-
-**Type:** `journey` (`journey`) · **Intrinsic Size:** `808×327 px` · Show the steps of a task and how satisfying each one is.
-
-![User journey](images/diagrams/journey.svg)
-
-<details>
-<summary>View Mermaid Source</summary>
-
-```mermaid
-journey
-    title My working day
-    section Go to work
-      Make tea: 5: Me
-      Go upstairs: 3: Me
-      Do work: 1: Me, Cat
-    section Go home
-      Go downstairs: 5: Me
-      Sit down: 5: Me
-```
-</details>
-
----
-
-## Kanban
-
-**Type:** `kanban` (`kanban`) · **Intrinsic Size:** `216×105 px` · Show tasks in columns by status.
-
-![Kanban](images/diagrams/kanban.svg)
-
-<details>
-<summary>View Mermaid Source</summary>
-
-```mermaid
-kanban
-  column1[Column Title]
-    task1[Task Description]
 ```
 </details>
 
@@ -442,6 +262,225 @@ mindmap
 
 ---
 
+## Pie
+
+**Type:** `pie` (`pie`) · **Intrinsic Size:** `425×352 px` · Show the parts of a whole.
+
+![Pie](images/diagrams/pie.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
+```mermaid
+pie title Fish caught by the crew
+    "ʻAhi" : 386
+    "Mahimahi" : 85
+    "Ono" : 15
+```
+</details>
+
+---
+
+## Sequence
+
+**Type:** `sequence` (`sequence`) · **Intrinsic Size:** `556×431 px` · Show the messages that participants exchange over time.
+
+![Sequence](images/diagrams/sequence.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Customer
+  participant Web as Web app
+  participant API as API gateway
+  participant Bank
+  Customer->>Web: Place order
+  Web->>API: POST /orders
+  activate API
+  API->>Bank: Authorize payment
+  Bank-->>API: Approved
+  API-->>Web: 201 Created
+  deactivate API
+  Web-->>Customer: Order confirmed
+  Note over Customer,Bank: One order, one transaction
+```
+</details>
+
+---
+
+## State
+
+**Type:** `state` (`stateDiagram`) · **Intrinsic Size:** `210×708 px` · Show the states of a system and the transitions between them.
+
+![State](images/diagrams/state.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
+```mermaid
+---
+config:
+  theme: default
+  look: classic
+  layout: dagre
+---
+stateDiagram-v2
+  [*] --> Draft
+  Draft --> Submitted : submit
+  state Review {
+    [*] --> Screening
+    Screening --> Decision
+  }
+  Submitted --> Review
+  Review --> Published : approved
+  Review --> Draft : rejected
+  Published --> [*]
+```
+</details>
+
+---
+
+## Block
+
+**Type:** `block` (`block`) · **Intrinsic Size:** `695×424 px` · Show blocks in a grid that you arrange yourself.
+
+![Block](images/diagrams/block.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
+```mermaid
+block
+columns 1
+  db(("DB"))
+  blockArrowId6<["&nbsp;&nbsp;&nbsp;"]>(down)
+  block:ID
+    A
+    B["A wide one in the middle"]
+    C
+  end
+  space
+  D
+  ID --> D
+  C --> D
+  style B fill:#969,stroke:#333,stroke-width:4px
+```
+</details>
+
+---
+
+## C4
+
+**Type:** `c4` (`c4`) · **Intrinsic Size:** `1296×558 px` · Show a software system as people, systems, containers, and components.
+
+![C4](images/diagrams/c4.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
+```mermaid
+C4Component
+    title Component diagram for Internet Banking System - API Application
+
+    Container(spa, "Single Page Application", "javascript and angular", "Provides all the internet banking functionality to customers via their web browser.")
+    Container(ma, "Mobile App", "Xamarin", "Provides a limited subset to the internet banking functionality to customers via their mobile device.")
+    ContainerDb(db, "Database", "Relational Database Schema", "Stores user registration information, hashed authentication credentials, access logs, etc.")
+    System_Ext(mbs, "Mainframe Banking System", "Stores all of the core banking information about customers, accounts, transactions, etc.")
+
+    Container_Boundary(api, "API Application") {
+        Component(sign, "Sign In Controller", "MVC Rest Controller", "Allows users to sign in to the internet banking system")
+        Component(accounts, "Accounts Summary Controller", "MVC Rest Controller", "Provides customers with a summary of their bank accounts")
+        Component(security, "Security Component", "Spring Bean", "Provides functionality related to singing in, changing passwords, etc.")
+        Component(mbsfacade, "Mainframe Banking System Facade", "Spring Bean", "A facade onto the mainframe banking system.")
+
+        Rel(sign, security, "Uses")
+        Rel(accounts, mbsfacade, "Uses")
+        Rel(security, db, "Read & write to", "JDBC")
+        Rel(mbsfacade, mbs, "Uses", "XML/HTTPS")
+    }
+
+    Rel_Back(spa, sign, "Uses", "JSON/HTTPS")
+    Rel(spa, accounts, "Uses", "JSON/HTTPS")
+
+    Rel(ma, sign, "Uses", "JSON/HTTPS")
+    Rel(ma, accounts, "Uses", "JSON/HTTPS")
+
+    UpdateRelStyle(spa, sign, $offsetY="-40")
+    UpdateRelStyle(spa, accounts, $offsetX="40", $offsetY="40")
+
+    UpdateRelStyle(ma, sign, $offsetX="-90", $offsetY="40")
+    UpdateRelStyle(ma, accounts, $offsetY="-40")
+
+        UpdateRelStyle(sign, security, $offsetX="-160", $offsetY="10")
+        UpdateRelStyle(accounts, mbsfacade, $offsetX="140", $offsetY="10")
+        UpdateRelStyle(security, db, $offsetY="-40")
+        UpdateRelStyle(mbsfacade, mbs, $offsetY="-40")
+```
+</details>
+
+---
+
+## Event modeling
+
+**Type:** `eventmodeling` (`eventmodeling`) · **Intrinsic Size:** `482×273 px` · Show how commands, events, and views change a system over time.
+
+![Event modeling](images/diagrams/eventmodeling.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
+```mermaid
+eventmodeling
+
+timeframe 01 ui CartUI
+timeframe 02 command AddItem { description: string }
+timeframe 03 event ItemAdded { description: string }
+```
+</details>
+
+---
+
+## Kanban
+
+**Type:** `kanban` (`kanban`) · **Intrinsic Size:** `1276×304 px` · Show tasks in columns by status.
+
+![Kanban](images/diagrams/kanban.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
+```mermaid
+---
+config:
+  kanban:
+    ticketBaseUrl: 'https://mermaidchart.atlassian.net/browse/#TICKET#'
+---
+kanban
+  Todo
+    [Create Documentation]
+    docs[Create Blog about the new diagram]
+  [In progress]
+    id6[Create renderer so that it works in all cases. We also add some extra text here for testing purposes. And some more just for the extra flare.]
+  id9[Ready for deploy]
+    id8[Design grammar]@{ assigned: 'knsv' }
+  id10[Ready for test]
+    id4[Create parsing tests]@{ ticket: MC-2038, assigned: 'K.Sveidqvist', priority: 'High' }
+    id66[last item]@{ priority: 'Very Low', assigned: 'knsv' }
+  id11[Done]
+    id5[define getData]
+    id2[Title of diagram is more than 100 chars when user duplicates diagram with 100 char]@{ ticket: MC-2036, priority: 'Very High'}
+    id3[Update DB function]@{ ticket: MC-2037, assigned: knsv, priority: 'High' }
+
+  id12[Can't reproduce]
+    id3[Weird flickering in Firefox]
+```
+</details>
+
+---
+
 ## Packet
 
 **Type:** `packet` (`packet`) · **Intrinsic Size:** `1035×455 px` · Show the fields of a network packet.
@@ -473,25 +512,6 @@ packet
 144-159: "Urgent Pointer"
 160-191: "(Options and Padding)"
 192-255: "Data (variable length)"
-```
-</details>
-
----
-
-## Pie
-
-**Type:** `pie` (`pie`) · **Intrinsic Size:** `425×352 px` · Show the parts of a whole.
-
-![Pie](images/diagrams/pie.svg)
-
-<details>
-<summary>View Mermaid Source</summary>
-
-```mermaid
-pie title Fish caught by the crew
-    "ʻAhi" : 386
-    "Mahimahi" : 85
-    "Ono" : 15
 ```
 </details>
 
@@ -561,7 +581,7 @@ requirementDiagram
 
 ## Sankey
 
-**Type:** `sankey` (`sankey`) · **Intrinsic Size:** `616×424 px` · Show flows between nodes, with widths proportional to quantity.
+**Type:** `sankey` (`sankey`) · **Intrinsic Size:** `616×416 px` · Show flows between nodes, with widths proportional to quantity.
 
 ![Sankey](images/diagrams/sankey.svg)
 
@@ -573,139 +593,22 @@ requirementDiagram
 config:
   sankey:
     showValues: false
+    nodeWidth: 14
+    nodePadding: 18
 ---
 sankey
 
-Agricultural 'waste',Bio-conversion,124.729
-Bio-conversion,Liquid,0.597
-Bio-conversion,Losses,26.862
-Bio-conversion,Solid,280.322
-Bio-conversion,Gas,81.144
-Biofuel imports,Liquid,35
-Biomass imports,Solid,35
-Coal imports,Coal,11.606
-Coal reserves,Coal,63.965
-Coal,Solid,75.571
-District heating,Industry,10.639
-District heating,Heating and cooling - commercial,22.505
-District heating,Heating and cooling - homes,46.184
-Electricity grid,Over generation / exports,104.453
-Electricity grid,Heating and cooling - homes,113.726
-Electricity grid,H2 conversion,27.14
-Electricity grid,Industry,342.165
-Electricity grid,Road transport,37.797
-Electricity grid,Agriculture,4.412
-Electricity grid,Heating and cooling - commercial,40.858
-Electricity grid,Losses,56.691
-Electricity grid,Rail transport,7.863
-Electricity grid,Lighting & appliances - commercial,90.008
-Electricity grid,Lighting & appliances - homes,93.494
-Gas imports,Ngas,40.719
-Gas reserves,Ngas,82.233
-Gas,Heating and cooling - commercial,0.129
-Gas,Losses,1.401
-Gas,Thermal generation,151.891
-Gas,Agriculture,2.096
-Gas,Industry,48.58
-Geothermal,Electricity grid,7.013
-H2 conversion,H2,20.897
-H2 conversion,Losses,6.242
-H2,Road transport,20.897
-Hydro,Electricity grid,6.995
-Liquid,Industry,121.066
-Liquid,International shipping,128.69
-Liquid,Road transport,135.835
-Liquid,Domestic aviation,14.458
-Liquid,International aviation,206.267
-Liquid,Agriculture,3.64
-Liquid,National navigation,33.218
-Liquid,Rail transport,4.413
-Marine algae,Bio-conversion,4.375
-Ngas,Gas,122.952
-Nuclear,Thermal generation,839.978
-Oil imports,Oil,504.287
-Oil reserves,Oil,107.703
-Oil,Liquid,611.99
-Other waste,Solid,56.587
-Other waste,Bio-conversion,77.81
-Pumped heat,Heating and cooling - homes,193.026
-Pumped heat,Heating and cooling - commercial,70.672
-Solar PV,Electricity grid,59.901
-Solar Thermal,Heating and cooling - homes,19.263
-Solar,Solar Thermal,19.263
-Solar,Solar PV,59.901
-Solid,Agriculture,0.882
-Solid,Thermal generation,400.12
-Solid,Industry,46.477
-Thermal generation,Electricity grid,525.531
-Thermal generation,Losses,787.129
-Thermal generation,District heating,79.329
-Tidal,Electricity grid,9.452
-UK land based bioenergy,Bio-conversion,182.01
-Wave,Electricity grid,19.013
-Wind,Electricity grid,289.366
-```
-</details>
-
----
-
-## Sequence
-
-**Type:** `sequence` (`sequence`) · **Intrinsic Size:** `556×431 px` · Show the messages that participants exchange over time.
-
-![Sequence](images/diagrams/sequence.svg)
-
-<details>
-<summary>View Mermaid Source</summary>
-
-```mermaid
-sequenceDiagram
-  autonumber
-  actor Customer
-  participant Web as Web app
-  participant API as API gateway
-  participant Bank
-  Customer->>Web: Place order
-  Web->>API: POST /orders
-  activate API
-  API->>Bank: Authorize payment
-  Bank-->>API: Approved
-  API-->>Web: 201 Created
-  deactivate API
-  Web-->>Customer: Order confirmed
-  Note over Customer,Bank: One order, one transaction
-```
-</details>
-
----
-
-## State
-
-**Type:** `state` (`stateDiagram`) · **Intrinsic Size:** `210×708 px` · Show the states of a system and the transitions between them.
-
-![State](images/diagrams/state.svg)
-
-<details>
-<summary>View Mermaid Source</summary>
-
-```mermaid
----
-config:
-  theme: default
-  look: classic
-  layout: dagre
----
-stateDiagram-v2
-  [*] --> Draft
-  Draft --> Submitted : submit
-  state Review {
-    [*] --> Screening
-    Screening --> Decision
-  }
-  Submitted --> Review
-  Review --> Published : approved
-  Review --> Draft : rejected
-  Published --> [*]
+Solar,Electricity Grid,140
+Wind,Electricity Grid,185
+Hydro,Electricity Grid,95
+Natural Gas,Electricity Grid,160
+Natural Gas,District Heating,110
+Electricity Grid,Homes,190
+Electricity Grid,Industry,230
+Electricity Grid,Electric Transport,95
+Electricity Grid,Grid Losses,65
+District Heating,Homes,70
+District Heating,Industry,40
 ```
 </details>
 
@@ -730,6 +633,30 @@ timeline
     section Younger islands
         Maui : 1 million years old, Haleakalā, Whale watching
         Hawaiʻi : Still growing, Mauna Kea, Kīlauea
+```
+</details>
+
+---
+
+## User journey
+
+**Type:** `journey` (`journey`) · **Intrinsic Size:** `808×327 px` · Show the steps of a task and how satisfying each one is.
+
+![User journey](images/diagrams/journey.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
+```mermaid
+journey
+    title My working day
+    section Go to work
+      Make tea: 5: Me
+      Go upstairs: 3: Me
+      Do work: 1: Me, Cat
+    section Go home
+      Go downstairs: 5: Me
+      Sit down: 5: Me
 ```
 </details>
 
@@ -970,6 +897,28 @@ swimlane-beta LR
 
 ---
 
+## Tree view
+
+**Type:** `treeView` (`treeView`) · **Intrinsic Size:** `294×184 px` · Show a hierarchy, such as files and folders.
+
+![Tree view](images/diagrams/treeview.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
+```mermaid
+treeView-beta
+├── src/
+│   ├── App.tsx :::highlight icon(logos:react) ## main component
+│   └── index.ts ## entry point
+├── .env ## environment variables
+├── Dockerfile
+└── package.json
+```
+</details>
+
+---
+
 ## Treemap
 
 **Type:** `treemap` (`treemap`) · **Intrinsic Size:** `656×416 px` · Show hierarchical data as nested rectangles, sized by value.
@@ -989,28 +938,6 @@ treemap-beta
     "Clothing"
         "Men's": 40
         "Women's": 40
-```
-</details>
-
----
-
-## Tree view
-
-**Type:** `treeView` (`treeView`) · **Intrinsic Size:** `294×184 px` · Show a hierarchy, such as files and folders.
-
-![Tree view](images/diagrams/treeview.svg)
-
-<details>
-<summary>View Mermaid Source</summary>
-
-```mermaid
-treeView-beta
-├── src/
-│   ├── App.tsx :::highlight icon(logos:react) ## main component
-│   └── index.ts ## entry point
-├── .env ## environment variables
-├── Dockerfile
-└── package.json
 ```
 </details>
 

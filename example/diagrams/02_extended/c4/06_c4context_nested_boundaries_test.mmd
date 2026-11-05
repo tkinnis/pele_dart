@@ -1,4 +1,4 @@
-%% label: 1. C4Context — System Context
+%% label: 6. C4Context — Nested Boundaries & Custom Styles
 C4Context
       title System Context diagram for Internet Banking System
       Enterprise_Boundary(b0, "BankBoundary0") {
@@ -34,7 +34,7 @@ C4Context
       Rel(SystemAA, SystemC, "Sends e-mails", "SMTP")
       Rel(SystemC, customerA, "Sends e-mails to")
 
-      UpdateElementStyle(customerA, $fontColor="red", $bgColor="gray", $borderColor="red")
+      UpdateElementStyle(customerA, $fontColor="red", $bgColor="grey", $borderColor="red")
       UpdateRelStyle(customerA, SystemAA, $textColor="blue", $lineColor="blue", $offsetX="5")
       UpdateRelStyle(SystemAA, SystemE, $textColor="blue", $lineColor="blue", $offsetY="-10")
       UpdateRelStyle(SystemAA, SystemC, $textColor="blue", $lineColor="blue", $offsetY="-40", $offsetX="-50")

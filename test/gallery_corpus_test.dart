@@ -120,6 +120,7 @@ void main() {
               expect(flatSvg, isNot(contains('var(--')));
               expect(flatSvg, isNot(contains('color-mix(')));
               expect(flatSvg, isNot(contains('currentColor')));
+              expect(flatSvg, isNot(contains('font- ')));
             }
           }
           for (var i = 0; i < family.showcaseSources.length; i++) {

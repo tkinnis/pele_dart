@@ -291,10 +291,10 @@ List<double>? _parseColor(String raw) {
 }
 
 final RegExp _tagWithStyleRe = RegExp(
-  r'<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*?\bstyle="([^"]*)"[^>]*?)(\/?)>',
+  r'<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*?\sstyle="([^"]*)"[^>]*?)(\/?)>',
 );
 
-final RegExp _styleAttrReplaceRe = RegExp(r'\s*\bstyle="[^"]*"');
+final RegExp _styleAttrReplaceRe = RegExp(r'\s+style="[^"]*"');
 
 const Set<String> _pxStripAttrs = <String>{
   'rx',
@@ -335,10 +335,10 @@ String _flattenInlineStyles(String svg, PelePalette palette) {
     if (tag == 'svg' && attrsWithoutStyle.contains('class="pele')) {
       // Root <svg>: replace CSS custom properties & font shorthand with static SVG attributes.
       final extra = StringBuffer();
-      if (!RegExp(r'\bfont-family=').hasMatch(attrsWithoutStyle)) {
+      if (!RegExp(r'(?<=\s)font-family=').hasMatch(attrsWithoutStyle)) {
         extra.write(' font-family="${esc(palette.fontFamily)}"');
       }
-      if (!RegExp(r'\bfont-size=').hasMatch(attrsWithoutStyle)) {
+      if (!RegExp(r'(?<=\s)font-size=').hasMatch(attrsWithoutStyle)) {
         extra.write(' font-size="13"');
       }
       return '<$tag$attrsWithoutStyle$extra$selfClose>';
@@ -386,7 +386,7 @@ String _flattenInlineStyles(String svg, PelePalette palette) {
     for (final entry in promoted.entries) {
       final attrName = entry.key;
       final attrVal = entry.value;
-      final existingRe = RegExp('\\b$attrName="[^"]*"');
+      final existingRe = RegExp('(?<=\\s)$attrName="[^"]*"');
       if (existingRe.hasMatch(attrsWithoutStyle)) {
         attrsWithoutStyle = attrsWithoutStyle.replaceFirst(
           existingRe,

@@ -137,7 +137,8 @@ Future<void> main(List<String> args) async {
       if (flatSvg.contains('var(--') ||
           flatSvg.contains('color-mix(') ||
           flatSvg.contains('currentColor') ||
-          flatSvg.contains('baseline-shift=')) {
+          flatSvg.contains('baseline-shift=') ||
+          flatSvg.contains('font- ')) {
         stderr.writeln(
           'Error: Flattened gallery SVG for ${entry.key} contains unflattened CSS!',
         );
