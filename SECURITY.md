@@ -6,14 +6,15 @@
 
 1. **Zero DOM & Zero Script Execution**:
    - Unlike browser-based diagram engines, `pele_dart` runs in pure Dart with no headless browser, WebView, or JavaScript engine.
-   - All text labels are escaped via XML/HTML entity escaping (`&`, `<`, `>`, `"`, `'`) before SVG emission, preventing script injection in generated SVG `<text>` elements.
+   - All text labels and attribute values are escaped via XML/HTML entity escaping (`&`, `<`, `>`, `"`) before SVG emission, preventing script injection in generated SVG `<text>` and attribute values.
 2. **URI Scheme Allowlisting**:
-   - [`RenderOptions.linkSchemes`](lib/src/types.dart) restricts clickable diagram hyperlinks (`click` directives and node links) to `['http', 'https', 'mailto']` by default, blocking `javascript:`, `data:`, and `file:` URIs.
-   - [`RenderOptions.imageSchemes`](lib/src/types.dart) restricts embedded `<image>` URIs to `['https']` by default.
+   - [`RenderOptions.linkSchemes`](lib/src/types.dart) restricts clickable diagram hyperlinks (`click` directives and node links) to `['http', 'https', 'mailto', 'tel']` by default (blocking `javascript:`, `data:`, `vbscript:`, and `file:` URIs), and [`RenderOptions.links`](lib/src/types.dart) (`false`) disables link emission entirely.
+   - [`RenderOptions.imageSchemes`](lib/src/types.dart) restricts embedded `<image>` URIs to `['http', 'https']` by default, and [`RenderOptions.images`](lib/src/types.dart) (`false`) disables embedded images entirely.
 3. **Configurable DoS & Resource Exhaustion Guards**:
-   - [`RenderOptions.limit`](lib/src/types.dart) enforces maximum input bytes (`maxBytes`, default 512 KB), maximum line count (`maxLines`, default 10,000), and maximum AST node count (`maxNodes`, default 2,000).
-   - [`RenderOptions.maxEdges`](lib/src/types.dart) bounds graph edge count (default 4,000) during layout.
-   - [`RenderOptions.outputLimit`](lib/src/types.dart) caps the maximum emitted SVG byte length (default 4 MB).
+   - [`RenderOptions.limit`](lib/src/types.dart) (and [`ParseOptions.limit`](lib/src/core.dart)) enforces a maximum input source length in characters (default `50000`).
+   - [`RenderOptions.maxEdges`](lib/src/types.dart) (and [`ParseOptions.maxEdges`](lib/src/core.dart)) bounds the maximum number of graph edges/relations allowed during parsing (default `5000`).
+   - [`RenderOptions.outputLimit`](lib/src/types.dart) caps the maximum emitted SVG string length in characters (default `4000000`).
+   - Excessive recursion/nesting that triggers a `StackOverflowError` is caught and converted into a structured `PeleError('Diagram is nested too deeply.', 'limit')`.
 
 ---
 

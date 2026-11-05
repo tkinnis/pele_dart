@@ -74,12 +74,12 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 
 ### B. Beta-to-Stable Diagram Promotions or Detector Changes (`M src/detect.ts`)
 * When upstream promotes a diagram from `<name>-beta` to `<name>` (or adds an alias in `src/detect.ts`):
-  1. Update `DETECTORS` in [`lib/src/detect.dart`](../../../lib/src/detect.dart) to match `src/detect.ts` 1:1.
-  2. Update the diagram's `parse.dart` header regex if it strips the first-line keyword.
+  1. Update `_detectors` in [`lib/src/detect.dart`](../../../lib/src/detect.dart) to match `src/detect.ts` 1:1.
+  2. Update the diagram's `parser.dart` header regex if it strips the first-line keyword.
   3. Update `"beta": false` in `example/diagrams/02_extended/<type>/family.json` and any updated `.mmd` sample headers in `example/diagrams/02_extended/<type>/*.mmd`.
 
 ### C. New Diagram Families (`A src/diagrams/<new_type>/...`)
-1. Create `lib/src/diagrams/<new_type>/` with 1:1 Dart counterparts for each `.ts` file (`model.dart`, `parse.dart`, `layout.dart`, `render.dart`, `index.dart`), each starting with `// Upstream: src/diagrams/<new_type>/<file>.ts`.
+1. Create `lib/src/diagrams/<new_type>/` with 1:1 Dart counterparts for each `.ts` file (`model.dart`, `parser.dart`, `layout.dart`, `render.dart`, `index.dart`), each starting with `// Upstream: src/diagrams/<new_type>/<file>.ts`.
 2. Add the detector regex to [`lib/src/detect.dart`](../../../lib/src/detect.dart) matching `src/detect.ts`.
 3. Register the diagram in [`lib/src/diagrams/registry.dart`](../../../lib/src/diagrams/registry.dart) matching `src/diagrams/registry.ts`.
 4. Export the new diagram entrypoint if upstream exports it in `src/index.ts`.
@@ -100,7 +100,7 @@ Before cutting or pushing any release, regenerate all standalone diagram and sty
 dart run tool/generate_doc_images.dart
 
 # 2. Format and static analysis (0 warnings/errors/infos)
-dart format lib test tool example/lib example/test
+dart format lib test tool example/lib example/main.dart
 dart analyze --fatal-infos lib test tool example
 
 # 3. Full unit, gallery corpus, and upstream differential test suite

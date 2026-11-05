@@ -24,7 +24,7 @@ Every file under `obsidianmd/pele/src/<path>.ts` maps 1:1 to `lib/src/<path>.dar
 
 | Upstream Path (`src/`) | Dart Path (`lib/src/`) | Status | Synced Commit |
 | :--- | :--- | :--- | :--- |
-| `types.ts`, `models.ts`, `errors.ts` | `types.dart`, `errors.dart` | ✅ Ported | `3a2f075ee0c3d914f0fad3545fc0f193693975ac` |
+| `types.ts`, `errors.ts` | `types.dart`, `errors.dart` | ✅ Ported | `3a2f075ee0c3d914f0fad3545fc0f193693975ac` |
 | `detect.ts`, `preprocess.ts`, `core.ts`, `index.ts` | `detect.dart`, `preprocess.dart`, `core.dart`, `index.dart` | ✅ Ported | `3a2f075ee0c3d914f0fad3545fc0f193693975ac` |
 | `util/{chars,unicode,url,yaml}.ts` | `util/{chars,unicode,url,yaml,math_js}.dart` | ✅ Ported | `3a2f075ee0c3d914f0fad3545fc0f193693975ac` |
 | `text/{entities,icons,label,math,measurer,metrics}.ts` | `text/{entities,icons,label,math,measurer,metrics}.dart` | ✅ Ported | `3a2f075ee0c3d914f0fad3545fc0f193693975ac` |

@@ -32,10 +32,10 @@ body:
     id: dart_code
     attributes:
       label: Dart Invocation & RenderOptions
-      description: Show how you called `render()`, `renderWithErrors()`, or `parse()`.
+      description: Show how you called `render()`, `renderMermaid()`, or `parse()`.
       render: dart
       placeholder: |
-        final svg = render(
+        final result = render(
           source,
           const RenderOptions(
             outputMode: SvgOutputMode.flattened,
@@ -60,7 +60,7 @@ body:
     id: environment
     attributes:
       label: Dart / Flutter SDK Version & Platform
-      description: "e.g., Dart 3.11.0, Flutter 3.41.0 on macOS / iOS / Android / Web / Linux"
-      placeholder: "Dart 3.11.0 / macOS 15"
+      description: "e.g., Dart 3.13.0 on macOS / iOS / Android / Web / Linux"
+      placeholder: "Dart 3.13.0 / macOS 15"
     validations:
       required: true

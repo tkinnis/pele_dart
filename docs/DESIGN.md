@@ -35,146 +35,114 @@ Traditional Mermaid diagram rendering in Dart and Flutter applications requires 
 
 ## 2. Public API Design
 
-The library exposes a synchronous function (`renderMermaid`) designed to run either on the main isolate or inside `Isolate.run()`, returning either a valid SVG payload (with natural width/height and accessibility label) or a typed failure (`syntaxError`, `tooLarge`, or `unsupportedDiagram`).
+The library exposes synchronous functions (`render`, `renderMermaid`, `parse`, `detectType`, `supports`, `flattenPeleSvg`, `register`, `registered`, `forgetTextWidths`) designed to run either on the main isolate or inside `Isolate.run()`, returning a [`RenderResult`](../lib/src/types.dart) (with `svg`, `width`, `height`, `type`, `mermaidType`, and `links`) or throwing a structured [`PeleError`](../lib/src/errors.dart) (`code`: `'syntax'`, `'semantic'`, `'unsupported-diagram'`, or `'limit'`).
 
 ```dart
 /// Output format for the generated SVG string.
 enum SvgOutputMode {
-  /// Emits strict static SVG primitives compatible with `vector_graphics_compiler`
-  /// (resolved hex/rgb palette colors, stamped arrowhead geometry instead of
-  /// `<marker>`, explicit text baseline `y` coordinates, and no `<style>` tags).
+  /// Emits static SVG 1.1 primitives compatible with `vector_graphics_compiler`
+  /// (resolved `#rrggbb` palette colors, `color-mix()` blends, `calc()` math,
+  /// `currentColor`, `<tspan>` `dy` baseline offsets, and promoted SVG attributes).
   flattened,
 
-  /// Emits upstream-compatible themeable SVG using `var(--pele-*)` CSS variables,
-  /// `<style>` rules, `<marker>` definitions, and `dominant-baseline`.
+  /// Emits upstream-compatible themeable SVG using `var(--pele-*)` CSS variables
+  /// and `color-mix(in srgb, ...)`.
   cssVariables,
 }
 
-/// Concrete color palette mapped to `--pele-*` theme variables.
-@immutable
+/// Concrete color and typography palette mapped to `--pele-*` theme variables.
 class PelePalette {
   const PelePalette({
     required this.bg,
     required this.fg,
-    required this.muted,
-    required this.line,
-    required this.surface,
+    this.muted,
+    this.line,
+    this.surface,
     required this.surfaceAlt,
-    required this.border,
-    required this.accent,
-    required this.series, // 8 series colors (--pele-series-1 .. --pele-series-8)
-    this.fontFamily = 'Inter, Helvetica Neue, sans-serif',
-    this.monoFontFamily = 'Fira Code, monospace',
-    this.cornerRadius = 4.0,
+    this.border,
+    this.accent,
+    this.code,
+    required this.critical,
+    this.fgOnLight,
+    this.fgOnDark,
+    this.radius = 6,
+    this.strokeWidth = 1.25,
+    this.thickStrokeWidth = 2.5,
+    this.hairlineStrokeWidth = 0.5,
+    this.fontFamily =
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    this.monoFontFamily =
+        'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+    this.colors = const <String>[
+      '#4c78a8',
+      '#f58518',
+      '#54a24b',
+      '#e45756',
+      '#72b7b2',
+      '#eeca3b',
+      '#b279a2',
+      '#9d755d',
+    ],
   });
 
   /// Built-in default light palette matching Pele's light defaults.
-  static const PelePalette light = ...;
+  static const PelePalette light = PelePalette(
+    bg: '#ffffff',
+    fg: '#24292e',
+    surfaceAlt: '#e6e6e6',
+    critical: '#e45756',
+  );
 
   /// Built-in default dark palette matching Pele's dark defaults.
-  static const PelePalette dark = ...;
+  static const PelePalette dark = PelePalette(
+    bg: '#1e1e1e',
+    fg: '#e1e4e8',
+    surfaceAlt: '#3f3f46',
+    critical: '#f87171',
+  );
 }
 
-/// Resource and DoS limits enforced before layout and during SVG emission.
-@immutable
-class PeleLimits {
-  const PeleLimits({
-    this.maxSourceChars = 50000,
-    this.maxEdges = 500,
-    this.maxNodes = 3000,
-    this.maxSourceStatements = 2000,
-    this.maxSourceItems = 1000,
-    this.maxVennAreas = 64,
-    this.maxLabelWordChars = 1000,
-    this.maxGanttSteppedDays = 100000,
-    this.maxDepth = 64,
-    this.maxElements = 20000,
-    this.maxSvgChars = 4000000,
-    this.maxPathChars = 200000,
-    this.maxTextChars = 2000,
-    this.maxDrawnTextChars = 200000,
-    this.maxSide = 16384,
-    this.maxPixels = 16000000,
-    this.maxDashEntries = 4096,
-    this.maxDashSegments = 100000,
-  });
-
-  static const PeleLimits defaults = PeleLimits();
-}
-
-/// Configuration for a single `renderMermaid()` invocation.
-@immutable
-class PeleRenderOptions {
-  const PeleRenderOptions({
+/// Configuration for a `render()` or `renderMermaid()` invocation.
+class RenderOptions {
+  const RenderOptions({
+    this.measurer,
+    this.fontFamily,
+    this.fontFamilyMono,
+    this.monospace,
+    this.fontSize,
+    this.idPrefix,
+    this.responsive,
+    this.maxWidth,
+    this.autoDirection,
+    this.directionBreakpoint,
+    this.padding,
+    this.limit,
+    this.outputLimit,
+    this.maxEdges,
+    this.linkSchemes,
+    this.imageSchemes,
+    this.links,
+    this.images,
+    this.linkRel,
+    this.icons,
+    this.math,
+    this.config,
+    this.now,
     this.outputMode = SvgOutputMode.flattened,
     this.palette = PelePalette.light,
-    this.limits = PeleLimits.defaults,
-    this.measurer,
-    this.includeRawCssVariableSvg = false,
   });
-
-  final SvgOutputMode outputMode;
-  final PelePalette palette;
-  final PeleLimits limits;
-  final PeleTextMeasurer? measurer;
-  final bool includeRawCssVariableSvg;
 }
 
-/// Sealed result returned by `renderMermaid()`.
-@immutable
-sealed class PeleRenderOutcome {
-  const PeleRenderOutcome();
-}
+/// Renders Mermaid [source] (`String` or pre-parsed model from `parse()`) into a [RenderResult].
+RenderResult render(
+  Object source, [
+  RenderOptions options = const RenderOptions(),
+]);
 
-final class PeleRenderSuccess extends PeleRenderOutcome {
-  const PeleRenderSuccess({
-    required this.svg,
-    required this.diagramType,
-    required this.width,
-    required this.height,
-    this.semanticsLabel,
-    this.rawCssVariableSvg,
-  });
-
-  /// The rendered SVG string (flattened by default).
-  final String svg;
-
-  /// Canonical diagram type identifier (e.g. `'flowchart'`, `'sequence'`).
-  final String diagramType;
-
-  /// Natural logical width from the SVG `viewBox`.
-  final double width;
-
-  /// Natural logical height from the SVG `viewBox`.
-  final double height;
-
-  /// Accessible label extracted from `accTitle` / `accDescr` / diagram title.
-  final String? semanticsLabel;
-
-  /// Optional themeable CSS-variable SVG (when `includeRawCssVariableSvg` is true).
-  final String? rawCssVariableSvg;
-}
-
-enum PeleFailureKind { syntaxError, tooLarge, unsupportedDiagram }
-
-final class PeleRenderFailure extends PeleRenderOutcome {
-  const PeleRenderFailure({
-    required this.kind,
-    required this.message,
-    this.line,
-    this.column,
-  });
-
-  final PeleFailureKind kind;
-  final String message;
-  final int? line;
-  final int? column;
-}
-
-/// Synchronously renders Mermaid [source] into SVG.
-PeleRenderOutcome renderMermaid(
+/// Convenience helper returning `render(source, options).svg`.
+String renderMermaid(
   String source, {
-  PeleRenderOptions options = const PeleRenderOptions(),
+  RenderOptions options = const RenderOptions(),
 });
 ```
 
@@ -186,21 +154,20 @@ PeleRenderOutcome renderMermaid(
 
 ```mermaid
 flowchart LR
-  A["Mermaid Source Text"] --> B["Preprocess & DoS Pre-Check\n(preprocess.dart / detect.dart)"]
+  A["Mermaid Source Text"] --> B["Preprocess & Limit Pre-Check\n(preprocess.dart / detect.dart)"]
   B --> C["Diagram Parser & Model\n(diagrams/<type>/parser.dart)"]
-  C --> D["Post-Parse Budget Gate\n(maxNodes / maxEdges / maxDepth)"]
-  D --> E["Deterministic Layout Engine\n(layout/layered, compound, lanes)"]
-  E --> F["Diagram Renderer\n(diagrams/<type>/render.dart)"]
-  F --> G{"SvgOutputMode"}
-  G -->|"flattened"| H["Flattened SVG Builder\n• Resolve --pele-* palette\n• Stamp arrowhead paths\n• Offset text baseline y\n• Enforce element/dash caps"]
-  G -->|"cssVariables"| I["Upstream SVG Builder\n• var(--pele-*) styles\n• <defs><marker>\n• dominant-baseline"]
-  H --> J["vector_graphics_compiler\n(Native Vector Rendering)"]
-  I --> K["Differential Snapshot Tests\n& Web SVG Export"]
+  C --> D["Deterministic Layout Engine\n(layout/layered, compound, lanes)"]
+  D --> E["Diagram SVG Renderer\n(diagrams/<type>/render.dart)"]
+  E --> F{"SvgOutputMode"}
+  F -->|"flattened"| G["SVG 1.1 Flattener (svg/flattener.dart)\n• Resolve --pele-* & --_* variables\n• Evaluate color-mix() & calc()\n• Convert baseline-shift to dy\n• Promote inline style attributes"]
+  F -->|"cssVariables"| H["Upstream CSS-Variable SVG\n• 100% byte-for-byte parity\n• var(--pele-*) & color-mix()"]
+  G --> I["vector_graphics_compiler\n(Native Vector Rendering)"]
+  H --> J["Differential Parity Tests\n& Web SVG Export"]
 ```
 
 ### 3.2 Directory Layout (`1:1` with `obsidianmd/pele`)
 
-Every file in `obsidianmd/pele/src/` maps directly to `lib/src/` in `pele_dart`, while `example/` houses the macOS 3-way visual and SVG diff comparison application:
+Every file in `obsidianmd/pele/src/` maps directly to `lib/src/` in `pele_dart`, while `example/` houses the pure-Dart CLI example and the macOS 3-way visual and SVG diff comparison application:
 
 ```text
 pele_dart/
@@ -209,7 +176,11 @@ pele_dart/
 ├── pubspec.yaml                     # Pure Dart package manifest (single source of truth for package version)
 ├── analysis_options.yaml            # Strict analyzer & lint rules
 ├── docs/
-│   └── DESIGN.md                    # This design document
+│   ├── API_MANUAL.md                # Complete API reference & integration guide
+│   ├── DIAGRAM_GALLERY.md           # Standalone pure-Dart SVG gallery for all 33 diagram families
+│   ├── UPSTREAM_SYNC.md             # Upstream release detection, sync & verification guide
+│   ├── DESIGN.md                    # This design document
+│   └── images/                      # Standalone SVG renders (diagrams/*.svg, styles/*.svg)
 ├── lib/
 │   ├── pele_dart.dart               # Public library entrypoint
 │   └── src/
@@ -217,7 +188,6 @@ pele_dart/
 │       ├── detect.dart              # <- src/detect.ts
 │       ├── errors.dart              # <- src/errors.ts
 │       ├── index.dart               # <- src/index.ts
-│       ├── models.dart              # <- src/models.ts
 │       ├── preprocess.dart          # <- src/preprocess.ts
 │       ├── types.dart               # <- src/types.ts
 │       ├── util/
@@ -239,10 +209,10 @@ pele_dart/
 │       │   ├── lanes.dart           # <- src/layout/lanes.ts
 │       │   └── layered.dart         # <- src/layout/layered.ts
 │       ├── svg/
-│       │   ├── builder.dart         # <- src/svg/builder.ts (+ Dual output mode)
+│       │   ├── builder.dart         # <- src/svg/builder.ts
 │       │   ├── cluster.dart         # <- src/svg/cluster.ts
-│       │   ├── edges.dart           # <- src/svg/edges.ts (+ Direct marker stamping)
-│       │   ├── flattener.dart       # Palette/CSS resolver & baseline normalizer
+│       │   ├── edges.dart           # <- src/svg/edges.ts
+│       │   ├── flattener.dart       # SVG 1.1 palette/CSS resolver & baseline normalizer
 │       │   ├── ink.dart             # <- src/svg/ink.ts
 │       │   ├── palette.dart         # <- src/svg/palette.ts
 │       │   ├── root.dart            # <- src/svg/root.ts
@@ -256,24 +226,23 @@ pele_dart/
 │           ├── sequence/            # <- src/diagrams/sequence/
 │           └── ... (all 33 diagram directories)
 ├── test/
-│   ├── compat/                      # Ported from obsidianmd/pele/tests/compat/
-│   ├── layout/                      # Ported from obsidianmd/pele/tests/layout/
-│   ├── render/                      # Ported from obsidianmd/pele/tests/render/
-│   └── vector_graphics/             # Validates flattened SVG via vector_graphics_compiler
+│   ├── core_test.dart               # Core detection, preprocessing, layout & API tests
+│   ├── gallery_corpus_test.dart     # 232 gallery & 522 upstream corpus parity + encodeSvg tests
+│   └── diagrams/                    # Per-diagram unit & vector_graphics_compiler tests
 ├── tool/
-│   ├── sync_upstream.dart           # Reads UPSTREAM.md, diffs obsidianmd/pele & generates sync tasks
-│   └── verify_against_upstream.dart # Automated differential test runner (Node Pele vs. pele_dart)
-└── example/                         # macOS-only Flutter 3-way comparison & SVG diff app
-    ├── pubspec.yaml
+│   ├── sync_upstream.dart           # Reads UPSTREAM.md, diffs obsidianmd/pele & refreshes assets
+│   ├── verify_against_upstream.dart # 787-diagram differential test runner (Bun Pele vs. pele_dart)
+│   └── generate_doc_images.dart     # Generates docs/images/**/*.svg and docs/DIAGRAM_GALLERY.md
+└── example/
+    ├── main.dart                    # Standalone pure-Dart CLI example (for pub.dev)
+    ├── README.md                    # Guide to CLI example & macOS 3-Way Comparison Studio
+    ├── pubspec.yaml                 # macOS Flutter Comparison Studio manifest
+    ├── diagrams/                    # File-based .mmd/.mermaid gallery (01_core, 02_extended, 03_custom)
     ├── macos/
     └── lib/
-        ├── main.dart
-        ├── gallery_corpus.dart      # Curated gallery across all 33 diagram types
-        ├── renderers/               # Adapters for pele_dart, obsidianmd/pele (JS), and mermaid.js
-        └── views/
-            ├── comparison_workbench.dart # 1-way, 2-way, or 3-way synchronized visual & SVG panes
-            ├── visual_diff_view.dart     # Split-curtain, Cyan/Magenta overlay, pixel heatmap & blink diff
-            └── svg_diff_view.dart        # Pretty-printed SVG inspector, inline diff & external diff launcher
+        ├── main.dart                # macOS 3-Way Comparison Studio UI, visual diff & SVG diff views
+        ├── engine_runner.dart       # Adapters for pele_dart, obsidianmd/pele (JS), and mermaid.js
+        └── gallery_samples.dart     # File-system .mmd/.mermaid scanner & corpus loader
 ```
 
 ---
@@ -282,14 +251,16 @@ pele_dart/
 
 In `mermaid.js`, diagram renderers mutate a live DOM in arbitrary ways (injecting CSS stylesheets, `<foreignObject>` HTML tables, D3 markers, and nested `<svg>` viewports), which requires querying `window.getComputedStyle()` and `SVGPathElement.getPointAtLength()` in a headless browser to flatten the DOM into static SVG primitives.
 
-In contrast, **every diagram in Pele builds its SVG exclusively through `src/svg/` (`builder.ts`, `shapes.ts`, `edges.ts`, `palette.ts`, `ink.ts`, `root.ts`)**. By making `lib/src/svg/` mode-aware (`SvgOutputMode.flattened` vs. `SvgOutputMode.cssVariables`), we solve all four `vector_graphics_compiler` incompatibilities at the point of SVG emission:
+In contrast, **upstream `obsidianmd/pele` already emits clean, self-contained SVG geometry without `<marker>` definitions or `<foreignObject>` layout tables**. The remaining incompatibilities with `vector_graphics_compiler` and static SVG 1.1 renderers are CSS custom properties (`var(--pele-*)`, `var(--_*)`), CSS Color 5 `color-mix(in srgb, ...)`, `calc(...)`, `currentColor`, `<tspan>` `baseline-shift="sub|super"`, and inline `style="..."` properties.
 
-| Upstream Pele Construct | Why `vector_graphics_compiler` Rejects It | How `pele_dart` (`SvgOutputMode.flattened`) Emits It Directly |
+`lib/src/svg/flattener.dart` (`flattenPeleSvg`) resolves all of these deterministically in pure Dart while keeping the 33 diagram renderers 100% 1:1 with upstream `obsidianmd/pele`:
+
+| Upstream Pele Construct | Why `vector_graphics_compiler` Rejects It | How `pele_dart` (`SvgOutputMode.flattened`) Resolves It in `svg/flattener.dart` |
 | :--- | :--- | :--- |
-| **`var(--pele-*)` & `color-mix()`** in `svg/palette.ts` and `svg/ink.ts` | Compiler only parses literal hex (`#rrggbb`), `rgb(...)`, or named SVG colors; CSS variables and `color-mix(in srgb, ...)` fail parsing. | `svg/palette.dart` evaluates `--pele-*` lookups and `color-mix()` math directly in Dart against `PelePalette`, emitting concrete `fill="rgb(r,g,b)"` and `fill-opacity="a"` attributes. |
-| **`<style>` blocks & CSS classes** in `svg/root.ts` and `svg/theme.ts` | Compiler ignores or rejects `<style>` rules and class-based presentation properties. | `svg/builder.dart` omits the `<style>` element and attaches resolved presentation attributes (`fill`, `stroke`, `stroke-width`, `font-family`, `font-size`) directly onto each SVG element. |
-| **`<defs><marker>` & `marker-end="url(#...)"`** in `svg/edges.ts` | Compiler does not render SVG `<marker>` definitions on paths or lines. | In `svg/edges.dart` (where the exact numeric `[x, y]` waypoints and Bezier control points of every edge are already in memory before string serialization!), `edges.dart` computes the start/end tangent angle $\theta = \text{atan2}(dy, dx)$, shortens the stroke endpoint by the marker ref offset, and emits the arrowhead’s `<path>`/`<polygon>` inside a `<g transform="matrix(...)">`. |
-| **`dominant-baseline="central"` / `"middle"` / `"hanging"`** on `<text>` and `<tspan>` | Compiler ignores `dominant-baseline`, causing all labels to sit above their intended vertical center. | `svg/builder.dart` converts `dominant-baseline` into an explicit numeric `y` offset (`y + fontSize * baselineFactor`, e.g. `+0.35 * fontSize` for `central`/`middle`, `+0.80 * fontSize` for `hanging`) and flattens multi-line `<tspan>` runs into explicit positioned `<text>` elements. |
+| **`var(--pele-*)`, `var(--_*)` & `color-mix(in srgb, ...)`** | Compiler only parses literal hex (`#rrggbb`), `rgb(...)`, or named SVG colors; CSS variables and `color-mix(in srgb, ...)` fail parsing. | `flattenPeleSvg` evaluates all `--pele-*` and scope-inherited `--_*` variable bindings plus nested `color-mix(in srgb, ...)` sRGB blends in Dart against `PelePalette`, emitting concrete `#rrggbb` / `rgba(...)` values. |
+| **`calc(...)` & `currentColor`** | Compiler requires numeric length attributes and explicit color values. | `flattenPeleSvg` evaluates `calc(...)` arithmetic expressions to numbers and replaces `currentColor` with the resolved foreground color (`--_fg`). |
+| **Inline `style="..."` presentation & geometry properties** | Compiler ignores CSS geometry properties (`rx`, `ry`) and certain presentation properties when only specified inside `style="..."`. | `flattenPeleSvg` promotes inline `style="..."` properties (`rx`, `ry`, `fill`, `stroke`, `stroke-width`, `stroke-dasharray`, `opacity`, `font-size`, etc.) to native SVG 1.1 XML attributes and attaches `font-family` and `font-size` to the root `<svg>`. |
+| **`<tspan baseline-shift="sub\|super" font-size="smaller">`** | Compiler ignores `baseline-shift` and relative keyword `font-size="smaller"`. | `flattenPeleSvg` converts `baseline-shift="sub\|super" font-size="smaller"` on `<tspan>` elements into explicit `dy="3"` / `dy="-4"` vertical offsets (with reset `dy` on following sibling `<tspan>`s) and numeric `font-size="10"`. |
 
 Because all 33 diagram families in Pele emit their output through `src/svg/`, **every diagram type compiles to native lossless `vector_graphics` without needing a raster PNG fallback**.
 
@@ -330,7 +301,7 @@ To allow human developers to visually vet diagram fidelity and inspect/diff raw 
 For any selected diagram, the workbench can run all three engines in parallel:
 1. **`pele_dart` (Native Dart)**:
    * Renders synchronously in Dart and compiles `SvgOutputMode.flattened` via `vector_graphics_compiler` + `vector_graphics`.
-   * Also captures `SvgOutputMode.cssVariables` (`includeRawCssVariableSvg: true`) so you can compare `pele_dart`’s CSS-variable SVG directly against upstream `obsidianmd/pele`’s SVG.
+   * Also renders `SvgOutputMode.cssVariables` so you can compare `pele_dart`’s CSS-variable SVG directly against upstream `obsidianmd/pele`’s SVG.
 2. **`obsidianmd/pele` (Upstream JS)**:
    * Runs the pinned upstream `pele` JS bundle inside a macOS `WKWebView` (or headless runner) to display upstream Pele’s reference rendering and capture its raw SVG string.
 3. **`mermaid.js` (Official Reference JS)**:
@@ -384,7 +355,7 @@ The workbench provides four complementary inspection modes for the active render
 
 ### Phase 1: Shared Core Infrastructure (~25 files)
 Port and unit-test the foundation modules in dependency order:
-1. `lib/src/types.dart`, `lib/src/models.dart`, `lib/src/errors.dart`
+1. `lib/src/types.dart`, `lib/src/errors.dart`
 2. `lib/src/util/` (`math_js.dart`, `chars.dart`, `unicode.dart`, `url.dart`, `yaml.dart`)
 3. `lib/src/text/` (`entities.dart`, `metrics.dart`, `measurer.dart`, `label.dart`, `icons.dart`, `math.dart`)
 4. `lib/src/layout/` (`components.dart`, `lanes.dart`, `layered.dart`, `compound.dart`)
@@ -419,22 +390,22 @@ Because `obsidianmd/pele` is actively evolving, `pele_dart` is designed from day
 ### 8.2 Automated Upstream Sync Tool (`tool/sync_upstream.dart`)
 When a new version of `obsidianmd/pele` is released (e.g., `v1.14.0`), running:
 ```bash
-dart run tool/sync_upstream.dart --target=v1.14.0
+dart run tool/sync_upstream.dart --update-to v1.14.0
 ```
-performs the following automated workflow:
+(or `dart run tool/sync_upstream.dart --update-to-latest`) performs the following automated workflow:
 1. Reads the currently pinned `Target Commit SHA` directly from [`UPSTREAM.md`](../UPSTREAM.md) (`<old-sha>`).
 2. Fetches the latest commits/tags from `https://github.com/obsidianmd/pele` into `.upstream/`.
 3. Runs `git -C .upstream diff --name-status <old-sha>..<target-sha> -- src/ tests/`.
 4. Maps every changed upstream TypeScript file (`src/diagrams/sequence/parser.ts`) to its exact Dart counterpart (`lib/src/diagrams/sequence/parser.dart`).
-5. Emits a structured **Sync Report & Task Breakdown** containing:
+5. Emits a structured **Sync Report & Task Breakdown** (`.upstream/diff_report.md`) containing:
    * Newly added files, modified files, and deleted files grouped by module (`core`, `layout`, `svg`, or `diagrams/<type>`).
    * The exact per-file unified diff (`git diff <old-sha>..<target-sha> -- <file>`) ready to be translated into Dart.
 
 ### 8.3 Differential Regression Gate
 After applying an upstream diff to `lib/src/<module>/`:
-1. Run `dart run tool/verify_against_upstream.dart --diagram=<type>` to verify that `pele_dart` in `SvgOutputMode.cssVariables` matches the new upstream `obsidianmd/pele` output across all corpus fixtures.
+1. Run `dart run tool/verify_against_upstream.dart` to verify that `pele_dart` in `SvgOutputMode.cssVariables` matches the new upstream `obsidianmd/pele` output byte-for-byte across all 787 canonical, gallery, and corpus fixtures.
 2. Run `dart test` to verify that `SvgOutputMode.flattened` compiles every fixture cleanly through `vector_graphics_compiler`.
-3. Update the `Target Release`, `Target Commit SHA`, and module status table in [`UPSTREAM.md`](../UPSTREAM.md).
+3. Update the `Target Release`, `Target Commit SHA`, and module status table in [`UPSTREAM.md`](../UPSTREAM.md) via `dart run tool/sync_upstream.dart --pin <tag> <sha>`.
 
 ---
 
@@ -459,8 +430,8 @@ Because `pele_dart` will be built and maintained heavily by AI coding agents, th
 
 ### 9.3 Self-Contained Agent Verification Loop
 Agents perform best when they have a fast, deterministic oracle that tells them *why* a port differs from upstream. We provide two fast CLI tools for agents:
-1. **`dart run tool/verify_against_upstream.dart --diagram=<type>`**:
-   * Runs the specific diagram’s test corpus through both upstream `obsidianmd/pele` (in `.upstream/` at the SHA parsed from `UPSTREAM.md`) and `pele_dart`, printing the first SVG element or attribute diff if the Dart port diverges from TypeScript.
+1. **`dart run tool/verify_against_upstream.dart`**:
+   * Runs all 787 canonical, gallery, and test corpus diagrams through both upstream `obsidianmd/pele` (in `.upstream/` at the SHA parsed from `UPSTREAM.md`) and `pele_dart`, reporting any SVG mismatch if the Dart port diverges from TypeScript.
 2. **`dart test test/diagrams/<type>_test.dart`**:
    * Runs the ported unit tests **and** passes every generated flattened SVG through `vector_graphics_compiler.encodeSvg()` in under 2 seconds, catching any unsupported SVG attribute or malformed path data immediately.
 

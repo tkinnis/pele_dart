@@ -14,29 +14,39 @@ body:
     attributes:
       label: Diagram Type
       options:
-        - flowchart
-        - sequence
-        - class
-        - state
-        - er
-        - gantt
-        - pie
-        - mindmap
-        - timeline
-        - gitGraph
-        - c4
-        - journey
-        - quadrant
-        - sankey
-        - xy
-        - block
-        - packet
-        - kanban
+        - agentflow
         - architecture
-        - requirement
-        - treemap
+        - block
+        - c4
+        - class
+        - cynefin
+        - er
+        - eventmodeling
+        - flowchart
+        - gantt
+        - gitGraph
+        - info
+        - ishikawa
+        - journey
+        - kanban
+        - mindmap
+        - packet
+        - pie
+        - quadrantChart
         - radar
-        -ishikawa / venn / treeview / wardley / dora / cynefin / other
+        - railroad
+        - requirement
+        - sankey
+        - sequence
+        - state
+        - swimlane
+        - timeline
+        - treeView
+        - treemap
+        - usecase
+        - venn
+        - wardley
+        - xychart
     validations:
       required: true
 

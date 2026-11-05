@@ -18,7 +18,7 @@ A fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG ren
 * **Dual SVG Output Modes (`SvgOutputMode`)**:
   1. **`SvgOutputMode.flattened`** *(Default)*: Resolves all `--pele-*` and `--_*` CSS custom properties, `color-mix(in srgb, ...)` blends, `calc(...)` expressions, `currentColor`, `<tspan>` `baseline-shift`, and inline `style="..."` properties against a `PelePalette` into static SVG 1.1 attributes—ready for immediate compilation with Flutter's `vector_graphics_compiler` (`encodeSvg`) or static PDF/PNG rasterizers.
   2. **`SvgOutputMode.cssVariables`** *(Upstream Parity Mode)*: Emits upstream `obsidianmd/pele`'s exact theme-reactive SVG styled via `var(--pele-*)` CSS custom properties so a single SVG adapts dynamically to light/dark CSS themes on the web.
-* **Built-in Safety & Resource Limits**: Escapes diagram text, sanitizes link/image URL schemes (`http`, `https`, `mailto`), and enforces configurable DoS budgets (`limit` input characters, `maxEdges`, recursion depth protection, and `outputLimit` SVG characters).
+* **Built-in Safety & Resource Limits**: Escapes diagram text, sanitizes link/image URL schemes (`http`, `https`, `mailto`, `tel`), and enforces configurable DoS budgets (`limit` input characters, `maxEdges`, recursion depth protection, and `outputLimit` SVG characters).
 * **macOS 3-Way Comparison Studio (`example/`)**: A desktop workbench for side-by-side visual rendering, pixel-diff / split-curtain inspection, and SVG markup diffing across `pele_dart` (Pure Dart), `obsidianmd/pele` (JS), and `mermaid.js`, complete with a live CSS style editor and dynamic `.mmd` / `.mermaid` folder browser.
 
 ---

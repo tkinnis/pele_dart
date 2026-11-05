@@ -13,7 +13,7 @@ Before opening an issue or submitting a pull request, please review our architec
 To keep `pele_dart` lightweight, deterministic, and easy to synchronize with upstream `obsidianmd/pele`, all contributions must follow these principles:
 
 1. **Pure-Dart SDK Boundary (`lib/`)**:
-   - Everything under `lib/` must depend strictly on pure Dart packages and standard `dart:*` libraries (`dart:core`, `dart:math`, `dart:convert`, `dart:typed_data`, `package:characters`, `package:xml`).
+   - Everything under `lib/` must depend strictly on standard Dart core libraries (`dart:core`, `dart:math`, `dart:convert`, `dart:typed_data`) with zero external runtime package imports (the root `pubspec.yaml` `dependencies:` lists only `package:meta`).
    - **Never** import `package:flutter`, `dart:ui`, `dart:io`, or `dart:html` inside `lib/`. This guarantees `pele_dart` runs identically on Flutter mobile/desktop/web, Dart CLI tools, server-side executables, and background isolates.
 2. **1:1 Upstream Parity with `obsidianmd/pele`**:
    - Core parsers (`lib/src/diagrams/*/parser.dart`), layout algorithms (`lib/src/layout/`), and SVG renderers (`lib/src/diagrams/*/render.dart`) mirror the upstream TypeScript modules in [`obsidianmd/pele`](https://github.com/obsidianmd/pele) 1:1.
@@ -29,8 +29,8 @@ To keep `pele_dart` lightweight, deterministic, and easy to synchronize with ups
 
 ### Prerequisites
 
-- **Dart SDK**: `^3.11.0` (or Flutter SDK `>=3.41.0` for running the `example/` macOS comparison studio).
-- **Node.js** *(optional)*: Only needed when running `tool/sync_upstream.dart` or `tool/verify_against_upstream.dart` against a local `.upstream/` clone of `obsidianmd/pele`.
+- **Dart SDK**: `^3.13.0` (or Flutter SDK for running the `example/` macOS comparison studio).
+- **Bun / Node.js** *(optional)*: Only needed when running `tool/sync_upstream.dart` or `tool/verify_against_upstream.dart` against a local `.upstream/` clone of `obsidianmd/pele`.
 
 ### Cloning & Installing Dependencies
 
@@ -62,12 +62,9 @@ dart test
 ```
 
 ### 4. Upstream 1:1 Parity Verification *(when `.upstream/` is present)*
-To verify byte-for-byte SVG parity across all 33 diagram types and upstream fixtures:
+To check for upstream `obsidianmd/pele` updates or verify byte-for-byte SVG parity across all 787 canonical, gallery, and test corpus diagrams:
 ```bash
-dart run tool/sync_upstream.dart --verify
-```
-Or run the standalone parity suite directly:
-```bash
+dart run tool/sync_upstream.dart --check
 dart run tool/verify_against_upstream.dart
 ```
 

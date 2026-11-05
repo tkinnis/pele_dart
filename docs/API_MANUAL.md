@@ -108,7 +108,7 @@ final String svg = renderMermaid(
 
 Parses, lays out, and renders a Mermaid diagram synchronously.
 
-- **`source`**: Either a raw Mermaid `String` (including optional YAML frontmatter or `%%{init: ...}%%` directives) **or** a pre-parsed model object previously returned by [`parse()`](#parsestring-text-parseoptions-options--const-parseoptions--dynamic).
+- **`source`**: Either a raw Mermaid `String` (including optional YAML frontmatter or `%%{init: ...}%%` directives) **or** a pre-parsed model object previously returned by [`parse()`](#parsestring-text-parseoptions-options--const-parseoptions--object).
 - **`options`**: Controls SVG output mode, color palette, typography, sizing, link/image security schemes, resource limits, and custom icon/math resolvers.
 - **Returns**: [`RenderResult`](#7-return-types-renderresult--linkinfo) containing `svg`, `width`, `height`, `type`, `mermaidType`, and `links`.
 - **Throws**: [`PeleError`](#8-error-handling-peleerror) on syntax errors, semantic validation errors, unsupported diagram types, or resource limit violations.
@@ -117,7 +117,7 @@ Parses, lays out, and renders a Mermaid diagram synchronously.
 
 Convenience wrapper around `render(source, options).svg`.
 
-### `parse(String text, [ParseOptions options = const ParseOptions()]) → dynamic`
+### `parse(String text, [ParseOptions options = const ParseOptions()]) → Object`
 
 Parses a Mermaid diagram source string into an internal model and caches its metadata so it can be passed directly to `render(model, options)` multiple times (for example, to re-render across light/dark themes or different `maxWidth` breakpoints without re-parsing).
 
@@ -381,20 +381,20 @@ flowchart LR
 | `measurer` | `TextMeasurer?` | `metricsMeasurer` | Custom text width measurer for proportional and monospace fonts. |
 | `fontFamily` | `String?` | `null` | Override primary font family in `SvgOutputMode.cssVariables`. |
 | `fontFamilyMono` | `String?` | `null` | Override monospace font family in `SvgOutputMode.cssVariables`. |
-| `monospace` | `List<MonospacePart>?` | `null` | Diagram parts to render in monospace (e.g., `['code']`). |
-| `fontSize` | `double?` | Diagram default (`13`–`16`) | Base font size in pixels. |
+| `monospace` | `List<MonospacePart>?` | `null` | Diagram parts to render in monospace (`'members'`, `'attributes'`, `'files'`, `'messages'`). |
+| `fontSize` | `double?` | `16` | Base font size in pixels. |
 | `idPrefix` | `String?` | `null` | Prefix for generated SVG `id` attributes to prevent DOM collisions. |
 | `responsive` | `bool?` | `true` (unless `useMaxWidth: false`) | Emits `style="max-width: <W>px"` instead of fixed `width`/`height` attributes. |
 | `maxWidth` | `double?` | `null` | Target container width in pixels for auto-direction and layout tightening. |
-| `autoDirection` | `bool?` | `false` | Automatically flips `LR` flowcharts to `TB` when narrower than `directionBreakpoint`. |
-| `directionBreakpoint` | `double?` | `500` | Width threshold in pixels for `autoDirection`. |
+| `autoDirection` | `bool?` | `true` | Automatically flips `LR`/`RL` diagrams to `TB` when narrower than `directionBreakpoint`. |
+| `directionBreakpoint` | `double?` | `640` | Width threshold in pixels for `autoDirection`. |
 | `padding` | `double?` | `8` | Outer SVG viewBox padding in pixels. |
 | `limit` | `int?` | `50000` | Maximum input source length in characters. |
 | `outputLimit` | `int?` | `4000000` | Maximum output SVG length in characters. |
 | `maxEdges` | `int?` | `5000` | Maximum number of edges/relations allowed during parsing. |
 | `links` | `bool?` | `true` | Whether `click` directives and node links emit `<a>` wrappers / `LinkInfo`. |
-| `linkSchemes` | `List<String>?` | `['http', 'https', 'mailto']` | Allowed URL schemes for clickable links. |
-| `linkRel` | `String?` | `null` | Optional `rel` attribute added to generated `<a>` tags. |
+| `linkSchemes` | `List<String>?` | `['http', 'https', 'mailto', 'tel']` | Allowed URL schemes for clickable links. |
+| `linkRel` | `String?` | `'noopener'` | `rel` attribute added to generated `<a>` tags (pass `''` to omit). |
 | `images` | `bool?` | `true` | Whether `<image>` elements are allowed in diagrams. |
 | `imageSchemes` | `List<String>?` | `['http', 'https']` | Allowed URL schemes for embedded `<image>` elements. |
 | `icons` | `IconResolver?` | Built-in icon pack | Callback `String? Function(String name)` returning inner SVG path markup for icon names. |

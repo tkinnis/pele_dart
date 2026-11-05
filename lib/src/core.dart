@@ -258,7 +258,7 @@ bool supports(String text) {
 ///
 /// Throws a [PeleError] if [text] exceeds [ParseOptions.limit], has an
 /// unrecognized header, or contains syntax/semantic errors.
-dynamic parse(String text, [ParseOptions options = const ParseOptions()]) {
+Object parse(String text, [ParseOptions options = const ParseOptions()]) {
   return _guarded(() {
     final parsed = _parseSource(
       text,

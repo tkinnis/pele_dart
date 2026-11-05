@@ -151,7 +151,7 @@ When `.upstream/diff_report.md` lists a new directory `src/diagrams/<new_type>/`
 2. Register the diagram in:
    - `lib/src/detect.dart` (`_detectors` list, in the exact order of `.upstream/src/detect.ts`).
    - `lib/src/diagrams/registry.dart` (`all` list).
-3. Add a canonical sample for `<new_type>` to `tool/verify_against_upstream.dart` (`_canonicalSamples`).
+3. Add a canonical sample for `<new_type>` to `tool/verify_against_upstream.dart` (`_sampleCorpus`).
 4. Create `test/diagrams/<new_type>_test.dart` covering parsing, layout, `SvgOutputMode.cssVariables`, and `SvgOutputMode.flattened` compilation with `vector_graphics_compiler` (`encodeSvg`).
 5. Add the new diagram family to `UPSTREAM.md` and `docs/API_MANUAL.md`.
 

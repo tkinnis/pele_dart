@@ -47,7 +47,7 @@ class MathMarkup {
 typedef MathResolver = MathMarkup? Function(String tex, double size);
 
 /// Identifier for a diagram text element category that should be rendered in a
-/// monospace font (for example `'code'` or `'class-member'`).
+/// monospace font (`'members'`, `'attributes'`, `'files'`, or `'messages'`).
 typedef MonospacePart = String;
 
 /// Controls whether the SVG emitted by `pele_dart` is flattened for static
@@ -219,10 +219,11 @@ class RenderOptions {
   /// Override for the monospace font stack (`--pele-font-mono`).
   final String? fontFamilyMono;
 
-  /// Text categories to render using the monospace font stack.
+  /// Text categories to render using the monospace font stack
+  /// (`'members'`, `'attributes'`, `'files'`, `'messages'`).
   final List<MonospacePart>? monospace;
 
-  /// Base font size in pixels (defaults to diagram-specific baseline, typically `13`–`16`).
+  /// Base font size in pixels (default `16`).
   final double? fontSize;
 
   /// Prefix prepended to generated SVG element `id` attributes to avoid DOM collisions.
@@ -236,12 +237,12 @@ class RenderOptions {
   /// [autoDirection] switching.
   final double? maxWidth;
 
-  /// When `true` and [maxWidth] is below [directionBreakpoint], automatically
-  /// rotates wide horizontal (`LR`/`RL`) flowcharts to vertical (`TB`).
+  /// When `true` (the default) and [maxWidth] is below [directionBreakpoint],
+  /// automatically rotates wide horizontal (`LR`/`RL`) diagrams to vertical (`TB`).
   final bool? autoDirection;
 
   /// Width threshold in pixels below which [autoDirection] switches horizontal
-  /// layouts to vertical (default `500`).
+  /// layouts to vertical (default `640`).
   final double? directionBreakpoint;
 
   /// Outer canvas padding around the diagram in pixels (default `8`).
@@ -256,7 +257,7 @@ class RenderOptions {
   /// Maximum allowed number of edges/relations in a diagram (default `5000`).
   final int? maxEdges;
 
-  /// Allowed URL schemes for clickable links (defaults to `['http', 'https', 'mailto']`).
+  /// Allowed URL schemes for clickable links (defaults to `['http', 'https', 'mailto', 'tel']`).
   final List<String>? linkSchemes;
 
   /// Allowed URL schemes for embedded images (defaults to `['http', 'https']`).
@@ -268,7 +269,8 @@ class RenderOptions {
   /// When `false`, suppresses `<image>` elements inside diagrams.
   final bool? images;
 
-  /// Value for the `rel` attribute on generated `<a>` link elements.
+  /// Value for the `rel` attribute on generated `<a>` link elements
+  /// (defaults to `'noopener'`; pass `''` to omit the attribute).
   final String? linkRel;
 
   /// Custom [IconResolver] callback for resolving icon names to SVG markup.

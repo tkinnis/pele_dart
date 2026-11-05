@@ -70,7 +70,7 @@ flutter run -d macos
 * **3-Engine Side-by-Side Comparison**:
   * **`pele_dart` (Pure Dart)** — rendered natively in Dart.
   * **`obsidianmd/pele` (JS)** — upstream JavaScript reference bundle (`v1.13.0`).
-  * **`mermaid.js` (v11.12.0)** — standard Mermaid browser renderer.
+  * **`mermaid.js` (v12.1.0)** — standard Mermaid browser renderer.
 * **4 Inspection Modes**:
   1. **Visual Render**: Synchronized pan and zoom across all active engine columns.
   2. **Visual Diff**: Compare any two engines using **Split-Curtain Swipe**, **Cyan/Magenta Channel Overlay**, **Pixel-Diff Heatmap**, or **A/B Blink Toggle**.
