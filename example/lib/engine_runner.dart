@@ -19,27 +19,97 @@ enum ComparisonEngine {
   const ComparisonEngine(this.id, this.label, this.accent);
 }
 
+/// Formats a millisecond timing value identically to `website/src/lib/timing.ts`
+/// on https://pele.run/playground.
+String formatPeleTime(double milliseconds) {
+  if (milliseconds < 0.05) return '< 0.1 ms';
+  if (milliseconds < 10) return '${milliseconds.toStringAsFixed(2)} ms';
+  if (milliseconds < 100) return '${milliseconds.toStringAsFixed(1)} ms';
+  return '${milliseconds.round()} ms';
+}
+
+/// Executes [run] using the exact median-of-budgeted-runs methodology from
+/// `website/src/lib/timing.ts` on https://pele.run/playground:
+/// repeats up to [maxRuns] times within [budgetMs] and returns the median (`p50`).
+({T result, double medianMs, double minMs, int runs}) timedRender<T>(
+  T Function() run, {
+  int maxRuns = 7,
+  double budgetMs = 60.0,
+}) {
+  final times = <double>[];
+  final totalSw = Stopwatch()..start();
+
+  final firstSw = Stopwatch()..start();
+  var result = run();
+  firstSw.stop();
+  times.add(firstSw.elapsedMicroseconds / 1000.0);
+
+  while (times.length < maxRuns &&
+      (totalSw.elapsedMicroseconds / 1000.0) < budgetMs) {
+    final iterSw = Stopwatch()..start();
+    result = run();
+    iterSw.stop();
+    times.add(iterSw.elapsedMicroseconds / 1000.0);
+  }
+  totalSw.stop();
+
+  times.sort();
+  final medianMs = times[times.length ~/ 2];
+  final minMs = times.first;
+  return (result: result, medianMs: medianMs, minMs: minMs, runs: times.length);
+}
+
 /// Output captured from a single diagram rendering engine.
 class EngineRenderOutput {
   final ComparisonEngine engine;
   final String flattenedSvg;
   final String cssVarsSvg;
   final Uint8List? compiledVectorBytes;
-  final double durationMs;
+
+  /// Pure `Mermaid text -> SVG string` median generation time (apples-to-apples across all 3 engines).
+  final double svgGenMs;
+
+  /// Minimum `Mermaid text -> SVG string` time across the timed runs.
+  final double minSvgGenMs;
+
+  /// Number of timed iterations executed within the timing budget.
+  final int sampleRuns;
+
+  /// Post-SVG display preparation time (`flattenPeleSvg + vector_graphics_compiler` for `pele_dart`,
+  /// or `innerHTML + DOM layout flush` for the WebView JS engines).
+  final double displayPrepMs;
+
   final double width;
   final double height;
+  final String? detectedType;
   final String? error;
+  final int? errorLine;
+  final int? errorColumn;
+  final String? errorSnippet;
 
   const EngineRenderOutput({
     required this.engine,
     required this.flattenedSvg,
     required this.cssVarsSvg,
     this.compiledVectorBytes,
-    required this.durationMs,
+    required this.svgGenMs,
+    this.minSvgGenMs = 0.0,
+    this.sampleRuns = 1,
+    this.displayPrepMs = 0.0,
     required this.width,
     required this.height,
+    this.detectedType,
     this.error,
+    this.errorLine,
+    this.errorColumn,
+    this.errorSnippet,
   });
+
+  /// Backwards-compatible alias for pure SVG generation time.
+  double get durationMs => svgGenMs;
+
+  /// End-to-end time (`SVG generation + display preparation`).
+  double get totalMs => svgGenMs + displayPrepMs;
 
   String svgForMode(SvgOutputMode mode) =>
       mode == SvgOutputMode.flattened ? flattenedSvg : cssVarsSvg;
@@ -82,22 +152,34 @@ class MemoryVectorBytesLoader extends BytesLoader {
   return (w ?? 600.0, h ?? 400.0);
 }
 
-/// Runs `pele_dart` natively in Dart and compiles the flattened SVG with `vector_graphics_compiler`.
-EngineRenderOutput renderWithPeleDart(String source, {required bool isDark}) {
+/// Runs `pele_dart` natively in Dart using `pele.run/playground`'s fair `timedRender`
+/// median methodology for pure `Mermaid -> CSS-variable SVG` generation, and measures
+/// `flattenPeleSvg + vector_graphics_compiler` separately as `displayPrepMs`.
+EngineRenderOutput renderWithPeleDart(
+  String source, {
+  required bool isDark,
+  int maxRuns = 7,
+  double budgetMs = 60.0,
+}) {
   final sw = Stopwatch()..start();
   try {
     final palette = isDark ? PelePalette.dark : PelePalette.light;
-    final cssVarsSvg = renderMermaid(
-      source,
-      options: RenderOptions(
-        palette: palette,
-        outputMode: SvgOutputMode.cssVariables,
-      ),
+    final options = RenderOptions(
+      palette: palette,
+      outputMode: SvgOutputMode.cssVariables,
     );
+
+    // 1. Fair apples-to-apples timing: pure Mermaid -> CSS-Variables SVG (matching Pele.render(source)).
+    final timed = timedRender<RenderResult>(
+      () => render(source, options),
+      maxRuns: maxRuns,
+      budgetMs: budgetMs,
+    );
+    final cssVarsSvg = timed.result.svg;
+
+    // 2. Display / Vector Graphics compilation pipeline timed separately.
+    final prepSw = Stopwatch()..start();
     final flattenedSvg = flattenPeleSvg(cssVarsSvg, palette: palette);
-    sw.stop();
-    final elapsedMs = sw.elapsedMicroseconds / 1000.0;
-    final (w, h) = parseSvgDimensions(flattenedSvg);
     Uint8List? vectorBytes;
     try {
       vectorBytes = vgc.encodeSvg(
@@ -108,17 +190,38 @@ EngineRenderOutput renderWithPeleDart(String source, {required bool isDark}) {
         enableOverdrawOptimizer: false,
       );
     } catch (_) {
-      // If vector_graphics_compiler rejects an exotic SVG construct, fall back to WebView SVG display.
       vectorBytes = null;
     }
+    prepSw.stop();
+    final prepMs = prepSw.elapsedMicroseconds / 1000.0;
+
     return EngineRenderOutput(
       engine: ComparisonEngine.peleDart,
       flattenedSvg: flattenedSvg,
       cssVarsSvg: cssVarsSvg,
       compiledVectorBytes: vectorBytes,
-      durationMs: elapsedMs,
-      width: w,
-      height: h,
+      svgGenMs: timed.medianMs,
+      minSvgGenMs: timed.minMs,
+      sampleRuns: timed.runs,
+      displayPrepMs: prepMs,
+      width: timed.result.width,
+      height: timed.result.height,
+      detectedType: timed.result.type,
+    );
+  } on PeleError catch (e) {
+    sw.stop();
+    return EngineRenderOutput(
+      engine: ComparisonEngine.peleDart,
+      flattenedSvg: '',
+      cssVarsSvg: '',
+      svgGenMs: sw.elapsedMicroseconds / 1000.0,
+      width: 400,
+      height: 200,
+      detectedType: e.type,
+      error: e.message,
+      errorLine: e.line,
+      errorColumn: e.column,
+      errorSnippet: e.snippet,
     );
   } catch (e) {
     sw.stop();
@@ -126,7 +229,7 @@ EngineRenderOutput renderWithPeleDart(String source, {required bool isDark}) {
       engine: ComparisonEngine.peleDart,
       flattenedSvg: '',
       cssVarsSvg: '',
-      durationMs: sw.elapsedMicroseconds / 1000.0,
+      svgGenMs: sw.elapsedMicroseconds / 1000.0,
       width: 400,
       height: 200,
       error: e.toString(),
@@ -136,11 +239,13 @@ EngineRenderOutput renderWithPeleDart(String source, {required bool isDark}) {
 
 /// Widget that renders a diagram inside a macOS `WKWebView` using either
 /// bundled `assets/pele.bundle.js` (`obsidianmd/pele` JS) or `assets/mermaid.min.js` (`mermaid.js`),
-/// and reports the generated raw `<svg>` string and render duration back to Flutter.
+/// using the exact `website/src/lib/timing.ts` and `website/src/scripts/playground-mermaid.ts`
+/// fair timing methodology.
 class WebViewEngineCanvas extends StatefulWidget {
   final ComparisonEngine engine;
   final String source;
   final bool isDark;
+  final int benchmarkNonce;
   final ValueChanged<EngineRenderOutput> onRendered;
 
   const WebViewEngineCanvas({
@@ -148,6 +253,7 @@ class WebViewEngineCanvas extends StatefulWidget {
     required this.engine,
     required this.source,
     required this.isDark,
+    this.benchmarkNonce = 0,
     required this.onRendered,
   });
 
@@ -172,9 +278,12 @@ class _WebViewEngineCanvasState extends State<WebViewEngineCanvas> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.source != widget.source ||
         oldWidget.isDark != widget.isDark ||
-        oldWidget.engine != widget.engine) {
+        oldWidget.engine != widget.engine ||
+        oldWidget.benchmarkNonce != widget.benchmarkNonce) {
       if (_pageReady) {
-        _triggerRender();
+        _triggerRender(
+          intensiveBenchmark: oldWidget.benchmarkNonce != widget.benchmarkNonce,
+        );
       }
     }
   }
@@ -263,40 +372,118 @@ $scriptContent
 <body>
 <div id="stage"></div>
 <script>
-async function runEngine(source, isDark) {
+let mermaidSeq = 0;
+const warmedTypes = new Set();
+
+// Exact port of website/src/lib/timing.ts from https://pele.run/playground
+function timedSync(run, maxRuns, budgetMs) {
+  const times = [];
+  const started = performance.now();
+  const r0 = performance.now();
+  let result = run();
+  times.push(performance.now() - r0);
+  while (times.length < maxRuns && (performance.now() - started) < budgetMs) {
+    const tIter = performance.now();
+    result = run();
+    times.push(performance.now() - tIter);
+  }
+  times.sort((a, b) => a - b);
+  return {
+    result: result,
+    medianMs: times[Math.floor(times.length / 2)],
+    minMs: times[0],
+    runs: times.length
+  };
+}
+
+async function timedAsync(run, maxRuns, budgetMs) {
+  const times = [];
+  const started = performance.now();
+  const r0 = performance.now();
+  let result = await run();
+  times.push(performance.now() - r0);
+  while (times.length < maxRuns && (performance.now() - started) < budgetMs) {
+    const tIter = performance.now();
+    result = await run();
+    times.push(performance.now() - tIter);
+  }
+  times.sort((a, b) => a - b);
+  return {
+    result: result,
+    medianMs: times[Math.floor(times.length / 2)],
+    minMs: times[0],
+    runs: times.length
+  };
+}
+
+async function runEngine(source, isDark, maxRuns, budgetMs) {
   document.body.className = isDark ? 'dark-mode' : '';
   const stage = document.getElementById('stage');
-  const t0 = performance.now();
   try {
     let svg = '';
+    let medianMs = 0;
+    let minMs = 0;
+    let runs = 1;
+
     if (${isPeleJs ? 'true' : 'false'}) {
-      svg = Pele.renderMermaid(source);
-      stage.innerHTML = svg;
+      const timed = timedSync(() => Pele.render(source), maxRuns, budgetMs);
+      svg = timed.result.svg;
+      medianMs = timed.medianMs;
+      minMs = timed.minMs;
+      runs = timed.runs;
     } else {
+      // Exact methodology from website/src/scripts/playground-mermaid.ts:
+      // 1. Initialize outside the timer.
       mermaid.initialize({
         startOnLoad: false,
         theme: isDark ? 'dark' : 'default',
-        securityLevel: 'strict'
+        securityLevel: 'strict',
+        suppressErrorRendering: true
       });
-      const id = 'm_' + Math.random().toString(36).slice(2);
-      const out = await mermaid.render(id, source);
-      svg = out.svg;
-      stage.innerHTML = svg;
+      // 2. Warm up diagram type loader on first use outside the timer.
+      const headerKey = (source.trim().split(/\\s+/)[0] || 'default') + ':' + (isDark ? 'dark' : 'light');
+      if (!warmedTypes.has(headerKey)) {
+        warmedTypes.add(headerKey);
+        try {
+          await mermaid.render('m_warmup_' + (++mermaidSeq), source);
+        } catch (_) {}
+      }
+      // 3. Timed render(s) within budget.
+      const timed = await timedAsync(
+        () => mermaid.render('m_run_' + (++mermaidSeq), source),
+        Math.min(maxRuns, 5),
+        budgetMs
+      );
+      svg = timed.result.svg;
+      medianMs = timed.medianMs;
+      minMs = timed.minMs;
+      runs = timed.runs;
     }
-    const elapsed = performance.now() - t0;
+
+    // 4. Measure DOM insertion + synchronous layout flush separately.
+    const tDom = performance.now();
+    stage.innerHTML = svg;
+    stage.getBoundingClientRect();
+    const displayPrepMs = performance.now() - tDom;
+
     EngineChannel.postMessage(JSON.stringify({
       ok: true,
       svg: svg,
-      durationMs: elapsed
+      svgGenMs: medianMs,
+      minSvgGenMs: minMs,
+      sampleRuns: runs,
+      displayPrepMs: displayPrepMs
     }));
   } catch (err) {
-    const elapsed = performance.now() - t0;
-    stage.innerHTML = '<pre style="color:#ef4444;font-size:12px;white-space:pre-wrap;">' +
+    stage.innerHTML = '<pre style="color:#ef4444;font-size:12px;white-space:pre-wrap;padding:12px;">' +
       String(err && err.message ? err.message : err) + '</pre>';
     EngineChannel.postMessage(JSON.stringify({
       ok: false,
       error: String(err && err.message ? err.message : err),
-      durationMs: elapsed
+      svgGenMs: 0,
+      minSvgGenMs: 0,
+      sampleRuns: 1,
+      displayPrepMs: 0
     }));
   }
 }
@@ -305,19 +492,27 @@ async function runEngine(source, isDark) {
 </html>''';
   }
 
-  Future<void> _triggerRender() async {
+  Future<void> _triggerRender({bool intensiveBenchmark = false}) async {
     final c = _controller;
     if (c == null || !_pageReady) return;
     final encodedSource = jsonEncode(widget.source);
     final isDarkLiteral = widget.isDark ? 'true' : 'false';
-    await c.runJavaScript('runEngine($encodedSource, $isDarkLiteral);');
+    final maxRuns = intensiveBenchmark ? 15 : 7;
+    final budgetMs = intensiveBenchmark ? 250 : 60;
+    await c.runJavaScript(
+      'runEngine($encodedSource, $isDarkLiteral, $maxRuns, $budgetMs);',
+    );
   }
 
   void _handleJsMessage(String rawJson) {
     try {
       final map = jsonDecode(rawJson) as Map<String, dynamic>;
       final ok = map['ok'] == true;
-      final durationMs = (map['durationMs'] as num?)?.toDouble() ?? 0.0;
+      final svgGenMs = (map['svgGenMs'] as num?)?.toDouble() ?? 0.0;
+      final minSvgGenMs = (map['minSvgGenMs'] as num?)?.toDouble() ?? svgGenMs;
+      final sampleRuns = (map['sampleRuns'] as num?)?.toInt() ?? 1;
+      final displayPrepMs = (map['displayPrepMs'] as num?)?.toDouble() ?? 0.0;
+
       if (ok) {
         final svg = (map['svg'] as String?) ?? '';
         final (w, h) = parseSvgDimensions(svg);
@@ -333,7 +528,10 @@ async function runEngine(source, isDark) {
             engine: widget.engine,
             flattenedSvg: flattened,
             cssVarsSvg: svg,
-            durationMs: durationMs,
+            svgGenMs: svgGenMs,
+            minSvgGenMs: minSvgGenMs,
+            sampleRuns: sampleRuns,
+            displayPrepMs: displayPrepMs,
             width: w,
             height: h,
           ),
@@ -344,7 +542,10 @@ async function runEngine(source, isDark) {
             engine: widget.engine,
             flattenedSvg: '',
             cssVarsSvg: '',
-            durationMs: durationMs,
+            svgGenMs: svgGenMs,
+            minSvgGenMs: minSvgGenMs,
+            sampleRuns: sampleRuns,
+            displayPrepMs: displayPrepMs,
             width: 400,
             height: 200,
             error: (map['error'] as String?) ?? 'Render failed',
@@ -357,7 +558,7 @@ async function runEngine(source, isDark) {
           engine: widget.engine,
           flattenedSvg: '',
           cssVarsSvg: '',
-          durationMs: 0,
+          svgGenMs: 0,
           width: 400,
           height: 200,
           error: e.toString(),
