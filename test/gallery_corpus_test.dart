@@ -16,7 +16,7 @@ void main() {
         0,
         (sum, s) => sum + s.showcaseSources.length,
       );
-      expect(playgroundCount, 167);
+      expect(playgroundCount, 172);
       expect(showcaseCount, 60);
       expect(render(playgroundDefaultSource).svg, contains('<svg'));
     });
@@ -25,6 +25,7 @@ void main() {
       test(
         '${family.id} renders all ${family.playgroundSamples.length} playground and ${family.showcaseSources.length} showcase samples',
         () {
+          expect(family.playgroundSamples.length, greaterThanOrEqualTo(3));
           for (final sample in family.playgroundSamples) {
             final cssRes = render(sample.source);
             expect(

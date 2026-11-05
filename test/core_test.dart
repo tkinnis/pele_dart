@@ -139,21 +139,19 @@ flowchart TD
       expect(flatRes.svg, contains('Pele v1.13.0'));
     });
 
-    test(
-      'flattenPeleSvg resolves color-mix, var, rx style, and baseline-shift',
-      () {
-        const rawSvg =
-            '<svg xmlns="http://www.w3.org/2000/svg" class="pele pele-test" style="--_bg:#fff;" fill="var(--_fg)">'
-            '<rect x="0" y="0" width="10" height="10" style="rx:var(--_r);fill:color-mix(in srgb,var(--_fg) 20%,var(--_bg));stroke:var(--_b);"/>'
-            '<text><tspan baseline-shift="sub" font-size="smaller">2</tspan></text>'
-            '</svg>';
-        final flat = flattenPeleSvg(rawSvg);
-        expect(flat, isNot(contains('var(--')));
-        expect(flat, isNot(contains('color-mix(')));
-        expect(flat, isNot(contains('baseline-shift=')));
-        expect(flat, contains('rx="6"'));
-        expect(flat, contains('dy="3" font-size="10"'));
-      },
-    );
+    test('flattenPeleSvg resolves color-mix, var, rx style, font weights, and baseline-shift', () {
+      const rawSvg =
+          '<svg xmlns="http://www.w3.org/2000/svg" class="pele pele-test" style="--_bg:#fff;" fill="var(--_fg)">'
+          '<rect x="0" y="0" width="10" height="10" style="rx:var(--_r);fill:color-mix(in srgb,var(--_fg) 20%,var(--_bg));stroke:var(--_b);"/>'
+          '<text font-weight="var(--_tw)"><tspan font-weight="var(--_w)" baseline-shift="sub" font-size="smaller">2</tspan></text>'
+          '</svg>';
+      final flat = flattenPeleSvg(rawSvg);
+      expect(flat, isNot(contains('var(--')));
+      expect(flat, isNot(contains('color-mix(')));
+      expect(flat, isNot(contains('baseline-shift=')));
+      expect(flat, contains('rx="6"'));
+      expect(flat, contains('font-weight="bold"'));
+      expect(flat, contains('dy="3" font-size="10"'));
+    });
   });
 }

@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pele_dart/pele_dart.dart';
-import 'package:vector_graphics/vector_graphics.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart';
 
 import 'engine_runner.dart';
 import 'gallery_samples.dart';
@@ -268,6 +268,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                                 child: VisualGraphicDiffView(
                                   outputs: _outputs,
                                   activeEngines: _orderedSelectedEngines,
+                                  source: _activeSource,
                                   isDark: widget.isDark,
                                 ),
                               ),
@@ -912,6 +913,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
               child: Opacity(
                 opacity: 0.0,
                 child: WebViewEngineCanvas(
+                  key: GlobalObjectKey(engine),
                   engine: engine,
                   source: _activeSource,
                   isDark: widget.isDark,
@@ -991,6 +993,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                 engine == ComparisonEngine.peleDart
                     ? _buildPeleDartVisualCanvas(out)
                     : WebViewEngineCanvas(
+                      key: GlobalObjectKey(engine),
                       engine: engine,
                       source: _activeSource,
                       isDark: widget.isDark,
@@ -1032,6 +1035,8 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
     if (bytes == null) {
       return const Center(child: Text('SVG rendered (inspect in Raw SVG tab)'));
     }
+    final w = out.width > 0 ? out.width : 600.0;
+    final h = out.height > 0 ? out.height : 400.0;
     return InteractiveViewer(
       transformationController: _zoomController,
       minScale: 0.2,
@@ -1039,9 +1044,19 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: VectorGraphic(
-            loader: MemoryVectorBytesLoader(bytes),
-            fit: BoxFit.contain,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: SizedBox(
+              width: w,
+              height: h,
+              child: createCompatVectorGraphic(
+                loader: MemoryVectorBytesLoader(bytes),
+                width: w,
+                height: h,
+                fit: BoxFit.contain,
+                strategy: RenderingStrategy.picture,
+              ),
+            ),
           ),
         ),
       ),

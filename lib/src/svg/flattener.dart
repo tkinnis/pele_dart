@@ -9,6 +9,7 @@ import 'builder.dart';
 /// SVG 1.1 attributes compatible with `vector_graphics_compiler` and non-CSS SVG renderers.
 String flattenPeleSvg(String svg, {PelePalette palette = PelePalette.light}) {
   final vars = _buildVarMap(palette);
+  _extractRootSvgCustomSeriesVars(svg, vars);
 
   // 1. Resolve all var(...) and color-mix(...) and calc(...) expressions globally first.
   var out = _resolveExpressions(svg, vars);
@@ -32,18 +33,34 @@ String flattenPeleSvg(String svg, {PelePalette palette = PelePalette.light}) {
   return out;
 }
 
+final RegExp _rootSeriesVarRe = RegExp(r'(--pele-series-\d+)\s*:\s*([^;"]+)');
+
+void _extractRootSvgCustomSeriesVars(String svg, Map<String, String> vars) {
+  final svgEnd = svg.indexOf('>');
+  if (svgEnd <= 0) return;
+  final head = svg.substring(0, svgEnd);
+  for (final m in _rootSeriesVarRe.allMatches(head)) {
+    final key = m.group(1)!.trim();
+    final val = m.group(2)!.trim();
+    if (val.isNotEmpty) {
+      vars[key] = val;
+    }
+  }
+}
+
 Map<String, String> _buildVarMap(PelePalette p) {
-  final fgRgb = _parseColor(p.fg) ?? const <double>[36, 41, 46];
+  final fgRgb = _parseColor(p.fg) ?? const <double>[31, 31, 31];
   final bgRgb = _parseColor(p.bg) ?? const <double>[255, 255, 255];
 
   String mixFgBg(double fgPercent) =>
       _formatRgb(_mixRgb(fgRgb, bgRgb, fgPercent / 100.0));
 
   final muted = p.muted ?? mixFgBg(60);
-  final line = p.line ?? mixFgBg(45);
-  final surface = p.surface ?? mixFgBg(3);
-  final accent = p.accent ?? mixFgBg(7);
-  final border = p.border ?? mixFgBg(20);
+  final line = p.line ?? p.fg;
+  final surface = p.surface ?? mixFgBg(5);
+  final surfaceAlt = p.surfaceAlt;
+  final border = p.border ?? mixFgBg(45);
+  final accent = p.accent ?? '#5b7bd5';
   final code = p.code ?? mixFgBg(8);
   final radiusStr = '${num(p.radius)}px';
   final swStr = num(p.strokeWidth);
@@ -56,23 +73,28 @@ Map<String, String> _buildVarMap(PelePalette p) {
     '--_m': muted,
     '--_l': line,
     '--_s': surface,
-    '--_a': accent,
+    '--_a': surfaceAlt,
     '--_b': border,
-    '--_c': code,
+    '--_c': accent,
     '--_r': radiusStr,
-    '--_w': swStr,
-    '--_tw': tswStr,
-    '--_hw': hswStr,
+    '--_w': 'bold',
+    '--_tw': 'bold',
+    '--_hw': 'bold',
     '--_fm': p.monoFontFamily,
     '--pele-bg': p.bg,
     '--pele-fg': p.fg,
     '--pele-muted': muted,
     '--pele-line': line,
     '--pele-surface': surface,
+    '--pele-surface-alt': surfaceAlt,
     '--pele-accent': accent,
     '--pele-border': border,
     '--pele-code': code,
+    '--pele-critical': p.critical,
     '--pele-radius': radiusStr,
+    '--pele-bold-weight': 'bold',
+    '--pele-title-weight': 'bold',
+    '--pele-heading-weight': 'bold',
     '--pele-stroke-width': swStr,
     '--pele-thick-stroke-width': tswStr,
     '--pele-hairline-stroke-width': hswStr,
@@ -81,6 +103,7 @@ Map<String, String> _buildVarMap(PelePalette p) {
   };
   for (var i = 0; i < p.colors.length; i++) {
     map['--pele-c$i'] = p.colors[i];
+    map['--pele-series-${i + 1}'] = p.colors[i];
   }
   return map;
 }
@@ -97,7 +120,8 @@ String _resolveExpressions(String input, Map<String, String> vars) {
         changed = true;
         final name = m.group(1)!;
         final fallback = m.group(2)?.trim();
-        return vars[name] ?? fallback ?? '';
+        final resolved = vars[name] ?? fallback ?? '';
+        return resolved.replaceAll('"', "'");
       },
     );
     current = nextVar;

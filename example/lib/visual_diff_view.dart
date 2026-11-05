@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:vector_graphics/vector_graphics.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart' as vgc;
 
 import 'engine_runner.dart';
@@ -24,12 +24,14 @@ enum VisualDiffSubMode {
 class VisualGraphicDiffView extends StatefulWidget {
   final Map<ComparisonEngine, EngineRenderOutput> outputs;
   final List<ComparisonEngine> activeEngines;
+  final String source;
   final bool isDark;
 
   const VisualGraphicDiffView({
     super.key,
     required this.outputs,
     required this.activeEngines,
+    required this.source,
     required this.isDark,
   });
 
@@ -255,13 +257,25 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
     final bgColor =
         widget.isDark ? const Color(0xFF14171F) : const Color(0xFFFFFFFF);
     if (bytes != null) {
+      final w = out.width > 0 ? out.width : 600.0;
+      final h = out.height > 0 ? out.height : 400.0;
       return Container(
         color: bgColor,
         alignment: Alignment.center,
         padding: const EdgeInsets.all(20),
-        child: VectorGraphic(
-          loader: MemoryVectorBytesLoader(bytes),
-          fit: BoxFit.contain,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: SizedBox(
+            width: w,
+            height: h,
+            child: createCompatVectorGraphic(
+              loader: MemoryVectorBytesLoader(bytes),
+              width: w,
+              height: h,
+              fit: BoxFit.contain,
+              strategy: RenderingStrategy.picture,
+            ),
+          ),
         ),
       );
     }
@@ -272,7 +286,7 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
       alignment: Alignment.center,
       child: WebViewEngineCanvas(
         engine: engine,
-        source: '',
+        source: widget.source,
         isDark: widget.isDark,
         onRendered: (_) {},
       ),

@@ -20,15 +20,26 @@ void main() {
         0,
         (sum, s) => sum + s.showcaseSources.length,
       );
-      expect(playgroundCount, 167);
+      expect(playgroundCount, 172);
       expect(showcaseCount, 60);
       expect(playgroundDefaultSource, contains('flowchart TD'));
 
       for (final family in gallerySamples) {
-        expect(family.playgroundSamples, isNotEmpty);
+        expect(family.playgroundSamples.length, greaterThanOrEqualTo(3));
         for (final sample in family.playgroundSamples) {
-          final result = render(sample.source);
-          expect(result.svg, contains('<svg'));
+          final out = renderWithPeleDart(sample.source, isDark: false);
+          expect(
+            out.error,
+            isNull,
+            reason: '${family.id}: ${sample.label} error: ${out.error}',
+          );
+          expect(out.flattenedSvg, contains('<svg'));
+          expect(
+            out.compiledVectorBytes,
+            isNotNull,
+            reason:
+                '${family.id}: ${sample.label} failed vector_graphics_compiler',
+          );
         }
       }
     },
