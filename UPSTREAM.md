@@ -11,6 +11,8 @@ This document is the **single source of truth** for the upstream [`obsidianmd/pe
 | **Target Release** | `v1.13.0` |
 | **Target Commit SHA** | `3a2f075ee0c3d914f0fad3545fc0f193693975ac` |
 | **Target Commit Date** | `2026-10-31T00:07:28Z` |
+| **Target Mermaid Version** | `12.1.0` |
+| **Target Mermaid Parser** | `@mermaid-js/parser@2.0.1` |
 
 ---
 

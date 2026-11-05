@@ -114,6 +114,7 @@ Future<void> main(List<String> args) async {
   // Optional differential check against .upstream/src/index.ts if bun is available.
   var exactUpstreamMatches = 0;
   var exactGalleryMatches = 0;
+  var exactCorpusMatches = 0;
   final galleryCorpus = <String, String>{};
   for (final family in gallerySamples) {
     for (var i = 0; i < family.playgroundSamples.length; i++) {
@@ -146,9 +147,60 @@ Future<void> main(List<String> args) async {
     }
   }
 
+  // Load upstream tests/corpus/*.json (522 diagrams) when .upstream exists.
+  final upstreamJsonCorpus = <String, String>{};
+  final corpusDir = Directory('${upstreamDir.path}/tests/corpus');
+  if (corpusDir.existsSync()) {
+    final files =
+        corpusDir
+            .listSync()
+            .whereType<File>()
+            .where((f) => f.path.endsWith('.json'))
+            .toList()
+          ..sort((a, b) => a.path.compareTo(b.path));
+    for (final file in files) {
+      final name = file.uri.pathSegments.last;
+      final decoded = jsonDecode(file.readAsStringSync());
+      if (decoded is List) {
+        for (var i = 0; i < decoded.length; i++) {
+          final item = decoded[i];
+          if (item is String) {
+            upstreamJsonCorpus['corpus:$name#$i'] = item;
+          } else if (item is Map && item['code'] is String) {
+            upstreamJsonCorpus['corpus:$name#$i'] = item['code'] as String;
+          } else if (item is Map && item['source'] is String) {
+            upstreamJsonCorpus['corpus:$name#$i'] = item['source'] as String;
+          }
+        }
+      }
+    }
+  }
+
+  // Verify Mermaid version alignment across UPSTREAM.md and example/lib/engine_runner.dart.
+  final pinnedMermaidVer = RegExp(
+    r'\*\*Target Mermaid Version\*\*\s*\|\s*`([^`]+)`',
+  ).firstMatch(md)?.group(1);
+  final engineRunnerFile = File('$root/example/lib/engine_runner.dart');
+  if (pinnedMermaidVer != null && engineRunnerFile.existsSync()) {
+    final runnerText = engineRunnerFile.readAsStringSync();
+    final uiMermaidVer = RegExp(r'mermaid\.js \(v([^)]+)\)')
+        .firstMatch(runnerText)
+        ?.group(1);
+    if (uiMermaidVer != null && uiMermaidVer != pinnedMermaidVer) {
+      stderr.writeln(
+        'Error: Studio UI Mermaid label (v$uiMermaidVer) does not match UPSTREAM.md Target Mermaid Version (v$pinnedMermaidVer)',
+      );
+      exitCode = 1;
+    }
+  }
+
   final bunFile = File('/opt/homebrew/bin/bun');
   if (upstreamDir.existsSync() && bunFile.existsSync()) {
-    final combined = <String, String>{..._sampleCorpus, ...galleryCorpus};
+    final combined = <String, String>{
+      ..._sampleCorpus,
+      ...galleryCorpus,
+      ...upstreamJsonCorpus,
+    };
     final tmpPayloadFile = File(
       '${Directory.systemTemp.path}/pele_verify_corpus.json',
     );
@@ -164,7 +216,7 @@ for (const [k, src] of Object.entries(corpus)) {
     const r = render(src, { now: '2026-10-01T00:00:00Z' });
     out[k] = { svg: r.svg, width: r.width, height: r.height };
   } catch (e) {
-    out[k] = { error: String(e) };
+    out[k] = { error: String(e?.code ?? e?.message ?? e) };
   }
 }
 console.log(JSON.stringify(out));
@@ -217,17 +269,48 @@ console.log(JSON.stringify(out));
           exitCode = 1;
         }
       }
+      for (final entry in upstreamJsonCorpus.entries) {
+        final key = entry.key;
+        final up = upstreamMap[key] as Map<String, dynamic>?;
+        try {
+          final dartRes = render(
+            entry.value,
+            const RenderOptions(
+              outputMode: SvgOutputMode.cssVariables,
+              now: '2026-10-01T00:00:00Z',
+            ),
+          );
+          if (up != null && up['svg'] == dartRes.svg) {
+            exactCorpusMatches++;
+          } else {
+            stderr.writeln('Diff in upstream corpus $key');
+            exitCode = 1;
+          }
+        } on PeleError catch (e) {
+          if (up != null && up['error'] == e.code) {
+            exactCorpusMatches++;
+          } else {
+            stderr.writeln(
+              'Error mismatch in upstream corpus $key: dart(${e.code}) vs upstream(${up?['error']})',
+            );
+            exitCode = 1;
+          }
+        }
+      }
     }
   }
 
   stdout.writeln(
-    jsonEncode(<String, Object>{
+    jsonEncode(<String, Object?>{
       'pinnedCommit': pinnedSha,
+      'targetMermaidVersion': pinnedMermaidVer,
       'verifiedHeaders': verifiedHeaders,
       'verifiedDiagrams': verifiedDiagrams,
       'exactUpstreamMatches': exactUpstreamMatches,
       'exactGalleryMatches': exactGalleryMatches,
       'totalGallerySamples': galleryCorpus.length,
+      'exactCorpusMatches': exactCorpusMatches,
+      'totalCorpusSamples': upstreamJsonCorpus.length,
       'status': exitCode == 0 ? 'ok' : 'failed',
     }),
   );

@@ -68,9 +68,20 @@ Before completing any task or committing changes, all quality gates must pass:
 
 3. **Formatting**:
    ```bash
-   dart format --output=none --set-exit-if-changed lib test
+   dart format --output=none --set-exit-if-changed lib test tool example/lib
    ```
 
-4. **Commit Policy**:
+4. **787-Diagram Upstream Differential Parity & Mermaid Version Check**:
+   ```bash
+   dart run tool/verify_against_upstream.dart
+   ```
+   Verifies Mermaid version consistency across `UPSTREAM.md`, `.upstream/`, and `example/assets/mermaid.min.js`, and asserts 100% byte-for-byte SVG equality between `pele_dart` and `obsidianmd/pele (JS)` across all 33 canonical diagram families, 232 gallery diagrams, and 522 upstream corpus diagrams (`787/787`).
+
+5. **Upstream Sync & Release Workflow**:
+   * Check for new `obsidianmd/pele` releases, commits, or target `mermaid.js` updates with `dart run tool/sync_upstream.dart` (`--check`).
+   * Follow [`docs/UPSTREAM_SYNC.md`](docs/UPSTREAM_SYNC.md) and the workspace skill [`.agents/skills/sync-upstream-pele/SKILL.md`](.agents/skills/sync-upstream-pele/SKILL.md) to stage updates (`--update-to-latest`), port changes 1:1, refresh assets (`--refresh-assets`), verify parity, and update `UPSTREAM.md` (`--pin`).
+   * Keep [`docs/API_MANUAL.md`](docs/API_MANUAL.md) updated whenever public options, APIs, or supported diagram families change.
+
+6. **Commit Policy**:
    * Follow **Conventional Commits** (`feat(flowchart): ...`, `fix(layout): ...`, `test(sequence): ...`, `docs(design): ...`).
    * **Strict NO AI References Policy**: Never include `Co-Authored-By`, AI tool names, or agent attributions in commit messages, PR descriptions, or comments.

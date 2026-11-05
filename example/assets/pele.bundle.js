@@ -37,7 +37,7 @@
       });
   };
 
-  // ../pele_dart/.upstream/src/index.ts
+  // .upstream/src/index.ts
   var exports_src = {};
   __export(exports_src, {
     PeleError: () => PeleError,
@@ -52,7 +52,7 @@
     supports: () => supports
   });
 
-  // ../pele_dart/.upstream/src/detect.ts
+  // .upstream/src/detect.ts
   var DETECTORS = [
     ["flowchart", "flowchart-elk", /^\s*flowchart-elk/],
     ["mindmap", "mindmap", /^\s*mindmap/],
@@ -99,7 +99,7 @@
     return null;
   }
 
-  // ../pele_dart/.upstream/src/errors.ts
+  // .upstream/src/errors.ts
   class PeleError extends Error {
     code;
     type;
@@ -186,7 +186,7 @@ ${detail}`;
     return new PeleError(message, "syntax", { type, ...loc });
   }
 
-  // ../pele_dart/.upstream/src/text/entities.ts
+  // .upstream/src/text/entities.ts
   var NAMED = "amp:38,lt:60,gt:62,quot:34,apos:39,nbsp:160,shy:173,iexcl:161,cent:162,pound:163,curren:164,yen:165,sect:167," + "copy:169,laquo:171,not:172,reg:174,deg:176,plusmn:177,sup2:178,sup3:179,micro:181,para:182,middot:183," + "sup1:185,raquo:187,frac14:188,frac12:189,frac34:190,iquest:191,times:215,divide:247,ndash:8211,mdash:8212," + "lsquo:8216,rsquo:8217,sbquo:8218,ldquo:8220,rdquo:8221,bdquo:8222,dagger:8224,Dagger:8225,bull:8226," + "hellip:8230,permil:8240,prime:8242,Prime:8243,lsaquo:8249,rsaquo:8250,euro:8364,trade:8482,larr:8592," + "uarr:8593,rarr:8594,darr:8595,harr:8596,lArr:8656,uArr:8657,rArr:8658,dArr:8659,hArr:8660,forall:8704," + "part:8706,exist:8707,empty:8709,nabla:8711,isin:8712,notin:8713,ni:8715,prod:8719,sum:8721,minus:8722," + "radic:8730,infin:8734,and:8743,or:8744,cap:8745,cup:8746,int:8747,there4:8756,sim:8764,cong:8773," + "asymp:8776,ne:8800,equiv:8801,le:8804,ge:8805,sub:8834,sup:8835,sube:8838,supe:8839,oplus:8853,otimes:8855," + "perp:8869,sdot:8901,loz:9674,spades:9824,clubs:9827,hearts:9829,diams:9830,check:10003,cross:10007," + "AMP:38,LT:60,GT:62,QUOT:34,lsqb:91,rsqb:93,lcub:123,rcub:125,verbar:124,VerticalLine:124,midast:42," + "DiacriticalGrave:96,Hat:94,UnderBar:95," + "equals:61,colon:58,semi:59,num:35,percnt:37,lpar:40,rpar:41,lbrack:91,rbrack:93,lbrace:123,rbrace:125," + "vert:124,sol:47,bsol:92,quest:63,excl:33,ast:42,plus:43,comma:44,period:46,dollar:36,commat:64,grave:96," + "hat:94,lowbar:95,tilde:126,Alpha:913,Beta:914,Gamma:915,Delta:916,Epsilon:917,Zeta:918,Eta:919,Theta:920," + "Iota:921,Kappa:922,Lambda:923,Mu:924,Nu:925,Xi:926,Omicron:927,Pi:928,Rho:929,Sigma:931,Tau:932," + "Upsilon:933,Phi:934,Chi:935,Psi:936,Omega:937,alpha:945,beta:946,gamma:947,delta:948,epsilon:949,zeta:950," + "eta:951,theta:952,iota:953,kappa:954,lambda:955,mu:956,nu:957,xi:958,omicron:959,pi:960,rho:961,sigmaf:962," + "sigma:963,tau:964,upsilon:965,phi:966,chi:967,psi:968,omega:969";
   var named;
   function lookup(name) {
@@ -241,7 +241,7 @@ ${detail}`;
     return text;
   }
 
-  // ../pele_dart/.upstream/src/text/icons.ts
+  // .upstream/src/text/icons.ts
   var resolver;
   var found = new Map;
   function withIcons(icons, run) {
@@ -267,7 +267,7 @@ ${detail}`;
     return markup;
   }
 
-  // ../pele_dart/.upstream/src/text/math.ts
+  // .upstream/src/text/math.ts
   var resolver2;
   var found2 = new Map;
   function withMath(math, run) {
@@ -312,7 +312,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/util/yaml.ts
+  // .upstream/src/util/yaml.ts
   class Incomplete {
     message;
     constructor(message) {
@@ -843,7 +843,7 @@ ${detail}`;
     return value;
   }
 
-  // ../pele_dart/.upstream/src/util/chars.ts
+  // .upstream/src/util/chars.ts
   function isSpace(c) {
     if (c < 128)
       return c === 32 || c >= 9 && c <= 13;
@@ -868,7 +868,7 @@ ${detail}`;
     return c >= 48 && c <= 57 || c >= 65 && c <= 90 || c >= 97 && c <= 122 || c === 95;
   }
 
-  // ../pele_dart/.upstream/src/preprocess.ts
+  // .upstream/src/preprocess.ts
   var RE_COMMENT = /^\s*%%(?!{)[^\n]+\n?/gm;
   var RE_DIRECTIVE = /%{2}{\s*(?:(\w+)\s*:|(\w+))\s*(?:(\w+)|((?:(?!}%{2}).|\r?\n)*))?\s*(?:}%{2})?/gi;
   var RE_HTML_TAG = /<(\w+)([^>]*)>/g;
@@ -1088,11 +1088,11 @@ ${detail}`;
     });
   }
 
-  // ../pele_dart/.upstream/src/text/metrics.ts
+  // .upstream/src/text/metrics.ts
   var REGULAR = "7q7q9vfgfgopij5b9999atg87q997q7qfgfgfgfgfgfgfgfgfgfg7q7qg8g8g8fgs7ijijk2k2ijgzlmk27qdwijfgn5k2lmijlmk2ijgzk2ijq8ijijgz7q7q7qd1fg99fgfgdwfgfg7qfgfg6666dw66n5fgfgfgfg99dw7qfgdwk2dwdwdw9a789ag8";
   var BOLD = "7q99d6fgfgopk26m9999atg87q997q7qfgfgfgfgfgfgfgfgfgfg9999g8g8g8gzr3k2k2k2k2ijgzlmk27qfgk2gzn5k2lmijlmk2ijgzk2ijq8ijijgz997q99g8fg99fggzfggzfg99gzgz7q7qfg7qopgzgzgzgzatfg99gzfglmfgfgdwat7satg8";
 
-  // ../pele_dart/.upstream/src/text/measurer.ts
+  // .upstream/src/text/measurer.ts
   var SMALLER = 1.2;
   function unpack(packed) {
     const out = new Uint16Array(95);
@@ -1203,7 +1203,7 @@ ${detail}`;
     shared.clear();
   }
 
-  // ../pele_dart/.upstream/src/svg/builder.ts
+  // .upstream/src/svg/builder.ts
   var RE_NEEDS_ESC = /[&<>"\x00-\x08\x0b\x0c\x0e-\x1f\x7f\ud800-\udfff\ufffe\uffff]/u;
   var RE_ESC = /[&<>"]|[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\ud800-\udfff\ufffe\uffff]+/gu;
   var ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
@@ -1333,7 +1333,7 @@ ${detail}`;
     return attrs + (shared2 & 1 /* Bold */ && !attrs.includes(' font-weight="') ? BOLD2 : "") + (shared2 & 2 /* Italic */ && !attrs.includes(' font-style="') ? ITALIC : "") + (shared2 & 4 /* Mono */ && !attrs.includes(' font-family="') ? MONO : "");
   }
 
-  // ../pele_dart/.upstream/src/svg/ink.ts
+  // .upstream/src/svg/ink.ts
   var DARK = new Set("black blue blueviolet brown crimson darkblue darkcyan darkgreen darkmagenta darkolivegreen darkorchid darkred darkslateblue darkslategray darkviolet dimgray firebrick forestgreen green indigo maroon mediumblue mediumslateblue mediumvioletred midnightblue navy olive purple rebeccapurple royalblue saddlebrown seagreen sienna slateblue steelblue teal".split(" "));
   var LIGHT = new Set("aliceblue antiquewhite aqua aquamarine azure beige bisque blanchedalmond burlywood cadetblue chartreuse chocolate coral cornflowerblue cornsilk cyan darkgoldenrod darkgray darkkhaki darkorange darksalmon darkseagreen darkturquoise deeppink deepskyblue dodgerblue floralwhite fuchsia gainsboro ghostwhite gold goldenrod gray greenyellow honeydew hotpink indianred ivory khaki lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan lightgoldenrodyellow lightgray lightgreen lightpink lightsalmon lightseagreen lightskyblue lightslategray lightsteelblue lightyellow lime limegreen linen magenta mediumaquamarine mediumorchid mediumpurple mediumseagreen mediumspringgreen mediumturquoise mintcream mistyrose moccasin navajowhite oldlace olivedrab orange orangered orchid palegoldenrod palegreen paleturquoise palevioletred papayawhip peachpuff peru pink plum powderblue red rosybrown salmon sandybrown seashell silver skyblue slategray snow springgreen tan thistle tomato turquoise violet wheat white whitesmoke yellow yellowgreen".split(" "));
   var ON_LIGHT = "var(--pele-fg-on-light,#1f1f1f)";
@@ -1453,7 +1453,7 @@ ${detail}`;
     return color2 ? ` fill="${color2}"` : "";
   }
 
-  // ../pele_dart/.upstream/src/svg/palette.ts
+  // .upstream/src/svg/palette.ts
   var PALETTES = {
     pie: { prefix: "pie", first: 1 },
     gitGraph: { prefix: "git", first: 0 },
@@ -1578,7 +1578,7 @@ ${detail}`;
     return color2 ? ` fill="${color2}"` : "";
   }
 
-  // ../pele_dart/.upstream/src/window.ts
+  // .upstream/src/window.ts
   function windowOf(element) {
     return element.ownerDocument?.defaultView ?? globalThis;
   }
@@ -1587,7 +1587,7 @@ ${detail}`;
     return width > 0 ? width : 0;
   }
 
-  // ../pele_dart/.upstream/src/zoom.ts
+  // .upstream/src/zoom.ts
   function frame(natural, box, scale, x, y) {
     const width = box.width / scale;
     const height = box.height / scale;
@@ -2032,7 +2032,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/mount.ts
+  // .upstream/src/mount.ts
   function fontsFor(style, drawing) {
     const own = drawing ? windowOf(drawing).getComputedStyle(drawing) : style;
     return {
@@ -2368,7 +2368,7 @@ ${detail}`;
     return handle;
   }
 
-  // ../pele_dart/.upstream/src/core.ts
+  // .upstream/src/core.ts
   var diagrams = new Map;
   function register(...list) {
     for (const diagram of list)
@@ -2496,7 +2496,7 @@ ${detail}`;
     return mountWith({ parse, render }, element, text, options);
   }
 
-  // ../pele_dart/.upstream/src/util/url.ts
+  // .upstream/src/util/url.ts
   var BLANK = "about:blank";
   var RE_INVALID_PROTOCOL = /^([^\w]*)(javascript|data|vbscript)/im;
   var RE_HTML_ENTITIES = /&#(\w+)(^\w|;)?/g;
@@ -2599,7 +2599,7 @@ ${detail}`;
     return rel ? ` rel="${esc(rel)}"` : "";
   }
 
-  // ../pele_dart/.upstream/src/diagrams/flowchart/shapes.ts
+  // .upstream/src/diagrams/flowchart/shapes.ts
   var SHAPES = [
     ["rect", "proc", "process", "rectangle", "squareRect"],
     ["rounded", "event", "roundedRect"],
@@ -2706,7 +2706,7 @@ ${detail}`;
     return SYNTAX.get(name) ?? canonical.get(name) ?? "rect";
   }
 
-  // ../pele_dart/.upstream/src/diagrams/agentflow/shapes.ts
+  // .upstream/src/diagrams/agentflow/shapes.ts
   var SHAPE_ALIASES = new Map([
     ["task", "roundedRect"],
     ["tool", "subroutine"],
@@ -2789,7 +2789,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/agentflow/db.ts
+  // .upstream/src/diagrams/agentflow/db.ts
   var PRESENTATION_KEYS = new Set([
     "shape",
     "view",
@@ -3553,7 +3553,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/util/unicode.ts
+  // .upstream/src/util/unicode.ts
   var PACKED = "4q 0 b 0 5 0 6 m 2 u 2 cp 5 b f 4 8 0 2 0 3m 4 2 1 3 3 9 0 2 2 2 0 2 j 2 2a 2 3u 9 4d a 11 3 0 8 12 21 q 6 2 1a 16 10 1 2 2q 2 0 g 1 8 1 b 2 3 0 h 0 2 t u 2g c 0 p w a 1 5 0 6 l 5 0 a 0 4 0 o o 20 0 2 a 2g 1h 4 0 j 0 8 9 g 6 2 6 6 7 3 1 3 l 2 6 2 0 4 3 4 0 h 0 e 1 2 2 f 1 k 5 5 1 3 l 2 6 2 1 2 1 2 1 w 3 2 0 k 2 h 8 2 2 2 l 2 6 2 1 2 4 4 0 j 0 g 1 10 7 3 1 3 l 2 6 2 1 2 4 4 0 v 1 2 2 g 0 i 0 2 5 4 2 2 3 4 1 2 0 2 1 4 1 4 2 4 b n 0 1h 7 2 2 2 m 2 9 2 4 4 0 r 1 7 1 10 7 2 2 2 m 2 9 2 4 4 0 x 0 2 1 g 1 j 7 2 2 2 14 3 0 h 0 i 1 p 5 6 h 4 n 2 8 2 0 3 6 1n 1b 2 1 d 6 1n 1 2 0 3 1 2 0 3 0 7 3 2 6 2 2 2 0 2 0 3 1 2 3 2 1 a 0 3 4 2 0 m 3 x 0 1s 7 2 z s 4 38 16 l 0 h 5 5 3 4 0 4 1 8 2 5 c d 0 i 11 2 0 6 0 3 16 2 98 2 3 3 6 2 0 2 3 3 14 2 3 3 w 2 3 3 6 2 0 2 3 3 e 2 1k 2 3 3 1u 12 f h 2c d h7 3 g 2 p 6 22 m c 2 3 f h f h f c 2 2 g 1f 10 0 5 0 1w 2f 9 14 2 0 6 1x b s 1g t 3 4 c 17 m 6 1l m a 1g 2b 0 2m 1a i 6 1k t e 1 b 17 r z 16 2 b z 30 3 2 3 4 1 a 5b 1t 7p 3 5 3 11 3 5 3 7 2 0 2 0 2 0 2 u 3 1g 2 6 2 0 4 2 2 6 4 3 3 5 5 c 6 2 2 6 39 0 e 0 h c 2u 0 5 0 3 9 2 0 4 4 7 0 2 0 2 0 2 3 2 a 3 3 6 4 5 0 1h 1 22k 1a 2 1a 2 3o 7 3 4 1 d 11 2 0 6 0 3 1j 8 0 h m a 6 2 6 2 6 2 6 2 6 2 6 2 6 2 6 29 0 d2 1 17 4 6 1 5 2d 7 2 2 2h 2 3 6 14 4 2l i q 1i f e9 52t 23 g5o 1g wc 1w 19 3 7g 4 f b 1 l 1a h o 9 1x 1e 8 3 2u 3 3 2 3 d a 26 9 2 2 2 3 2 m u 1f f 1d 1r 5 4 0 f r b m q s 8 1a t 0 1d 14 o 2 2 7 l m 4 0 6 1b 2 0 4 1 3 4 3 0 2 0 p 2 3 a 8 2 d 5 3 5 3 5 a 6 2 6 42 y u 8mb d m 5 1c 6it a5 3 2x 13 6 d 4 6 0 2 9 2 c 2 4 2 0 2 1 2 1 2 2z y a2 j 1r 3 1h 15 b 39 4 2 3q 11 p 7 p c 2g 4 5 3 5 3 5 3 2";
   var table;
   function build() {
@@ -3586,7 +3586,7 @@ ${detail}`;
     return false;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/agentflow/tokens.ts
+  // .upstream/src/diagrams/agentflow/tokens.ts
   var TOKEN_NAMES = [
     "$end",
     "INVALID",
@@ -3670,7 +3670,7 @@ ${detail}`;
     "EOF"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/agentflow/lexer.ts
+  // .upstream/src/diagrams/agentflow/lexer.ts
   var NODE_CHAR = new Uint8Array(128);
   for (const ch of "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"#$%&'*+.`?\\_/") {
     NODE_CHAR[ch.charCodeAt(0)] = 1;
@@ -4645,7 +4645,7 @@ ${detail}`;
     return { types, texts, starts, locs };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/agentflow/parser.ts
+  // .upstream/src/diagrams/agentflow/parser.ts
   var ID = new Uint8Array(79 /* EOF */ + 1);
   for (const t of [
     34 /* NUM */,
@@ -5349,7 +5349,7 @@ ${detail}`;
   var DIRECTIONS = ["TB", "BT", "RL", "LR", "TD"];
   var STATEMENT_START = "'COMMENT', 'SEMI', 'NEWLINE', 'SPACE', 'EOF', 'flow', 'global', 'connector', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'STYLE', 'LINKSTYLE', 'CLASSDEF', 'CLASS', 'CLICK', 'NODE_STRING'";
 
-  // ../pele_dart/.upstream/src/layout/layered.ts
+  // .upstream/src/layout/layered.ts
   function lnode(w, h, kind = 0 /* Node */) {
     return { w, h, kind, pin: 0, hint: NaN, key: NaN, span: 0, x: 0, y: 0, rank: 0 };
   }
@@ -7431,7 +7431,7 @@ ${detail}`;
     return out;
   }
 
-  // ../pele_dart/.upstream/src/layout/compound.ts
+  // .upstream/src/layout/compound.ts
   function direction(dir) {
     return dir === "BT" || dir === "LR" || dir === "RL" ? dir : "TB";
   }
@@ -8305,7 +8305,7 @@ ${detail}`;
     return total;
   }
 
-  // ../pele_dart/.upstream/src/svg/cluster.ts
+  // .upstream/src/svg/cluster.ts
   function markCrossings(crossings, route) {
     for (let k = 0;k < route.length; k += 3) {
       const key = Math.round(route[k + 1]);
@@ -8360,7 +8360,7 @@ ${detail}`;
     return `<g class="pele-cluster-title" data-id="${id}">` + labelSvg(label, x, y, ` fill="none" stroke="${fill}" stroke-width="5" stroke-linejoin="round"`, icons) + labelSvg(label, x, y, attrs, icons) + "</g>";
   }
 
-  // ../pele_dart/.upstream/src/svg/edges.ts
+  // .upstream/src/svg/edges.ts
   var ARROW = 8;
   var CORNER = 12;
   var HANDLE2 = 0.62;
@@ -8812,7 +8812,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/svg/theme.ts
+  // .upstream/src/svg/theme.ts
   var ROOT_STYLE = "--_bg:var(--pele-bg,#fff);--_fg:var(--pele-fg,#1f1f1f);--_m:var(--pele-muted,#6e6e6e);" + "--_l:var(--pele-line,#1f1f1f);--_s:var(--pele-surface,#f3f3f3);--_a:var(--pele-surface-alt,#e6e6e6);" + "--_b:var(--pele-border,#8a8a8a);--_c:var(--pele-accent,#5b7bd5);color:var(--_fg)";
   var FONT_MONO = "var(--_fm)";
   var RADIUS = "var(--pele-radius,4px)";
@@ -8921,7 +8921,7 @@ ${detail}`;
     return `var(--pele-series-${k + 1},${SERIES[k]})`;
   }
 
-  // ../pele_dart/.upstream/src/svg/root.ts
+  // .upstream/src/svg/root.ts
   var WEIGHTS = [
     ["tw", "title"],
     ["hw", "heading"],
@@ -8955,7 +8955,7 @@ ${detail}`;
     return `<svg xmlns="http://www.w3.org/2000/svg" class="pele pele-${type}" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="${fit}${ROOT_STYLE}${weights}${esc(fontStyle(fontSize, options.fontFamily, options.fontFamilyMono))}${paletteStyle()}" fill="var(--_fg)" role="graphics-document document" aria-roledescription="${type}"${aria}>` + head + content + "</svg>";
   }
 
-  // ../pele_dart/.upstream/src/svg/shapes.ts
+  // .upstream/src/svg/shapes.ts
   var PAD_X = 18;
   var PAD_Y = 12;
   var CORNER2 = 12;
@@ -9504,7 +9504,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/text/label.ts
+  // .upstream/src/text/label.ts
   var LINE_HEIGHT = 1.5;
   var WRAPPED_LINE_HEIGHT = 1.3;
   var RE_BREAK = /<br\s*\/?>|\\n|\n/gi;
@@ -9873,7 +9873,7 @@ ${detail}`;
     return line;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/common/fit-width.ts
+  // .upstream/src/diagrams/common/fit-width.ts
   function fitWidth(options, natural, least, draw) {
     let result = draw(natural, false);
     const available = options.maxWidth;
@@ -9922,7 +9922,7 @@ ${detail}`;
     return tight.width < loose.width ? tight : loose;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/agentflow/colorSlots.ts
+  // .upstream/src/diagrams/agentflow/colorSlots.ts
   var KIND_SLOT = new Map([
     ["tool", 0],
     ["task", 1],
@@ -9951,7 +9951,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/agentflow/graph.ts
+  // .upstream/src/diagrams/agentflow/graph.ts
   function buildAgentGraph(db, paletteLength, defaultCurve) {
     const nodes = [];
     const edges = [];
@@ -10154,7 +10154,7 @@ ${detail}`;
     return { nodes, edges };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/agentflow/render.ts
+  // .upstream/src/diagrams/agentflow/render.ts
   var PALETTE = 8;
   var NODE_SEP = 40;
   var EDGE_SEP = 16;
@@ -10470,7 +10470,7 @@ ${detail}`;
     return `M${num(x - 1.75)},${num(y)}a1.75,1.75 0 1 0 3.5,0a1.75,1.75 0 1 0 -3.5,0Z`;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/agentflow/index.ts
+  // .upstream/src/diagrams/agentflow/index.ts
   var agentflow = {
     type: "agentflow",
     keepComments: true,
@@ -10492,7 +10492,7 @@ ${detail}`;
     render: renderAgentflow
   };
 
-  // ../pele_dart/.upstream/src/diagrams/architecture/db.ts
+  // .upstream/src/diagrams/architecture/db.ts
   function fail(message) {
     throw new PeleError(message, "semantic", { type: "architecture" });
   }
@@ -10592,7 +10592,7 @@ ${detail}`;
       db.addLayoutHint({ direction: alignment.direction, members: [...alignment.members] });
   }
 
-  // ../pele_dart/.upstream/src/diagrams/common/tokens.ts
+  // .upstream/src/diagrams/common/tokens.ts
   var tables = new WeakMap;
   function prepare(types) {
     const every = types.map((_, k) => k);
@@ -10813,7 +10813,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/architecture/parser.ts
+  // .upstream/src/diagrams/architecture/parser.ts
   var ID2 = { name: "ID", pattern: /[\w]([-\w]*\w)?/y };
   function word(text) {
     return { name: text, pattern: text, longer: [ID2] };
@@ -10957,7 +10957,7 @@ ${detail}`;
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/architecture/icons.ts
+  // .upstream/src/diagrams/architecture/icons.ts
   var GLYPHS = new Map([
     ["database", "M4 6a8 3 0 1 0 16 0a8 3 0 1 0-16 0M4 6v12a8 3 0 0 0 16 0V6M4 12a8 3 0 0 0 16 0"],
     ["server", "M3 4h18v7H3zM3 13h18v7H3zM7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6"],
@@ -10970,7 +10970,7 @@ ${detail}`;
     return d === undefined ? "" : `<path d="${d}" stroke="var(--_fg)" stroke-width="1.5"/>`;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/architecture/layout.ts
+  // .upstream/src/diagrams/architecture/layout.ts
   var DX = [-1, 1, 0, 0];
   var DY = [0, 0, -1, 1];
   function sideIndex(side) {
@@ -11322,7 +11322,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/architecture/render.ts
+  // .upstream/src/diagrams/architecture/render.ts
   var STUB = 12;
   var CORNER3 = 6;
   var LABEL_GAP = 4;
@@ -11832,7 +11832,7 @@ ${detail}`;
     return { svg, width, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/architecture/index.ts
+  // .upstream/src/diagrams/architecture/index.ts
   var architecture = {
     type: "architecture",
     parse(source, _config, title) {
@@ -11845,7 +11845,7 @@ ${detail}`;
     render: renderArchitecture
   };
 
-  // ../pele_dart/.upstream/src/diagrams/block/db.ts
+  // .upstream/src/diagrams/block/db.ts
   var MAX_SPACES = 1e5;
   function typeStr2Type(typeStr) {
     switch (typeStr) {
@@ -12057,7 +12057,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/block/tokens.ts
+  // .upstream/src/diagrams/block/tokens.ts
   var TOKEN_NAMES2 = [
     "$end",
     "INVALID",
@@ -12099,7 +12099,7 @@ ${detail}`;
     "EOF"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/block/lexer.ts
+  // .upstream/src/diagrams/block/lexer.ts
   var DIRECTIONS2 = ["right", "left", "x", "y", "up", "down"];
   var ID_STOP = new Uint8Array(128);
   for (const c of [9, 10, 11, 12, 13, 32, 40, 41, 45, 58, 60, 61, 62, 91, 123, 125])
@@ -12576,7 +12576,7 @@ ${detail}`;
     return { types, texts, starts };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/block/parser.ts
+  // .upstream/src/diagrams/block/parser.ts
   var STATEMENT_START2 = "'NODE_ID', 'COLUMNS', 'SPACE_BLOCK', 'BLOCK_DIAGRAM_KEY', 'id-block', 'classDef', 'class', 'style'";
   function closeDocument(list) {
     const last = list[list.length - 1];
@@ -12727,7 +12727,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/svg/title.ts
+  // .upstream/src/svg/title.ts
   function titleLabel(title, measurer, size, maxWidth) {
     return withoutMath(() => layoutLabel(title, false, measurer, size, maxWidth, 1 /* Bold */));
   }
@@ -12744,7 +12744,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/block/arrows.ts
+  // .upstream/src/diagrams/block/arrows.ts
   var RIGHT = 1;
   var LEFT = 2;
   var UP = 4;
@@ -12864,7 +12864,7 @@ ${detail}`;
     return `<polygon points="${points}" stroke-linejoin="round"${attrs}/>`;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/block/layout.ts
+  // .upstream/src/diagrams/block/layout.ts
   var MAX_SPAN = 1000;
   function calculateBlockPosition(columns, position2) {
     if (columns === 0 || !Number.isInteger(columns)) {
@@ -12980,7 +12980,7 @@ ${detail}`;
     return { width: root.w, height: root.h };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/block/render.ts
+  // .upstream/src/diagrams/block/render.ts
   var GAP2 = 12;
   var WRAP = 200;
   var CORNER4 = 8;
@@ -13700,7 +13700,7 @@ ${detail}`;
     return { svg, width, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/block/index.ts
+  // .upstream/src/diagrams/block/index.ts
   var block2 = {
     type: "block",
     math: true,
@@ -13713,7 +13713,7 @@ ${detail}`;
     render: renderBlock
   };
 
-  // ../pele_dart/.upstream/src/diagrams/c4/db.ts
+  // .upstream/src/diagrams/c4/db.ts
   var ELEMENT_FIELDS = new Set([
     "label",
     "type",
@@ -13942,7 +13942,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/c4/tokens.ts
+  // .upstream/src/diagrams/c4/tokens.ts
   var TOKEN_NAMES3 = [
     "$end",
     "INVALID",
@@ -14011,7 +14011,7 @@ ${detail}`;
     "EOF"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/c4/lexer.ts
+  // .upstream/src/diagrams/c4/lexer.ts
   var KEYWORDS = new Map([
     ["C4Context", 14 /* C4_CONTEXT */],
     ["C4Container", 15 /* C4_CONTAINER */],
@@ -14335,7 +14335,7 @@ ${detail}`;
     return { types, starts, ends };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/c4/parser.ts
+  // .upstream/src/diagrams/c4/parser.ts
   var KINDS = [
     "person",
     "external_person",
@@ -14525,7 +14525,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/common/literal-label.ts
+  // .upstream/src/diagrams/common/literal-label.ts
   var SPACE = /\s/;
   function literalLabel(text2, measurer, size, room2, style = 0) {
     const lines = [];
@@ -14649,7 +14649,7 @@ ${detail}`;
     return body;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/c4/route.ts
+  // .upstream/src/diagrams/c4/route.ts
   var LOOP2 = 28;
   var LANE = 20;
   var LANE_STEP = 7;
@@ -15130,7 +15130,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/c4/layout.ts
+  // .upstream/src/diagrams/c4/layout.ts
   var SHAPE_W = 216;
   var SHAPE_MIN_H = 64;
   var PAD_X2 = 14;
@@ -15309,7 +15309,7 @@ ${detail}`;
     return { order, boxes };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/c4/render.ts
+  // .upstream/src/diagrams/c4/render.ts
   var PAIR_SHIFT = 7;
   var NARROW_GAP = 36;
   var WIDEN = 24;
@@ -15552,7 +15552,7 @@ ${detail}`;
     return [{ svg, width, height, links }, lanes.squeezed];
   }
 
-  // ../pele_dart/.upstream/src/diagrams/c4/index.ts
+  // .upstream/src/diagrams/c4/index.ts
   var c4 = {
     type: "c4",
     parse(source, _config, title) {
@@ -15565,7 +15565,7 @@ ${detail}`;
     render: renderC4
   };
 
-  // ../pele_dart/.upstream/src/diagrams/common/generics.ts
+  // .upstream/src/diagrams/common/generics.ts
   function tildes(text2) {
     let count = 0;
     for (let i = text2.indexOf("~");i !== -1; i = text2.indexOf("~", i + 1))
@@ -15605,7 +15605,7 @@ ${detail}`;
     return output.join("");
   }
 
-  // ../pele_dart/.upstream/src/diagrams/class/members.ts
+  // .upstream/src/diagrams/class/members.ts
   function isVisibility(ch) {
     return ch === "#" || ch === "+" || ch === "~" || ch === "-";
   }
@@ -15693,7 +15693,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/class/db.ts
+  // .upstream/src/diagrams/class/db.ts
   var LINE_TYPE = { LINE: 0, DOTTED_LINE: 1 };
   var RELATION_TYPE = { AGGREGATION: 0, EXTENSION: 1, COMPOSITION: 2, DEPENDENCY: 3, LOLLIPOP: 4 };
   var DOM_ID_PREFIX = "classId-";
@@ -15961,7 +15961,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/class/tokens.ts
+  // .upstream/src/diagrams/class/tokens.ts
   var TOKEN_NAMES4 = [
     "$end",
     "INVALID",
@@ -16026,7 +16026,7 @@ ${detail}`;
     "PUNCTUATION"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/class/lexer.ts
+  // .upstream/src/diagrams/class/lexer.ts
   var AT_END = [
     4 /* EOF */,
     6 /* STR */,
@@ -16487,7 +16487,7 @@ ${detail}`;
     return { types, texts, starts };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/class/parser.ts
+  // .upstream/src/diagrams/class/parser.ts
   var COUNT = 60 /* PUNCTUATION */ + 1;
   var ALPHANUM2 = new Uint8Array(COUNT);
   for (const t of [53 /* UNICODE_TEXT */, 27 /* ALPHA */, 52 /* MINUS */])
@@ -16836,7 +16836,7 @@ ${detail}`;
     expect(0 /* END */);
   }
 
-  // ../pele_dart/.upstream/src/layout/components.ts
+  // .upstream/src/layout/components.ts
   function wrapComponents(nodes, edges, width, gap) {
     const parent = Int32Array.from(nodes, (_, i) => i);
     const root = (i) => {
@@ -16906,7 +16906,7 @@ ${detail}`;
     return { width: right, height: y + rowHeight };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/class/graph.ts
+  // .upstream/src/diagrams/class/graph.ts
   var MARKERS = ["aggregation", "extension", "composition", "dependency", "lollipop"];
   function marker2(type) {
     return typeof type === "number" && MARKERS[type] || "none";
@@ -17031,7 +17031,7 @@ ${detail}`;
     return { nodes, edges };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/class/markers.ts
+  // .upstream/src/diagrams/class/markers.ts
   var TRIANGLE = 12;
   var DIAMOND = 16;
   var HALF = 6;
@@ -17074,7 +17074,7 @@ ${detail}`;
     return "";
   }
 
-  // ../pele_dart/.upstream/src/diagrams/class/render.ts
+  // .upstream/src/diagrams/class/render.ts
   var NODE_SEP2 = 40;
   var EDGE_SEP2 = 16;
   var RANK_SEP2 = 56;
@@ -17650,7 +17650,7 @@ ${detail}`;
     return { svg, width: titled.width, height: titled.height, links };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/class/index.ts
+  // .upstream/src/diagrams/class/index.ts
   var classDiagram = {
     type: "class",
     math: true,
@@ -17664,7 +17664,7 @@ ${detail}`;
     render: renderClass
   };
 
-  // ../pele_dart/.upstream/src/diagrams/cynefin/model.ts
+  // .upstream/src/diagrams/cynefin/model.ts
   class CynefinDb {
     domains = new Map;
     transitions = [];
@@ -17697,7 +17697,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/cynefin/parser.ts
+  // .upstream/src/diagrams/cynefin/parser.ts
   var CYNEFIN_TOKENS = [
     { name: "cynefin-beta:", pattern: "cynefin-beta:" },
     keyword("cynefin-beta"),
@@ -17775,7 +17775,7 @@ ${detail}`;
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/cynefin/boundaries.ts
+  // .upstream/src/diagrams/cynefin/boundaries.ts
   function seededRandom(seed) {
     let t = seed + 1831565813 | 0;
     t = Math.imul(t ^ t >>> 15, t | 1);
@@ -17858,7 +17858,7 @@ ${detail}`;
     return `M${num(cx - rx)},${num(cy)}A${r} 0 1,1 ${num(cx + rx)},${num(cy)}A${r} 0 1,1 ${num(cx - rx)},${num(cy)}Z`;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/cynefin/render.ts
+  // .upstream/src/diagrams/cynefin/render.ts
   var QUADRANTS = [
     ["complex", 0, 0, 0],
     ["complicated", 1, 0, 1],
@@ -18089,14 +18089,14 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/cynefin/index.ts
+  // .upstream/src/diagrams/cynefin/index.ts
   var cynefin = {
     type: "cynefin",
     parse: (source, _config, title) => buildCynefin(parseCynefin(source), title),
     render: renderCynefin
   };
 
-  // ../pele_dart/.upstream/src/diagrams/er/db.ts
+  // .upstream/src/diagrams/er/db.ts
   function labelType2(type) {
     return type === "markdown" || type === "string" || type === "text" ? type : "markdown";
   }
@@ -18231,7 +18231,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/er/tokens.ts
+  // .upstream/src/diagrams/er/tokens.ts
   var TOKEN_NAMES5 = [
     "$end",
     "INVALID",
@@ -18281,7 +18281,7 @@ ${detail}`;
     "CHAR"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/er/lexer.ts
+  // .upstream/src/diagrams/er/lexer.ts
   var TEXT = 1;
   var STYLE_TEXT = 2;
   var ATTR_START = 4;
@@ -18772,7 +18772,7 @@ ${detail}`;
     return { types, texts, starts };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/er/parser.ts
+  // .upstream/src/diagrams/er/parser.ts
   var CARDINALITY = new Map([
     [37 /* ZERO_OR_ONE */, "ZERO_OR_ONE"],
     [38 /* ZERO_OR_MORE */, "ZERO_OR_MORE"],
@@ -19067,7 +19067,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/er/graph.ts
+  // .upstream/src/diagrams/er/graph.ts
   var NO_ATTRIBUTES = [];
   function buildErGraph(model) {
     const nodes = [];
@@ -19144,7 +19144,7 @@ ${detail}`;
     return { nodes, edges };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/er/markers.ts
+  // .upstream/src/diagrams/er/markers.ts
   var MARKER_LENGTH = 18;
   var BAR = 5;
   var FOOT = 6;
@@ -19171,7 +19171,7 @@ ${detail}`;
     return "";
   }
 
-  // ../pele_dart/.upstream/src/diagrams/er/render.ts
+  // .upstream/src/diagrams/er/render.ts
   var NODE_SEP3 = 48;
   var EDGE_SEP3 = 20;
   var RANK_SEP3 = 64;
@@ -19638,7 +19638,7 @@ ${detail}`;
       route3[at + 1] -= Math.sign(dy) * (c.h - view.h) / 2;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/er/index.ts
+  // .upstream/src/diagrams/er/index.ts
   var er = {
     type: "er",
     math: true,
@@ -19652,7 +19652,7 @@ ${detail}`;
     render: renderEr
   };
 
-  // ../pele_dart/.upstream/src/diagrams/eventmodeling/model.ts
+  // .upstream/src/diagrams/eventmodeling/model.ts
   var KINDS2 = new Map([
     ["ui", "ui"],
     ["pcr", "processor"],
@@ -19783,7 +19783,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/common/accDescr.ts
+  // .upstream/src/diagrams/common/accDescr.ts
   var RE_HEAD = /[\t ]*accDescr(?:[\t ]*:(?:[^\n\r]*?(?=%%)|[^\n\r]*)|\s*({))/y;
   function scanner() {
     let unclosed = false;
@@ -19806,7 +19806,7 @@ ${detail}`;
     return { ...ACC_DESCR, name, scanner };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/eventmodeling/parser.ts
+  // .upstream/src/diagrams/eventmodeling/parser.ts
   var EM_ID = { name: "EM_ID", pattern: /[_a-zA-Z][\w_]*/y };
   var word2 = (text2) => ({ name: text2, pattern: text2, longer: [EM_ID] });
   var sign = (text2) => ({ name: text2, pattern: text2 });
@@ -19995,7 +19995,7 @@ ${detail}`;
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/eventmodeling/render.ts
+  // .upstream/src/diagrams/eventmodeling/render.ts
   var SERIES2 = new Map([
     ["command", 0],
     ["event", 1],
@@ -20292,7 +20292,7 @@ ${detail}`;
     return { svg: svgDocument("eventmodeling", totalWidth, height, size, options, model, content), width: totalWidth, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/eventmodeling/index.ts
+  // .upstream/src/diagrams/eventmodeling/index.ts
   var eventmodeling = {
     type: "eventmodeling",
     keepComments: true,
@@ -20300,7 +20300,7 @@ ${detail}`;
     render: renderEventModel
   };
 
-  // ../pele_dart/.upstream/src/diagrams/flowchart/db.ts
+  // .upstream/src/diagrams/flowchart/db.ts
   function labelType3(type) {
     return type === "markdown" || type === "string" || type === "text" ? type : "markdown";
   }
@@ -20729,7 +20729,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/flowchart/tokens.ts
+  // .upstream/src/diagrams/flowchart/tokens.ts
   var TOKEN_NAMES6 = [
     "$end",
     "INVALID",
@@ -20810,7 +20810,7 @@ ${detail}`;
     "EOF"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/flowchart/lexer.ts
+  // .upstream/src/diagrams/flowchart/lexer.ts
   var NODE_CHAR2 = new Uint8Array(128);
   for (const ch of "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"#$%&'*+.`?\\_/") {
     NODE_CHAR2[ch.charCodeAt(0)] = 1;
@@ -21722,7 +21722,7 @@ ${detail}`;
     return { types, texts, starts };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/flowchart/parser.ts
+  // .upstream/src/diagrams/flowchart/parser.ts
   var ID3 = new Uint8Array(76 /* EOF */ + 1);
   for (const t of [
     32 /* NUM */,
@@ -22352,7 +22352,7 @@ ${detail}`;
   var DIRECTIONS4 = ["TB", "BT", "RL", "LR", "TD"];
   var STATEMENT_START3 = "'SEMI', 'NEWLINE', 'SPACE', 'EOF', 'subgraph', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'STYLE', 'LINKSTYLE', 'CLASSDEF', 'CLASS', 'CLICK', 'NODE_STRING'";
 
-  // ../pele_dart/.upstream/src/diagrams/flowchart/graph.ts
+  // .upstream/src/diagrams/flowchart/graph.ts
   function shapeOf(vertex) {
     if (vertex.img)
       return "imageSquare";
@@ -22584,7 +22584,7 @@ ${detail}`;
     return { nodes, edges };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/flowchart/render.ts
+  // .upstream/src/diagrams/flowchart/render.ts
   var NODE_SEP4 = 40;
   var EDGE_SEP4 = 16;
   var RANK_SEP4 = 48;
@@ -22864,7 +22864,7 @@ ${detail}`;
     return { svg, width, height, links };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/flowchart/index.ts
+  // .upstream/src/diagrams/flowchart/index.ts
   var flowchart = {
     type: "flowchart",
     math: true,
@@ -22879,7 +22879,7 @@ ${detail}`;
     render: renderFlowchart
   };
 
-  // ../pele_dart/.upstream/src/diagrams/gantt/dates.ts
+  // .upstream/src/diagrams/gantt/dates.ts
   var MONTHS = [
     "January",
     "February",
@@ -23221,7 +23221,7 @@ ${detail}`;
     return date && isValid(date) && format(date, template) === input ? date : undefined;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/gantt/db.ts
+  // .upstream/src/diagrams/gantt/db.ts
   var RE_NUMERIC_FORMAT = /^[YMDHhmsSZXx\-/.:, T]*$/;
   var RE_TAG2 = /^\s*(active|done|crit|milestone|vert)\s*$/;
   var RE_AFTER = /^after\s+([\d\w- ]+)/;
@@ -23577,7 +23577,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/gantt/tokens.ts
+  // .upstream/src/diagrams/gantt/tokens.ts
   var TOKEN_NAMES7 = [
     "$end",
     "INVALID",
@@ -23620,7 +23620,7 @@ ${detail}`;
     "EOF"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/gantt/lexer.ts
+  // .upstream/src/diagrams/gantt/lexer.ts
   var RE_ACC_TITLE5 = /accTitle\s*:\s*/iy;
   var RE_ACC_DESCR5 = /accDescr\s*:\s*/iy;
   var RE_ACC_DESCR_ML4 = /accDescr\s*\{\s*/iy;
@@ -23890,7 +23890,7 @@ ${detail}`;
     return { types, texts, starts };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/gantt/parser.ts
+  // .upstream/src/diagrams/gantt/parser.ts
   var WEEKDAYS2 = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
   var LINE3 = "'EOF', 'SPACE', 'NL', 'weekday_monday', 'weekday_tuesday', 'weekday_wednesday', 'weekday_thursday', " + "'weekday_friday', 'weekday_saturday', 'weekday_sunday', 'weekend_friday', 'weekend_saturday', 'dateFormat', " + "'inclusiveEndDates', 'topAxis', 'axisFormat', 'tickInterval', 'excludes', 'includes', 'todayMarker', 'title', " + "'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'section', 'taskTxt', 'click'";
   var STARTS_LINE = new Uint8Array(38 /* EOF */ + 1);
@@ -24064,7 +24064,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/gantt/axis.ts
+  // .upstream/src/diagrams/gantt/axis.ts
   var SECOND = 1000;
   var MINUTE = 60 * SECOND;
   var HOUR = 60 * MINUTE;
@@ -24387,7 +24387,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/gantt/render.ts
+  // .upstream/src/diagrams/gantt/render.ts
   var WIDTH = 800;
   var MIN_PLOT = 240;
   var LABEL_GAP3 = 8;
@@ -24687,7 +24687,7 @@ ${detail}`;
     return { svg: svgDocument("gantt", width, height, size, options, model, content), width, height, links };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/gantt/index.ts
+  // .upstream/src/diagrams/gantt/index.ts
   var gantt = {
     type: "gantt",
     parse(source, config, title) {
@@ -24703,7 +24703,7 @@ ${detail}`;
     render: renderGantt
   };
 
-  // ../pele_dart/.upstream/src/diagrams/git/db.ts
+  // .upstream/src/diagrams/git/db.ts
   var commitType = { NORMAL: 0, REVERSE: 1, HIGHLIGHT: 2, MERGE: 3, CHERRY_PICK: 4 };
   function fail2(message) {
     throw new PeleError(message, "semantic", { type: "gitGraph" });
@@ -24889,7 +24889,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/git/parser.ts
+  // .upstream/src/diagrams/git/parser.ts
   var REFERENCE = { name: "REFERENCE", pattern: /\w([-\./\w]*[-\w])?/y };
   var NAME2 = [REFERENCE];
   function word3(name) {
@@ -25060,7 +25060,7 @@ ${detail}`;
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/common/fit.ts
+  // .upstream/src/diagrams/common/fit.ts
   var RE_TAG_START = /<(?!br\s*\/?>)/gi;
   var RE_ICON2 = /:fa-/g;
   var RE_UNIT = /<br\s*\/?>|ﬂ°°?\w+¶ß|&#?\w+;|[\ud800-\udbff][\udc00-\udfff]|[\s\S]/gi;
@@ -25097,7 +25097,7 @@ ${detail}`;
     return plainLabel(out, measurer, size, max, base);
   }
 
-  // ../pele_dart/.upstream/src/diagrams/git/render.ts
+  // .upstream/src/diagrams/git/render.ts
   var DOT2 = 7;
   var STEP2 = 44;
   var LANE2 = 44;
@@ -25408,14 +25408,14 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/git/index.ts
+  // .upstream/src/diagrams/git/index.ts
   var gitGraph = {
     type: "gitGraph",
     parse: (source, config, title) => buildGit(parseGit(source), config, title),
     render: renderGit
   };
 
-  // ../pele_dart/.upstream/src/diagrams/info/model.ts
+  // .upstream/src/diagrams/info/model.ts
   function buildInfo(ast, title) {
     return {
       type: "info",
@@ -25426,7 +25426,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/info/parser.ts
+  // .upstream/src/diagrams/info/parser.ts
   var INFO_TOKENS = [
     keyword("showInfo"),
     keyword("info"),
@@ -25469,10 +25469,10 @@ ${detail}`;
     }
     return ast;
   }
-  // ../pele_dart/.upstream/package.json
+  // .upstream/package.json
   var version = "1.13.0";
 
-  // ../pele_dart/.upstream/src/diagrams/info/render.ts
+  // .upstream/src/diagrams/info/render.ts
   function renderInfo(model, _config, options) {
     const size = options.fontSize ?? 16;
     const measurer = options.measurer ?? defaultMeasurer(options.fontFamily, options.fontFamilyMono);
@@ -25486,14 +25486,14 @@ ${detail}`;
     return { svg: svgDocument("info", width, height, size, options, model, content), width, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/info/index.ts
+  // .upstream/src/diagrams/info/index.ts
   var info = {
     type: "info",
     parse: (source, _config, title) => buildInfo(parseInfo(source), title),
     render: renderInfo
   };
 
-  // ../pele_dart/.upstream/src/diagrams/ishikawa/db.ts
+  // .upstream/src/diagrams/ishikawa/db.ts
   class IshikawaDb {
     type = "ishikawa";
     title;
@@ -25517,7 +25517,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/ishikawa/lexer.ts
+  // .upstream/src/diagrams/ishikawa/lexer.ts
   var TOKEN_NAMES8 = ["$end", "EOF", "SPACELINE", "NL", "ISHIKAWA", "SPACELIST", "TEXT"];
   function keyword2(src, at) {
     const word4 = "ishikawa-beta";
@@ -25591,7 +25591,7 @@ ${detail}`;
     return { types, starts, ends };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/ishikawa/parser.ts
+  // .upstream/src/diagrams/ishikawa/parser.ts
   var STOP = "'SPACELINE', 'NL', 'EOF'";
   function parseIshikawa(src, db) {
     const { types, starts, ends } = tokenize10(src);
@@ -25633,7 +25633,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/ishikawa/render.ts
+  // .upstream/src/diagrams/ishikawa/render.ts
   var SLANT = 0.5;
   var LENGTH = Math.hypot(SLANT, 1);
   var FIRST_ROW = 14;
@@ -25834,7 +25834,7 @@ ${detail}`;
     return { svg: svgDocument("ishikawa", totalWidth, height, size, options, {}, content), width: totalWidth, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/ishikawa/index.ts
+  // .upstream/src/diagrams/ishikawa/index.ts
   var ishikawa = {
     type: "ishikawa",
     parse(source, _config, title) {
@@ -25846,7 +25846,7 @@ ${detail}`;
     render: renderIshikawa
   };
 
-  // ../pele_dart/.upstream/src/diagrams/journey/db.ts
+  // .upstream/src/diagrams/journey/db.ts
   function journeyActors(tasks) {
     const names = new Set;
     for (const task of tasks)
@@ -25887,7 +25887,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/common/scan.ts
+  // .upstream/src/diagrams/common/scan.ts
   function lineEnd(src, from) {
     const at = src.indexOf(`
 `, from);
@@ -25961,7 +25961,7 @@ ${detail}`;
     return q + 1;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/journey/lexer.ts
+  // .upstream/src/diagrams/journey/lexer.ts
   var TOKEN_NAMES9 = [
     "$end",
     "EOF",
@@ -26062,7 +26062,7 @@ ${detail}`;
     return out;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/journey/parser.ts
+  // .upstream/src/diagrams/journey/parser.ts
   var STATEMENT = "'EOF', 'SPACE', 'NEWLINE', 'title', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'section', 'taskName'";
   function parseJourney(src, db) {
     const { types, texts, starts } = tokenize11(src);
@@ -26105,7 +26105,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/journey/render.ts
+  // .upstream/src/diagrams/journey/render.ts
   var PAD_X4 = 10;
   var PAD_Y3 = 8;
   var MIN_TEXT = 124;
@@ -26322,7 +26322,7 @@ ${detail}`;
     return { svg: svgDocument("journey", totalWidth, height, size, options, model, content), width: totalWidth, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/journey/index.ts
+  // .upstream/src/diagrams/journey/index.ts
   var journey = {
     type: "journey",
     parse(source, _config, title) {
@@ -26334,7 +26334,7 @@ ${detail}`;
     render: renderJourney
   };
 
-  // ../pele_dart/.upstream/src/diagrams/common/outline.ts
+  // .upstream/src/diagrams/common/outline.ts
   var NAMES = [
     "1",
     "INVALID",
@@ -26633,7 +26633,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/kanban/db.ts
+  // .upstream/src/diagrams/kanban/db.ts
   class KanbanDb {
     type = "kanban";
     title;
@@ -26705,17 +26705,17 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/kanban/parser.ts
+  // .upstream/src/diagrams/kanban/parser.ts
   function parseKanban(src, db) {
     parseOutline(src, db, true);
   }
 
-  // ../pele_dart/.upstream/src/diagrams/common/icon.ts
+  // .upstream/src/diagrams/common/icon.ts
   function iconSvg(name, x, y, side, icons) {
     return `<svg class="pele-icon" data-icon="${escText(name)}" x="${num(x)}" y="${num(y)}" width="${num(side)}" height="${num(side)}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons?.(name) ?? ""}</svg>`;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/kanban/render.ts
+  // .upstream/src/diagrams/kanban/render.ts
   var COLUMN_GAP = 12;
   var COLUMN_PAD = 8;
   var CARD_PAD = 10;
@@ -26933,7 +26933,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/kanban/index.ts
+  // .upstream/src/diagrams/kanban/index.ts
   var kanban = {
     type: "kanban",
     math: true,
@@ -26946,7 +26946,7 @@ ${detail}`;
     render: renderKanban
   };
 
-  // ../pele_dart/.upstream/src/diagrams/mindmap/db.ts
+  // .upstream/src/diagrams/mindmap/db.ts
   var SECTIONS = 11;
 
   class MindmapDb {
@@ -26991,12 +26991,12 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/mindmap/parser.ts
+  // .upstream/src/diagrams/mindmap/parser.ts
   function parseMindmap(src, db) {
     parseOutline(src, db, false);
   }
 
-  // ../pele_dart/.upstream/src/diagrams/mindmap/render.ts
+  // .upstream/src/diagrams/mindmap/render.ts
   var SHAPES4 = ["", "rounded", "rect", "circle", "cloud", "bang", "hex"];
   var ROOT_SHAPE = "stadium";
   var GAP_X2 = 36;
@@ -27246,7 +27246,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/mindmap/index.ts
+  // .upstream/src/diagrams/mindmap/index.ts
   var mindmap = {
     type: "mindmap",
     math: true,
@@ -27259,7 +27259,7 @@ ${detail}`;
     render: renderMindmap
   };
 
-  // ../pele_dart/.upstream/src/diagrams/packet/model.ts
+  // .upstream/src/diagrams/packet/model.ts
   var MAX_ROWS = 1e4;
   function packetOption(config, key, fallback, min, max) {
     const value = config.packet?.[key];
@@ -27321,7 +27321,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/packet/parser.ts
+  // .upstream/src/diagrams/packet/parser.ts
   var PACKET_TOKENS = [
     { name: "packet-beta", pattern: "packet-beta" },
     keyword("packet"),
@@ -27394,7 +27394,7 @@ ${detail}`;
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/common/fit-text.ts
+  // .upstream/src/diagrams/common/fit-text.ts
   function fitText(text3, max, size, min, measurer, style = 0) {
     if (text3 === "" || max <= 0)
       return;
@@ -27425,7 +27425,7 @@ ${detail}`;
     return width <= max ? { text: cut, size: min, width } : undefined;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/packet/render.ts
+  // .upstream/src/diagrams/packet/render.ts
   function renderPacket(model, config, options) {
     return turnToFit(options, (down) => draw13(model, config, options, down));
   }
@@ -27547,14 +27547,14 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/packet/index.ts
+  // .upstream/src/diagrams/packet/index.ts
   var packet = {
     type: "packet",
     parse: (source, config, title) => buildPacket(parsePacket(source), config, title),
     render: renderPacket
   };
 
-  // ../pele_dart/.upstream/src/diagrams/pie/model.ts
+  // .upstream/src/diagrams/pie/model.ts
   function buildPie(ast, title) {
     const sections = new Map;
     for (const { label: label2, value } of ast.sections) {
@@ -27575,7 +27575,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/pie/parser.ts
+  // .upstream/src/diagrams/pie/parser.ts
   function digits(src, from) {
     let i = from;
     for (let c = src.charCodeAt(i);c >= 48 && c <= 57; c = src.charCodeAt(i))
@@ -27674,7 +27674,7 @@ ${detail}`;
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/pie/render.ts
+  // .upstream/src/diagrams/pie/render.ts
   var RADIUS2 = 120;
   var SWATCH = 12;
   var ROW = 26;
@@ -27814,14 +27814,14 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/pie/index.ts
+  // .upstream/src/diagrams/pie/index.ts
   var pie = {
     type: "pie",
     parse: (source, _config, title) => buildPie(parsePie(source), title),
     render: renderPie
   };
 
-  // ../pele_dart/.upstream/src/diagrams/quadrant/db.ts
+  // .upstream/src/diagrams/quadrant/db.ts
   var RE_NUMBER2 = /^\d+$/;
   var RE_HEX3 = /^#?([\dA-Fa-f]{6}|[\dA-Fa-f]{3})$/;
   var RE_PIXELS = /^\d+px$/;
@@ -27923,7 +27923,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/common/caseless.ts
+  // .upstream/src/diagrams/common/caseless.ts
   function wordAt(src, at, word4) {
     for (let k = 0;k < word4.length; k++) {
       const c = src.charCodeAt(at + k);
@@ -27934,7 +27934,7 @@ ${detail}`;
     return true;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/quadrant/tokens.ts
+  // .upstream/src/diagrams/quadrant/tokens.ts
   var TOKEN_NAMES10 = [
     "$end",
     "INVALID",
@@ -27980,7 +27980,7 @@ ${detail}`;
     "EOF"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/quadrant/lexer.ts
+  // .upstream/src/diagrams/quadrant/lexer.ts
   var AT_END2 = [41 /* EOF */, 4 /* title_value */, 6 /* acc_title_value */, 8 /* acc_descr_value */, 9 /* acc_descr_multiline_value */, 19 /* STR */];
   var SINGLE = new Uint8Array(128);
   for (const [chars, type] of [
@@ -28310,7 +28310,7 @@ ${detail}`;
     return { types, texts, starts };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/quadrant/parser.ts
+  // .upstream/src/diagrams/quadrant/parser.ts
   function flags(...tokens) {
     const out = new Uint8Array(41 /* EOF */ + 1);
     for (const t of tokens)
@@ -28442,7 +28442,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/quadrant/render.ts
+  // .upstream/src/diagrams/quadrant/render.ts
   var GAP6 = 4;
   var CAREFUL = 300;
   function setting4(config, key) {
@@ -28606,7 +28606,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/quadrant/index.ts
+  // .upstream/src/diagrams/quadrant/index.ts
   var quadrantChart = {
     type: "quadrantChart",
     parse(source, _config, title) {
@@ -28618,7 +28618,7 @@ ${detail}`;
     render: renderQuadrant
   };
 
-  // ../pele_dart/.upstream/src/diagrams/radar/model.ts
+  // .upstream/src/diagrams/radar/model.ts
   var MAX_TICKS = 32;
   function invalid3(message) {
     return new PeleError(message, "semantic", { type: "radar" });
@@ -28669,7 +28669,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/radar/parser.ts
+  // .upstream/src/diagrams/radar/parser.ts
   var runFrom = 0;
   var runEnd = 0;
   function digits2(src, at) {
@@ -28883,7 +28883,7 @@ ${detail}`;
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/radar/render.ts
+  // .upstream/src/diagrams/radar/render.ts
   var SWATCH2 = 12;
   var ROW2 = 26;
   var GAP7 = 24;
@@ -29019,14 +29019,14 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/radar/index.ts
+  // .upstream/src/diagrams/radar/index.ts
   var radar = {
     type: "radar",
     parse: (source, _config, title) => buildRadar(parseRadar(source), title),
     render: renderRadar
   };
 
-  // ../pele_dart/.upstream/src/diagrams/railroad/common.ts
+  // .upstream/src/diagrams/railroad/common.ts
   function isSpace3(c) {
     return c === 32 || c >= 9 && c <= 13 || c > 127 && /\s/.test(String.fromCharCode(c));
   }
@@ -29179,7 +29179,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/railroad/abnf.ts
+  // .upstream/src/diagrams/railroad/abnf.ts
   var DIGITS = "0123456789";
   var NAME3 = { name: "ABNF_RULENAME", pattern: /[A-Za-z][A-Za-z0-9-]*/y, first: LETTERS };
   var COMMENT = { name: "ABNF_COMMENT", pattern: /;[^\n\r]*/y, hidden: true, first: ";" };
@@ -29297,7 +29297,7 @@ ${detail}`;
   }
   var abnfRules = (ast) => toRules(ast, node);
 
-  // ../pele_dart/.upstream/src/diagrams/railroad/ebnf.ts
+  // .upstream/src/diagrams/railroad/ebnf.ts
   function specialSequence(src, at) {
     if (src.charCodeAt(at) !== 63)
       return -1;
@@ -29475,7 +29475,7 @@ ${detail}`;
   }
   var ebnfRules = (ast) => toRules(ast, node2);
 
-  // ../pele_dart/.upstream/src/diagrams/railroad/ir.ts
+  // .upstream/src/diagrams/railroad/ir.ts
   var ID7 = identifier("RR_ID");
   var word5 = (name) => literal(name, [ID7]);
   var IR_TOKENS = [
@@ -29595,7 +29595,7 @@ ${detail}`;
   }
   var irRules = (ast) => toRules(ast, node3);
 
-  // ../pele_dart/.upstream/src/diagrams/railroad/peg.ts
+  // .upstream/src/diagrams/railroad/peg.ts
   var ID8 = identifier("PEG_ID");
   var PEG_TOKENS = [
     opening("railroad-peg-beta", ID8),
@@ -29722,7 +29722,7 @@ ${detail}`;
   }
   var pegRules = (ast) => toRules(ast, node4);
 
-  // ../pele_dart/.upstream/src/diagrams/railroad/db.ts
+  // .upstream/src/diagrams/railroad/db.ts
   class RailroadDb {
     type = "railroad";
     notation = "railroad";
@@ -29800,7 +29800,7 @@ ${detail}`;
     return db;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/railroad/render.ts
+  // .upstream/src/diagrams/railroad/render.ts
   var LEAD2 = 12;
   var HEAD_GAP3 = 6;
   var RULE_GAP = 18;
@@ -30149,14 +30149,14 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/railroad/index.ts
+  // .upstream/src/diagrams/railroad/index.ts
   var railroad = {
     type: "railroad",
     parse: (source, _config, title2) => parseRailroad(source, title2),
     render: renderRailroad
   };
 
-  // ../pele_dart/.upstream/src/diagrams/requirement/db.ts
+  // .upstream/src/diagrams/requirement/db.ts
   var RequirementType = {
     REQUIREMENT: "Requirement",
     FUNCTIONAL_REQUIREMENT: "Functional Requirement",
@@ -30317,7 +30317,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/requirement/tokens.ts
+  // .upstream/src/diagrams/requirement/tokens.ts
   var TOKEN_NAMES11 = [
     "$end",
     "INVALID",
@@ -30415,7 +30415,7 @@ ${detail}`;
     ["class", 48 /* CLASS */]
   ]);
 
-  // ../pele_dart/.upstream/src/diagrams/requirement/lexer.ts
+  // .upstream/src/diagrams/requirement/lexer.ts
   var RE_ACC_TITLE6 = /accTitle\s*:\s*/iy;
   var RE_ACC_DESCR7 = /accDescr\s*:\s*/iy;
   var RE_ACC_DESCR_ML5 = /accDescr\s*\{\s*/iy;
@@ -30700,7 +30700,7 @@ ${detail}`;
     return { types, texts, starts };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/requirement/parser.ts
+  // .upstream/src/diagrams/requirement/parser.ts
   var VALUES = [
     RequirementType.REQUIREMENT,
     RequirementType.FUNCTIONAL_REQUIREMENT,
@@ -30932,7 +30932,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/requirement/graph.ts
+  // .upstream/src/diagrams/requirement/graph.ts
   function buildRequirementGraph(model) {
     const nodes = [];
     for (const requirement of model.requirements.values()) {
@@ -30964,7 +30964,7 @@ ${detail}`;
     return { nodes, edges, direction: model.direction };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/requirement/render.ts
+  // .upstream/src/diagrams/requirement/render.ts
   var NODE_SEP5 = 40;
   var EDGE_SEP5 = 16;
   var RANK_SEP5 = 56;
@@ -31258,7 +31258,7 @@ ${detail}`;
     return { svg, width, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/requirement/index.ts
+  // .upstream/src/diagrams/requirement/index.ts
   var requirement = {
     type: "requirement",
     math: true,
@@ -31272,7 +31272,7 @@ ${detail}`;
     render: renderRequirement
   };
 
-  // ../pele_dart/.upstream/src/diagrams/sankey/db.ts
+  // .upstream/src/diagrams/sankey/db.ts
   class SankeyDb {
     type = "sankey";
     nodes = [];
@@ -31295,7 +31295,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sankey/lexer.ts
+  // .upstream/src/diagrams/sankey/lexer.ts
   var TOKEN_NAMES12 = [
     "$end",
     "STUCK",
@@ -31388,7 +31388,7 @@ ${detail}`;
     return { types, texts, starts };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sankey/parser.ts
+  // .upstream/src/diagrams/sankey/parser.ts
   var RE_LINE_BREAKS = /[\n\r]+/g;
   var RE_INVALID_XML2 = /[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff\ufffe\uffff]/u;
   function isBlank3(c) {
@@ -31514,7 +31514,7 @@ ${detail}`;
       fail3("'NEWLINE', 'EOF'");
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sankey/layout.ts
+  // .upstream/src/diagrams/sankey/layout.ts
   var PASSES = 6;
   function sort(list, compare) {
     if (list.length > 8) {
@@ -31776,7 +31776,7 @@ ${detail}`;
     return { nodes, links };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sankey/render.ts
+  // .upstream/src/diagrams/sankey/render.ts
   var LABEL_GAP5 = 6;
   var VALUE_GAP = 15;
   var LABEL_ROOM = 1.8;
@@ -31966,7 +31966,7 @@ ${detail}`;
     return { svg, width, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sankey/index.ts
+  // .upstream/src/diagrams/sankey/index.ts
   var sankey = {
     type: "sankey",
     parse(source, _config, title2) {
@@ -31979,7 +31979,7 @@ ${detail}`;
     render: renderSankey
   };
 
-  // ../pele_dart/.upstream/src/diagrams/sequence/colors.ts
+  // .upstream/src/diagrams/sequence/colors.ts
   var KEYWORDS4 = "aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue blueviolet brown burlywood " + "cadetblue chartreuse chocolate coral cornflowerblue cornsilk crimson cyan darkblue darkcyan darkgoldenrod darkgray " + "darkgreen darkgrey darkkhaki darkmagenta darkolivegreen darkorange darkorchid darkred darksalmon darkseagreen " + "darkslateblue darkslategray darkslategrey darkturquoise darkviolet deeppink deepskyblue dimgray dimgrey dodgerblue " + "firebrick floralwhite forestgreen fuchsia gainsboro ghostwhite gold goldenrod gray green greenyellow grey honeydew " + "hotpink indianred indigo ivory khaki lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan " + "lightgoldenrodyellow lightgray lightgreen lightgrey lightpink lightsalmon lightseagreen lightskyblue lightslategray " + "lightslategrey lightsteelblue lightyellow lime limegreen linen magenta maroon mediumaquamarine mediumblue " + "mediumorchid mediumpurple mediumseagreen mediumslateblue mediumspringgreen mediumturquoise mediumvioletred " + "midnightblue mintcream mistyrose moccasin navajowhite navy oldlace olive olivedrab orange orangered orchid " + "palegoldenrod palegreen paleturquoise palevioletred papayawhip peachpuff peru pink plum powderblue purple " + "rebeccapurple red rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue " + "slateblue slategray slategrey snow springgreen steelblue tan teal thistle tomato turquoise violet wheat white " + "whitesmoke yellow yellowgreen transparent currentcolor inherit initial unset revert " + "accentcolor accentcolortext activetext buttonborder buttonface buttontext canvas canvastext field fieldtext " + "graytext highlight highlighttext linktext mark marktext selecteditem selecteditemtext visitedtext " + "activeborder activecaption appworkspace background buttonhighlight buttonshadow captiontext inactiveborder " + "inactivecaption inactivecaptiontext infobackground infotext menu menutext scrollbar threeddarkshadow threedface " + "threedhighlight threedlightshadow threedshadow window windowframe windowtext";
   var keywords;
   var RE_TERM = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?(%|deg|grad|rad|turn)?$/i;
@@ -32042,7 +32042,7 @@ ${detail}`;
     return keywords.has(color2.toLowerCase());
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sequence/db.ts
+  // .upstream/src/diagrams/sequence/db.ts
   var RE_WRAP = /^:?wrap:/;
   var RE_NOWRAP = /^:?nowrap:/;
   var RE_WRAP_PREFIX = /^:?(?:no)?wrap:/;
@@ -32406,7 +32406,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sequence/tokens.ts
+  // .upstream/src/diagrams/sequence/tokens.ts
   var TOKEN_NAMES13 = [
     "$end",
     "INVALID",
@@ -32489,7 +32489,7 @@ ${detail}`;
     "STICK_ARROW_BOTTOM_REVERSE_DOTTED"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/sequence/lexer.ts
+  // .upstream/src/diagrams/sequence/lexer.ts
   var CLASS2 = new Uint8Array(128);
   for (let c = 0;c < 128; c++) {
     const ch = String.fromCharCode(c);
@@ -32982,7 +32982,7 @@ ${detail}`;
     return { types, texts, starts };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sequence/parser.ts
+  // .upstream/src/diagrams/sequence/parser.ts
   var SIGNAL = new Int8Array(78 /* STICK_ARROW_BOTTOM_REVERSE_DOTTED */ + 1).fill(-1);
   SIGNAL[53 /* SOLID_OPEN_ARROW */] = 5 /* SOLID_OPEN */;
   SIGNAL[54 /* DOTTED_OPEN_ARROW */] = 6 /* DOTTED_OPEN */;
@@ -33365,7 +33365,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sequence/actors.ts
+  // .upstream/src/diagrams/sequence/actors.ts
   var PAD_X6 = 16;
   var PAD_Y5 = 10;
   var GLYPH = 34;
@@ -33434,7 +33434,7 @@ ${detail}`;
     return `<rect x="${num(left)}" y="${num(top)}" width="${num(w)}" height="${num(h)}"${SHAPE}${ROUNDED}/>` + labelSvg(label3, cx, top + h / 2, text3, icons);
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sequence/render.ts
+  // .upstream/src/diagrams/sequence/render.ts
   var STYLES = [];
   function style(type, dotted, head, ends = 1, bottom = false) {
     STYLES[type] = { dotted, head, atStart: ends !== 1, atEnd: ends !== 0, bottom };
@@ -34219,7 +34219,7 @@ ${detail}`;
     return { svg, width, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/sequence/index.ts
+  // .upstream/src/diagrams/sequence/index.ts
   var sequence2 = {
     type: "sequence",
     math: true,
@@ -34237,7 +34237,7 @@ ${detail}`;
     render: renderSequence
   };
 
-  // ../pele_dart/.upstream/src/diagrams/state/graph.ts
+  // .upstream/src/diagrams/state/graph.ts
   function direction2(doc) {
     let dir = "TB";
     for (const item of doc)
@@ -34410,7 +34410,7 @@ ${detail}`;
     return { nodes, edges };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/state/db.ts
+  // .upstream/src/diagrams/state/db.ts
   class StateDb {
     type = "state";
     rootDoc = [];
@@ -34607,7 +34607,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/state/tokens.ts
+  // .upstream/src/diagrams/state/tokens.ts
   var TOKEN_NAMES14 = [
     "$end",
     "INVALID",
@@ -34660,7 +34660,7 @@ ${detail}`;
     "INVALID"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/state/lexer.ts
+  // .upstream/src/diagrams/state/lexer.ts
   var RE_DIRECTION7 = /direction/gi;
   var RE_STEREOTYPE = /<<(?:fork|join|choice)>>|\[\[(?:fork|join|choice)\]\]/gi;
   var RE_LINE_END7 = /[\n\r\u2028\u2029]/g;
@@ -35313,7 +35313,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/state/parser.ts
+  // .upstream/src/diagrams/state/parser.ts
   var DIRECTIONS5 = ["TB", "BT", "RL", "LR"];
   var STATEMENT2 = "'NL', 'ID', 'HIDE_EMPTY', 'scale', 'COMPOSIT_STATE', 'STATE_DESCR', 'FORK', 'JOIN', 'CHOICE', 'CONCURRENT', 'note', " + "'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'CLICK', 'classDef', 'style', 'class', 'direction_tb', " + "'direction_bt', 'direction_rl', 'direction_lr', 'EDGE_STATE'";
   function parseState(src, db) {
@@ -35526,7 +35526,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/state/render.ts
+  // .upstream/src/diagrams/state/render.ts
   var NODE_SEP6 = 40;
   var EDGE_SEP6 = 16;
   var RANK_SEP6 = 44;
@@ -36147,7 +36147,7 @@ ${detail}`;
     return best;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/state/index.ts
+  // .upstream/src/diagrams/state/index.ts
   var state = {
     type: "state",
     math: true,
@@ -36161,7 +36161,7 @@ ${detail}`;
     render: renderState
   };
 
-  // ../pele_dart/.upstream/src/layout/lanes.ts
+  // .upstream/src/layout/lanes.ts
   var LANE_HEAD = 34;
   var LANE_PAD2 = 24;
   var SWEEPS = 8;
@@ -36799,7 +36799,7 @@ ${detail}`;
     return [from.x + dx * scale, from.y + dy * scale];
   }
 
-  // ../pele_dart/.upstream/src/diagrams/swimlane/index.ts
+  // .upstream/src/diagrams/swimlane/index.ts
   var DEFAULT_LANE = "__swimlane_default__";
   function prepare2(graph) {
     let loose2 = false;
@@ -36855,7 +36855,7 @@ ${detail}`;
     render: (db, config, options) => renderFlowchart(db, config, options, variant)
   };
 
-  // ../pele_dart/.upstream/src/diagrams/timeline/db.ts
+  // .upstream/src/diagrams/timeline/db.ts
   class TimelineDb {
     type = "timeline";
     title;
@@ -36901,7 +36901,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/timeline/lexer.ts
+  // .upstream/src/diagrams/timeline/lexer.ts
   var TOKEN_NAMES15 = [
     "$end",
     "EOF",
@@ -37014,7 +37014,7 @@ ${detail}`;
     return out;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/timeline/parser.ts
+  // .upstream/src/diagrams/timeline/parser.ts
   var STATEMENT3 = "'EOF', 'SPACE', 'NEWLINE', 'title', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'section', 'period', 'event'";
   function parseTimeline(src, db) {
     const { types, texts, starts } = tokenize18(src);
@@ -37062,7 +37062,7 @@ ${detail}`;
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/timeline/render.ts
+  // .upstream/src/diagrams/timeline/render.ts
   var PAD_X8 = 12;
   var PAD_Y7 = 8;
   var MIN_TEXT2 = 152;
@@ -37266,7 +37266,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/timeline/index.ts
+  // .upstream/src/diagrams/timeline/index.ts
   var timeline = {
     type: "timeline",
     parse(source, _config, title2) {
@@ -37278,7 +37278,7 @@ ${detail}`;
     render: renderTimeline
   };
 
-  // ../pele_dart/.upstream/src/diagrams/treeview/boxDrawing.ts
+  // .upstream/src/diagrams/treeview/boxDrawing.ts
   var ALL_BOX_CHARS = /[─━│┃└┗├┣]/;
   var BRANCH_CHAR = /[└┗├┣]/;
   var DASH_CHAR = /[─━]/;
@@ -37393,7 +37393,7 @@ ${detail}`;
 `), lineMap, columns };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treeview/parser.ts
+  // .upstream/src/diagrams/treeview/parser.ts
   function annotationAt(src, at) {
     if (src.startsWith("##", at) || src.startsWith("icon(", at))
       return true;
@@ -37517,7 +37517,7 @@ ${detail}`;
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treeview/model.ts
+  // .upstream/src/diagrams/treeview/model.ts
   class TreeViewDb {
     count = 1;
     root = { id: 0, level: -1, name: "/", nodeType: "directory", children: [] };
@@ -37581,7 +37581,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treeview/icons.ts
+  // .upstream/src/diagrams/treeview/icons.ts
   var BUILTIN_PACK = "mermaid-treeview";
   var GLYPHS2 = new Map([
     ["folder", "M3 6.5A1.5 1.5 0 0 1 4.5 5h4.6l2.4 2.5h8A1.5 1.5 0 0 1 21 9v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"],
@@ -37638,7 +37638,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treeview/render.ts
+  // .upstream/src/diagrams/treeview/render.ts
   var ICON_GAP3 = 6;
   var DESC_GAP = 16;
   var GUIDE_INSET = 7;
@@ -37785,14 +37785,14 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treeview/index.ts
+  // .upstream/src/diagrams/treeview/index.ts
   var treeView = {
     type: "treeView",
     parse: (source, _config, title2) => buildTreeView(readTreeView(source), title2),
     render: renderTreeView
   };
 
-  // ../pele_dart/.upstream/src/diagrams/treemap/model.ts
+  // .upstream/src/diagrams/treemap/model.ts
   function buildHierarchy(items) {
     const roots = [];
     const stack = [];
@@ -37853,7 +37853,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treemap/parser.ts
+  // .upstream/src/diagrams/treemap/parser.ts
   var TREEMAP_TOKENS = [
     ACC_DESCR,
     ACC_TITLE,
@@ -37926,7 +37926,7 @@ ${detail}`;
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treemap/format.ts
+  // .upstream/src/diagrams/treemap/format.ts
   var RE_SPEC = /^(?:.?[<>=^])?([-+( ])?(\$)?0?\d*(,)?(?:\.(\d+))?(~)?([a-zA-Z%])?$/;
   function group2(digits3) {
     let out = "";
@@ -37965,7 +37965,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treemap/layout.ts
+  // .upstream/src/diagrams/treemap/layout.ts
   function box3(node5, parent, series) {
     const value = node5.children === undefined && Number.isFinite(node5.value) && node5.value > 0 ? node5.value : 0;
     return { node: node5, parent, series, value, children: [], headed: false, header: 0, x: 0, y: 0, w: 0, h: 0 };
@@ -38074,7 +38074,7 @@ ${detail}`;
     return placed;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treemap/render.ts
+  // .upstream/src/diagrams/treemap/render.ts
   var HEADER = 28;
   var SHORT_HEADER = 18;
   var SIDE = 6;
@@ -38203,17 +38203,17 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/treemap/index.ts
+  // .upstream/src/diagrams/treemap/index.ts
   var treemap = {
     type: "treemap",
     parse: (source, _config, title2) => buildTreemap(parseTreemap(source), title2),
     render: renderTreemap
   };
 
-  // ../pele_dart/.upstream/src/diagrams/usecase/tokens.ts
+  // .upstream/src/diagrams/usecase/tokens.ts
   var TOKEN_NAMES16 = "EOF USECASE ACTOR SYSTEM_BOUNDARY END DIRECTION TD TB BT LR RL NOTE FOR JSON CLASS_DEF CLASS STYLE INCLUDE EXTEND TRUE FALSE IDENTIFIER NUMBER AT COMMA COLON HASH_COLOR CSS_IDENTIFIER CSS_ESCAPED_COMMA DASH DOT PERCENT CSS_PUNCTUATION LABEL_PUNCTUATION LABEL_SYMBOL PLAIN_STRING MARKDOWN_STRING UNCLOSED_MARKDOWN_STRING COMMENT NEWLINE ACC_DESCR_BLOCK ACC_TITLE_LINE ACC_DESCR_LINE JSON_DECLARATION_START JSON_OBJECT_LITERAL UNCLOSED_JSON_OBJECT_LITERAL GENERALIZATION DEPENDENCY_ARROW STEREOTYPE_START STEREOTYPE_END STEREOTYPE_TEXT UNCLOSED_STEREOTYPE_TEXT CLASS_SEPARATOR FORWARD_SOLID BACKWARD_SOLID FORWARD_CIRCLE BACKWARD_CIRCLE FORWARD_CROSS BACKWARD_CROSS MARKERLESS_SOLID METADATA_START LBRACE RBRACE LBRACKET RBRACKET LPAREN RPAREN".split(" ");
 
-  // ../pele_dart/.upstream/src/diagrams/usecase/lexer.ts
+  // .upstream/src/diagrams/usecase/lexer.ts
   var WORD2 = 1;
   var PUNCTUATION = 2;
   var CLASS3 = new Uint8Array(128);
@@ -38613,7 +38613,7 @@ ${detail}`;
     return { types, starts, ends };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/usecase/types.ts
+  // .upstream/src/diagrams/usecase/types.ts
   function emptyModel() {
     return {
       type: "usecase",
@@ -38635,7 +38635,7 @@ ${detail}`;
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/usecase/db.ts
+  // .upstream/src/diagrams/usecase/db.ts
   function emptyDrafts() {
     return {
       elements: [],
@@ -39067,7 +39067,7 @@ ${detail}`;
     return model;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/usecase/json.ts
+  // .upstream/src/diagrams/usecase/json.ts
   class WalkError extends Error {
     offset;
     constructor(offset) {
@@ -39325,7 +39325,7 @@ ${detail}`;
     return { value: parsed, propertyOrder: propertyOrder(text3) };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/usecase/parser.ts
+  // .upstream/src/diagrams/usecase/parser.ts
   var LINE7 = 1;
   var RELATION = 2;
   var STYLE_PART4 = 4;
@@ -39975,7 +39975,7 @@ but found: '${image(p)}'`);
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/usecase/graph.ts
+  // .upstream/src/diagrams/usecase/graph.ts
   var ACTOR_SHAPES = {
     normal: "usecaseActor",
     hollow: "usecaseActorHollow",
@@ -40186,7 +40186,7 @@ but found: '${image(p)}'`);
     return { nodes, edges };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/usecase/render.ts
+  // .upstream/src/diagrams/usecase/render.ts
   var NODE_SEP7 = 32;
   var EDGE_SEP7 = 16;
   var RANK_SEP7 = 72;
@@ -40640,7 +40640,7 @@ but found: '${image(p)}'`);
     return out;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/usecase/index.ts
+  // .upstream/src/diagrams/usecase/index.ts
   var usecase = {
     type: "usecase",
     math: true,
@@ -40648,7 +40648,7 @@ but found: '${image(p)}'`);
     render: renderUsecase
   };
 
-  // ../pele_dart/.upstream/src/diagrams/venn/db.ts
+  // .upstream/src/diagrams/venn/db.ts
   function normalizeText(text4) {
     const trimmed2 = text4.trim();
     return trimmed2.length >= 2 && trimmed2.startsWith('"') && trimmed2.endsWith('"') ? trimmed2.slice(1, -1) : trimmed2;
@@ -40702,7 +40702,7 @@ but found: '${image(p)}'`);
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/venn/lexer.ts
+  // .upstream/src/diagrams/venn/lexer.ts
   var TOKEN_NAMES17 = [
     "$end",
     "INVALID",
@@ -40941,7 +40941,7 @@ but found: '${image(p)}'`);
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/venn/parser.ts
+  // .upstream/src/diagrams/venn/parser.ts
   var STATEMENT4 = "'EOF', 'NEWLINE', 'TITLE', 'SET', 'UNION', 'TEXT', 'INDENT_TEXT', 'STYLE'";
   var VALUE = "'NUMERIC', 'IDENTIFIER', 'STRING', 'HEXCOLOR', 'RGBCOLOR', 'RGBACOLOR'";
   function parseVenn(src2, db) {
@@ -41053,7 +41053,7 @@ but found: '${image(p)}'`);
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/venn/layout.ts
+  // .upstream/src/diagrams/venn/layout.ts
   var TAU = Math.PI * 2;
   function ensurePairwiseSubsets(subsets) {
     const present = new Set;
@@ -41389,7 +41389,7 @@ but found: '${image(p)}'`);
     return d + "Z";
   }
 
-  // ../pele_dart/.upstream/src/diagrams/venn/render.ts
+  // .upstream/src/diagrams/venn/render.ts
   var RADIUS3 = 100;
   var MAX_GROWTH = 1.6;
   var NO_STYLE = resolveStyle([]);
@@ -41568,7 +41568,7 @@ but found: '${image(p)}'`);
     return { svg, width, height, links: [] };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/venn/index.ts
+  // .upstream/src/diagrams/venn/index.ts
   var venn = {
     type: "venn",
     parse(source, _config, title2) {
@@ -41581,7 +41581,7 @@ but found: '${image(p)}'`);
     render: renderVenn
   };
 
-  // ../pele_dart/.upstream/src/diagrams/wardley/builder.ts
+  // .upstream/src/diagrams/wardley/builder.ts
   class WardleyBuilder {
     nodes = new Map;
     labels;
@@ -41683,7 +41683,7 @@ but found: '${image(p)}'`);
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/wardley/model.ts
+  // .upstream/src/diagrams/wardley/model.ts
   function toPercent(value, context2) {
     const normalized = value <= 1 ? value * 100 : value;
     if (normalized < 0 || normalized > 100) {
@@ -41822,7 +41822,7 @@ but found: '${image(p)}'`);
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/wardley/parser.ts
+  // .upstream/src/diagrams/wardley/parser.ts
   function digits3(src2, from) {
     let i = from;
     for (let c = src2.charCodeAt(i);c >= 48 && c <= 57; c = src2.charCodeAt(i))
@@ -42116,7 +42116,7 @@ but found: '${image(p)}'`);
     return ast;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/wardley/render.ts
+  // .upstream/src/diagrams/wardley/render.ts
   var DEFAULT_STAGES = ["Genesis", "Custom Built", "Product", "Commodity"];
   var CANVAS_MARGIN = 48;
   var R = 6;
@@ -42466,7 +42466,7 @@ but found: '${image(p)}'`);
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/wardley/index.ts
+  // .upstream/src/diagrams/wardley/index.ts
   var wardley = {
     type: "wardley",
     section: "wardley-beta",
@@ -42474,7 +42474,7 @@ but found: '${image(p)}'`);
     render: renderWardley
   };
 
-  // ../pele_dart/.upstream/src/diagrams/xychart/db.ts
+  // .upstream/src/diagrams/xychart/db.ts
   class XyChartDb {
     type = "xychart";
     title;
@@ -42556,7 +42556,7 @@ but found: '${image(p)}'`);
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/xychart/tokens.ts
+  // .upstream/src/diagrams/xychart/tokens.ts
   var TOKEN_NAMES18 = [
     "$end",
     "INVALID",
@@ -42594,7 +42594,7 @@ but found: '${image(p)}'`);
     "EOF"
   ];
 
-  // ../pele_dart/.upstream/src/diagrams/xychart/lexer.ts
+  // .upstream/src/diagrams/xychart/lexer.ts
   var AT_END3 = [33 /* EOF */, 33 /* EOF */, 33 /* EOF */, 33 /* EOF */, 33 /* EOF */, 19 /* STR */, 5 /* acc_title_value */, 7 /* acc_descr_value */, 8 /* acc_descr_multiline_value */];
   var BROKEN_RULE = "`)" + " ".repeat(36) + '{ this.pushstate(md_string); }\n<md_string>(?:(?!`").)+' + " ".repeat(18) + "{ return md_str; }\n<md_string>(?:`";
   var SINGLE2 = new Uint8Array(128);
@@ -42850,7 +42850,7 @@ but found: '${image(p)}'`);
     return { types: types2, texts, starts: starts2 };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/xychart/parser.ts
+  // .upstream/src/diagrams/xychart/parser.ts
   function flags2(...tokens) {
     const out = new Uint8Array(33 /* EOF */ + 1);
     for (const t of tokens)
@@ -42967,7 +42967,7 @@ but found: '${image(p)}'`);
     }
   }
 
-  // ../pele_dart/.upstream/src/diagrams/xychart/ticks.ts
+  // .upstream/src/diagrams/xychart/ticks.ts
   function tickStep2(span3, count2) {
     const raw = span3 / Math.max(count2, 1);
     const power = Math.floor(Math.log10(raw));
@@ -42994,7 +42994,7 @@ but found: '${image(p)}'`);
     return out;
   }
 
-  // ../pele_dart/.upstream/src/diagrams/xychart/render.ts
+  // .upstream/src/diagrams/xychart/render.ts
   var TICK = 4;
   var SWATCH3 = 12;
   var ROW3 = 26;
@@ -43351,7 +43351,7 @@ but found: '${image(p)}'`);
     };
   }
 
-  // ../pele_dart/.upstream/src/diagrams/xychart/index.ts
+  // .upstream/src/diagrams/xychart/index.ts
   var xychart = {
     type: "xychart",
     section: "xyChart",
@@ -43364,7 +43364,7 @@ but found: '${image(p)}'`);
     render: renderXyChart
   };
 
-  // ../pele_dart/.upstream/src/diagrams/registry.ts
+  // .upstream/src/diagrams/registry.ts
   var all = [
     flowchart,
     pie,
@@ -43401,7 +43401,7 @@ but found: '${image(p)}'`);
     swimlane
   ];
 
-  // ../pele_dart/.upstream/src/index.ts
+  // .upstream/src/index.ts
   register(...all);
   globalThis.Pele = exports_src;
   globalThis.PeleMetricsMeasurer = metricsMeasurer;

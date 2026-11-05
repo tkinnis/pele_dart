@@ -14,7 +14,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 enum ComparisonEngine {
   peleDart('pele_dart', 'pele_dart (Pure Dart)', Color(0xFF00B4D8)),
   peleJs('pele_js', 'obsidianmd/pele (JS)', Color(0xFF7C3AED)),
-  mermaidJs('mermaid_js', 'mermaid.js (v11)', Color(0xFFFF007F));
+  mermaidJs('mermaid_js', 'mermaid.js (v12.1.0)', Color(0xFFFF007F));
 
   final String id;
   final String label;
