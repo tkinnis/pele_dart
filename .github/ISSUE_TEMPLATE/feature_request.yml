@@ -26,7 +26,7 @@ body:
       options:
         - Dart / Flutter ecosystem integration (e.g., SvgOutputMode.flattened, PelePalette, TextMeasurer)
         - Upstream obsidianmd/pele sync (new upstream Pele release or commit)
-        - Example app / 3-Way Comparison Studio / Documentation
+        - Pele Studio (studio/) / Documentation
         - Other
     validations:
       required: true

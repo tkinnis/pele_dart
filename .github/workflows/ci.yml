@@ -35,7 +35,7 @@ jobs:
         run: dart format --output=none --set-exit-if-changed lib test tool studio/lib example/main.dart
 
       - name: Run static analysis
-        run: dart analyze --fatal-infos lib test tool
+        run: dart analyze --fatal-infos lib test tool example
 
       - name: Run test suite (including 1:1 version lockstep & doc examples)
         run: dart test
