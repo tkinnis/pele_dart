@@ -1,4 +1,4 @@
-# pele_dart
+# ![Pele](doc/images/pele_logo.svg) pele_dart
 
 [![pub package](https://img.shields.io/pub/v/pele_dart.svg)](https://pub.dev/packages/pele_dart)
 [![CI](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml/badge.svg)](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml)
@@ -6,51 +6,51 @@
 [![Upstream obsidianmd/pele](https://img.shields.io/badge/upstream-obsidianmd%2Fpele-7c3aed)](UPSTREAM.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG rendering engine.
+**pele_dart** renders [Mermaid](https://mermaid.js.org) diagrams to SVG in pure Dart. It is fast, synchronous, has zero browser or JavaScript dependencies, and outputs both themeable CSS-variable SVG and static SVG 1.1 ready for Flutter.
 
-**`pele_dart`** is a 1:1 pure-Dart port of [**`obsidianmd/pele`**](https://github.com/obsidianmd/pele) ([`pele.run`](https://pele.run))—the lightweight, synchronous, zero-dependency TypeScript Mermaid renderer created by [**Steph Ango (`kepano`)**](https://github.com/kepano) and the [**Obsidian**](https://obsidian.md) team—augmented with a native SVG 1.1 flattener for Flutter's `vector_graphics_compiler` (`encodeSvg`).
+Ported 1:1 from [Pele](https://pele.run) ([obsidianmd/pele](https://github.com/obsidianmd/pele)) by [Steph Ango](https://github.com/kepano) and the [Obsidian](https://obsidian.md) team.
 
 ## Highlights
 
-* **Pure Dart 3 (`sdk: ^3.13.0`)**: Zero browser (`WKWebView` / `WebKitGTK` / `WebView2`), zero JavaScript runtime (`QuickJS` / `JavaScriptCore`), and zero Flutter SDK dependency in the core package. Runs synchronously in CLI tools, servers, background Dart isolates (`Isolate.run`), and Flutter apps.
-* **100% Byte-for-Byte Upstream Parity**: Version-locked 1:1 to upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (see [Upstream Tracking](UPSTREAM.md)) across all supported diagram families, showcase/playground samples, and upstream test corpus diagrams.
-* **Native Dart AOT Performance**: Renders the entire showcase gallery corpus in **~10.2 ms** (`43.8 µs` mean per diagram)—**~2.2x faster** overall (and up to **4.5x faster** on complex Class, Sequence, and Flowchart diagrams) than JavaScript (see [Performance Benchmarks](doc/BENCHMARKS.md)).
-* **Dual SVG Output Modes (`SvgOutputMode`)**:
-  * **`SvgOutputMode.flattened`** *(Default)*: Resolves all `--pele-*` CSS custom properties, `color-mix(in srgb, ...)` blends, `calc(...)` expressions, `currentColor`, and `<tspan>` `baseline-shift` against a `PelePalette` into static SVG 1.1 attributes ready for `vector_graphics_compiler` (`encodeSvg`).
-  * **`SvgOutputMode.cssVariables`** *(Upstream Parity)*: Emits upstream `obsidianmd/pele`'s exact theme-reactive `var(--pele-*)` SVG markup.
-* **Built-in Safety & Resource Limits**: Escapes diagram text, sanitizes link/image URL schemes (`http`, `https`, `mailto`, `tel`), and enforces configurable DoS budgets (`limit`, `maxEdges`, recursion depth, and `outputLimit`).
+* **Pure Dart**: Synchronous layout and SVG rendering with zero WebView, zero JavaScript runtime, and zero Flutter SDK dependency in the core package.
+* **100% Upstream Parity**: Version-locked 1:1 to [obsidianmd/pele](https://github.com/obsidianmd/pele) across every supported diagram family and test suite (see [Upstream Tracking](UPSTREAM.md)).
+* **2.2x Faster in Native AOT**: Renders the full showcase corpus in **~10.2 ms** (**43.8 µs** mean per diagram)—up to **4.5x faster** on complex diagrams than JavaScript (see [Performance Benchmarks](doc/BENCHMARKS.md)).
+* **Flutter & Web Ready**: Emit static SVG 1.1 attributes for Flutter's `vector_graphics_compiler` (`SvgOutputMode.flattened`) or theme-reactive CSS variables (`SvgOutputMode.cssVariables`).
+* **Safe by Default**: Escapes diagram text, filters unsafe URLs, and enforces configurable size and complexity budgets.
 
 ## Visual Showcase
 
-Every image below is a standalone SVG generated directly by `pele_dart` in pure Dart (`SvgOutputMode.flattened`) with zero browser or JavaScript runtime. [**Browse all supported diagram families in the Visual Diagram Gallery →**](doc/DIAGRAM_GALLERY.md)
+Every diagram below is a standalone SVG generated directly by **pele_dart** in pure Dart.
 
-**Flowchart (`flowchart`)**
+**[→ Browse the Full Visual Diagram Gallery (All Supported Diagram Families)](doc/DIAGRAM_GALLERY.md)**
+
+### Flowchart
 
 ![Flowchart](doc/images/diagrams/flowchart.svg)
 
-| Sequence Diagram (`sequenceDiagram`) | Class Diagram (`classDiagram`) |
+| Sequence Diagram | Class Diagram |
 | :---: | :---: |
 | ![Sequence Diagram](doc/images/diagrams/sequence.svg) | ![Class Diagram](doc/images/diagrams/class.svg) |
 
 ### Custom Styling & Palettes
 
-Use the built-in defaults (`PelePalette.light` or `PelePalette.dark`) or supply a custom `PelePalette(...)`, `--pele-*` CSS variables, or in-diagram Mermaid `classDef` / `style` directives (see [**Theming & Customization in the API Manual**](doc/API_MANUAL.md#5-theming-styling--customization)):
+Use the built-in light and dark palettes, supply a custom `PelePalette`, or style nodes with Mermaid `classDef` directives (see [Theming & Customization](doc/API_MANUAL.md#5-theming-styling--customization)):
 
-**Default Light (`PelePalette.light`)**
+**Default Light Palette**
 
 ![Default Light](doc/images/styles/style_light.svg)
 
-**Custom Palette Example (Catppuccin Mocha)**
+**Catppuccin Mocha Palette**
 
 ![Catppuccin Mocha](doc/images/styles/style_catppuccin_mocha.svg)
 
-## Installation & Quick Start
+## Quick Start
 
 ```bash
 dart pub add pele_dart
 ```
 
-### Pure Dart Usage
+### Pure Dart
 
 ```dart
 import 'package:pele_dart/pele_dart.dart';
@@ -63,7 +63,6 @@ flowchart LR
   B -->|No| D[Revise]
 ''';
 
-  // Render with full metadata (dimensions, detected diagram type, links, and SVG):
   final RenderResult result = render(
     source,
     const RenderOptions(
@@ -77,7 +76,7 @@ flowchart LR
 }
 ```
 
-### Flutter Vector Graphics Integration
+### Flutter Vector Graphics
 
 ```dart
 final result = render(
@@ -97,32 +96,21 @@ final Uint8List vectorBytes = encodeSvg(
 );
 ```
 
-See the [**API User Manual**](doc/API_MANUAL.md) for two-phase `parse()` + `render()`, `PeleError` diagnostics, custom `PelePalette` tokens, `TextMeasurer` / `IconResolver` / `MathResolver` hooks, and complete Flutter widget examples.
-
-## Supported Diagram Families
-
-`pele_dart` supports every diagram family in `obsidianmd/pele` (browse rendered SVG outputs and sample source in the [Visual Diagram Gallery](doc/DIAGRAM_GALLERY.md)):
-
-| Tier | Mermaid Header Keywords |
-| :--- | :--- |
-| **Core Mermaid** | `flowchart` (`graph`, `flowchart-elk`), `sequenceDiagram`, `classDiagram`, `stateDiagram-v2` (`stateDiagram`), `erDiagram`, `gantt`, `gitGraph`, `mindmap`, `pie`, `info` |
-| **Extended & Beta** | `architecture-beta`, `C4Context` (`C4Container`, `C4Component`, `C4Dynamic`, `C4Deployment`), `kanban`, `sankey`, `xychart-beta`, `block-beta`, `packet-beta`, `timeline`, `journey`, `quadrantChart`, `requirementDiagram`, `radar-beta`, `treemap-beta`, `treeView-beta`, `railroad-beta`, `agentflow-beta`, `ishikawa-beta`, `venn-beta`, `wardley-beta`, `cynefin-beta`, `swimlane-beta`, `usecase-beta`, `eventmodeling` |
-
-## Documentation & Workbench
+## Documentation
 
 | Guide | Description |
 | :--- | :--- |
-| **[API User Manual](doc/API_MANUAL.md)** | Complete reference for `render`, `renderMermaid`, `parse`, `detectType`, `supports`, `SvgOutputMode`, `PelePalette`, `PeleError`, custom resolvers, and Flutter integration. |
-| **[Visual Diagram Gallery](doc/DIAGRAM_GALLERY.md)** | Standalone SVG renders and Mermaid source code for all supported diagram families. |
-| **[Performance Benchmarks](doc/BENCHMARKS.md)** | Native Dart AOT vs `obsidianmd/pele` (JS) benchmarks across the full gallery corpus, phase breakdowns, and regression gate rules. |
-| **[Pele Studio User Guide](doc/STUDIO_GUIDE.md)** | Guide to **Pele Studio** (`studio/`), the macOS 3-way visual & SVG diff workbench comparing `pele_dart`, `obsidianmd/pele` (JS), and `mermaid.js`. |
+| **[API User Manual](doc/API_MANUAL.md)** | Complete reference for `render`, `parse`, `detectType`, `supports`, `PelePalette`, `PeleError`, custom resolvers, and Flutter integration. |
+| **[Visual Diagram Gallery](doc/DIAGRAM_GALLERY.md)** | Rendered SVG outputs and Mermaid source for all supported diagram families—Flowchart, Sequence, Class, State, ER, C4, Architecture, Sankey, XY Chart, Gantt, Kanban, Mindmap, Radar, Timeline, and more. |
+| **[Performance Benchmarks](doc/BENCHMARKS.md)** | Native Dart AOT vs JavaScript benchmarks across the full gallery corpus and phase breakdowns. |
+| **[Pele Studio Guide](doc/STUDIO_GUIDE.md)** | Guide to **Pele Studio**, the macOS 3-way visual and SVG diff workbench. |
 
 **Architecture & Maintainer Docs:** [Architecture & Internals](doc/ARCHITECTURE.md) · [Upstream Tracking](UPSTREAM.md) · [Upstream Sync Guide](doc/UPSTREAM_SYNC.md) · [Contributing Guide](CONTRIBUTING.md)
 
 ## Credits & License
 
-`pele_dart` is a pure-Dart port of [**`obsidianmd/pele`**](https://github.com/obsidianmd/pele) ([`pele.run`](https://pele.run)), created by [**Steph Ango (`kepano`)**](https://github.com/kepano) and the [**Obsidian**](https://obsidian.md) team. All credit for the original parser architecture, deterministic layout algorithms, and `--pele-*` visual design system belongs to the upstream `obsidianmd/pele` authors.
+**pele_dart** is a pure-Dart port of [Pele](https://pele.run) ([obsidianmd/pele](https://github.com/obsidianmd/pele)), created by [Steph Ango](https://github.com/kepano) and the [Obsidian](https://obsidian.md) team. All credit for the original parser architecture, deterministic layout algorithms, and visual design system belongs to the upstream authors.
 
-* **`pele_dart`**: Copyright (c) 2026 Tony Kinnis — [MIT License](LICENSE).
-* **Upstream `obsidianmd/pele`**: Copyright (c) 2026 kepano — [MIT License](https://github.com/obsidianmd/pele/blob/main/LICENSE).
+* **pele_dart**: Copyright (c) 2026 Tony Kinnis — [MIT License](LICENSE).
+* **Upstream obsidianmd/pele**: Copyright (c) 2026 kepano — [MIT License](https://github.com/obsidianmd/pele/blob/main/LICENSE).
 * **Built-in Icons**: Includes icon paths from [Lucide](https://lucide.dev) — [ISC License](LICENSE).
