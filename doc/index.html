@@ -444,6 +444,10 @@
       transition: color 150ms ease, text-decoration-color 150ms ease;
     }
 
+    .markdown-section a.anchor {
+      text-decoration: none !important;
+    }
+
     .markdown-section a:hover {
       color: var(--volcano) !important;
       text-decoration-color: var(--volcano);
@@ -531,6 +535,11 @@
       font-size: 0.875rem !important;
       line-height: 1.68 !important;
       overflow-x: auto;
+    }
+
+    .markdown-section pre::after {
+      display: none !important;
+      content: none !important;
     }
 
     .markdown-section pre > code {
