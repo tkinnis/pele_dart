@@ -56,26 +56,32 @@ flowchart LR
 
 ---
 
-## 2. Launching the macOS 3-Way Comparison Studio
+## 2. Launching the macOS 3-Way Comparison Studio (`Pele Studio`)
 
-From the `example/` directory:
+> **[Read the Complete Pele Studio User Guide (`docs/STUDIO_GUIDE.md`) →](../docs/STUDIO_GUIDE.md)**
+
+![Pele Studio — 3-Way Visual Render Workbench](../docs/images/studio/studio_3way_render.png)
+
+From the `example/` directory, run in `--release` mode to benchmark native Dart AOT speeds:
 
 ```bash
 cd example
-flutter run -d macos
+flutter run -d macos --release
 ```
 
 ### Studio Features
 
 * **3-Engine Side-by-Side Comparison**:
-  * **`pele_dart` (Pure Dart)** — rendered natively in Dart.
+  * **`pele_dart` (Pure Dart)** — rendered natively in Dart via `flattenPeleSvg` + `vector_graphics`.
   * **`obsidianmd/pele` (JS)** — upstream JavaScript reference bundle (see [`UPSTREAM.md`](../UPSTREAM.md)).
   * **`mermaid.js`** — standard Mermaid browser renderer.
 * **4 Inspection Modes**:
-  1. **Visual Render**: Synchronized pan and zoom across all active engine columns.
-  2. **Visual Diff**: Compare any two engines using **Split-Curtain Swipe**, **Cyan/Magenta Channel Overlay**, **Pixel-Diff Heatmap**, or **A/B Blink Toggle**.
-  3. **Raw SVG**: Pretty-printed, syntax-readable SVG source for each engine with one-click copy.
+  1. **Visual Render**: Synchronized pan and zoom across all active engine columns with draggable column splitters and per-engine `p50` timing badges.
+  2. **Visual Diff**: Compare any two engines using **Split-Curtain Swipe**, **Cyan/Magenta Channel Overlay**, **Pixel-Diff Heatmap**, or **In-Place Blink Toggle**.
+  3. **Raw SVG**: Pretty-printed, syntax-readable SVG source for each engine (`SvgOutputMode.flattened` or `SvgOutputMode.cssVariables`) with one-click copy.
   4. **SVG Text Diff**: Line-by-line unified diff between any two engines, plus an **Open in External Diff** launcher (`opendiff`, `code --diff`, `meld`, `ksdiff`).
+* **Full Keyboard Navigation**:
+  * Step through all 232+ diagrams with `↓` / `→` / `j` (Next Diagram) and `↑` / `←` / `k` (Previous Diagram), jump between the 33 diagram family folders with `Alt + ↓` / `]` and `Alt + ↑` / `[`, or press `1`–`9` (`Home` / `End`) to jump directly to a sample within the current family.
 * **Style Preset Selector & Live `Style (CSS)` Editor**:
   * Switch between example style presets (`Default Dark`, `Default Light`, `Flexoki Paper`, `Catppuccin Mocha`, `Nord Blueprint`, `Solarized Dark`) in the top toolbar.
   * Open the **`Style (CSS)`** tab in the bottom Playground Editor to type in your own `--pele-*` CSS custom properties and preview them live.

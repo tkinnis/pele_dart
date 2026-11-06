@@ -216,15 +216,19 @@ xychart-beta
 
 ## macOS 3-Way Comparison Studio (`example/`)
 
-The repository includes a macOS desktop showcase and comparison workbench in [`example/`](example/README.md) that renders every diagram side-by-side across **`pele_dart` (Pure Dart)**, **`obsidianmd/pele` (JS)**, and **`mermaid.js`**:
+The repository includes **Pele Studio**, a native macOS desktop showcase and comparison workbench in [`example/`](example/README.md) that renders every diagram side-by-side across **`pele_dart` (Pure Dart)**, **`obsidianmd/pele` (JS)**, and **`mermaid.js`**.
+
+> **[Read the Pele Studio User Guide (`docs/STUDIO_GUIDE.md`) →](docs/STUDIO_GUIDE.md)**
+
+![Pele Studio — 3-Way Visual Render Workbench](docs/images/studio/studio_3way_render.png)
 
 ```bash
 cd example
-flutter run -d macos
+flutter run -d macos --release
 ```
 
-* **Gallery Folder Browser (`example/diagrams/`)**: Dynamically scans `.mmd` and `.mermaid` text files organized under `01_core/`, `02_extended/`, and `03_custom/`. Drop new `.mmd` or `.mermaid` files into any subfolder and click **Rescan (`↻`)** to browse them immediately.
-* **4 Inspection Modes**: **Visual Render** (synchronized pan/zoom), **Visual Diff** (split-curtain swipe, Cyan/Magenta channel overlay, pixel-diff heatmap, and blink toggle), **Raw SVG**, and **SVG Text Diff** (inline diff + external diff launcher).
+* **Gallery Folder Browser & Keyboard Navigation (`example/diagrams/`)**: Dynamically scans `.mmd` and `.mermaid` text files organized under `01_core/`, `02_extended/`, and `03_custom/`. Step through all 232+ diagrams with `↑` / `↓` (`←` / `→`, `j` / `k`), jump between folders with `Alt + ↑` / `Alt + ↓` (`[` / `]`), or press `1`–`9` to select samples directly.
+* **4 Inspection Modes**: **Visual Render** (synchronized pan/zoom & timing badges), **Visual Diff** (split-curtain swipe, Cyan/Magenta channel overlay, pixel-diff heatmap, and blink toggle), **Raw SVG**, and **SVG Text Diff** (inline diff + external diff launcher).
 * **Live Mermaid & CSS Style Playground**: Edit Mermaid source or switch to the **`Style (CSS)`** tab to test custom `--pele-*` CSS variables and style presets in real time.
 
 ---
@@ -233,6 +237,7 @@ flutter run -d macos
 
 * **[Visual Diagram Gallery (`docs/DIAGRAM_GALLERY.md`)](docs/DIAGRAM_GALLERY.md)**: Clean standalone SVG renders and Mermaid source code for all 33 supported diagram families.
 * **[Performance Benchmarks (`docs/BENCHMARKS.md`)](docs/BENCHMARKS.md)**: Native Dart AOT vs `obsidianmd/pele` (JS) benchmarks across all 33 diagram families (232 diagrams), phase breakdowns (`parse` vs `render`), and upstream sync regression gate rules.
+* **[Pele Studio User Guide (`docs/STUDIO_GUIDE.md`)](docs/STUDIO_GUIDE.md)**: Complete walkthrough of the macOS 3-Way Comparison Studio, Visual Diff tools, keyboard shortcuts, and custom `.mmd` workflows.
 * **[API User Manual (`docs/API_MANUAL.md`)](docs/API_MANUAL.md)**: Complete reference covering `render`, `renderMermaid`, `parse`, `detectType`, `supports`, `SvgOutputMode`, `PelePalette` theming & custom palettes, `RenderOptions`, `ParseOptions`, `PeleError`, custom `TextMeasurer` / `IconResolver` / `MathResolver`, and Flutter integration.
 * **[Example & Comparison Studio Guide (`example/README.md`)](example/README.md)**: Guide to pure-Dart CLI usage and the macOS 3-Way Comparison Studio.
 * **[Upstream Sync & Release Guide (`docs/UPSTREAM_SYNC.md`)](docs/UPSTREAM_SYNC.md)**: Workflow for detecting upstream `obsidianmd/pele` releases (`dart run tool/sync_upstream.dart`), staging diffs, and running the 787-diagram differential verification suite (`dart run tool/verify_against_upstream.dart`).

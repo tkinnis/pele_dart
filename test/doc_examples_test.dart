@@ -336,8 +336,10 @@ flowchart LR
         final docFiles = <String>[
           'README.md',
           'docs/API_MANUAL.md',
+          'docs/BENCHMARKS.md',
           'docs/DESIGN.md',
           'docs/DIAGRAM_GALLERY.md',
+          'docs/STUDIO_GUIDE.md',
         ];
         final fenceRe = RegExp(r'```mermaid\n([\s\S]*?)```');
         var totalBlocks = 0;
@@ -445,6 +447,7 @@ flowchart LR
         'docs/API_MANUAL.md',
         'docs/BENCHMARKS.md',
         'docs/DIAGRAM_GALLERY.md',
+        'docs/STUDIO_GUIDE.md',
         'docs/UPSTREAM_SYNC.md',
         'docs/DESIGN.md',
       ];
