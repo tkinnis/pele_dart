@@ -10,6 +10,7 @@ import 'package:vector_graphics/vector_graphics_compat.dart';
 
 import 'engine_runner.dart';
 import 'gallery_samples.dart';
+import 'mac_controls.dart';
 import 'svg_diff_view.dart';
 import 'visual_diff_view.dart';
 
@@ -686,7 +687,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       builder: (ctx) {
         return AlertDialog(
           title: const Text(
-            'Save Diagram to example/diagrams/03_custom/',
+            'Save Diagram to studio/diagrams/03_custom/',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
           ),
           content: SizedBox(
@@ -950,8 +951,8 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
     );
 
     return Container(
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         border: Border(
@@ -960,22 +961,22 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       ),
       child: Row(
         children: <Widget>[
-          IconButton(
+          MacIconButton(
             tooltip:
                 _showGallerySidebar
                     ? 'Hide Diagram Sidebar'
                     : 'Show Diagram Sidebar',
-            icon: const Icon(Icons.view_sidebar_outlined, size: 17),
-            visualDensity: VisualDensity.compact,
+            icon: Icons.view_sidebar_outlined,
+            isActive: _showGallerySidebar,
             onPressed:
                 () =>
                     setState(() => _showGallerySidebar = !_showGallerySidebar),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           Image.asset(
             'assets/app_icon.png',
-            width: 20,
-            height: 20,
+            width: 19,
+            height: 19,
             filterQuality: FilterQuality.medium,
             errorBuilder:
                 (_, __, ___) => const Icon(
@@ -987,35 +988,29 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
           const SizedBox(width: 6),
           const Text(
             'Pele Studio',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
           ),
-          const SizedBox(width: 8),
-          // Primary 4-Mode Switcher centered
+          const SizedBox(width: 10),
+          // Primary 4-Mode Switcher centered (macOS NSSegmentedControl style)
           Expanded(
             child: Center(
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: SegmentedButton<InspectionTab>(
-                  style: const ButtonStyle(
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  segments:
-                      InspectionTab.values
-                          .map(
-                            (t) => ButtonSegment<InspectionTab>(
-                              value: t,
-                              icon: Icon(t.icon, size: 14),
-                              label: Text(
-                                t.label,
-                                style: const TextStyle(fontSize: 11.5),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                  selected: <InspectionTab>{_activeTab},
-                  onSelectionChanged: (sel) {
+                child: MacSegmentedControl<InspectionTab>(
+                  height: 26,
+                  fontSize: 11.5,
+                  segments: <MacSegment<InspectionTab>>[
+                    for (final t in InspectionTab.values)
+                      MacSegment<InspectionTab>(
+                        value: t,
+                        icon: t.icon,
+                        label: t.label,
+                      ),
+                  ],
+                  selected: _activeTab,
+                  onChanged: (next) {
                     setState(() {
-                      _activeTab = sel.first;
+                      _activeTab = next;
                     });
                   },
                 ),
@@ -1023,10 +1018,26 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          // Style / Theme Preset Selector
-          PopupMenuButton<PeleStylePreset>(
+          // Style / Theme Preset Selector (macOS NSPopUpButton style)
+          MacPopupButton<PeleStylePreset>(
             tooltip: 'Diagram Theme & Style Preset',
-            onSelected: (preset) {
+            value: _stylePreset,
+            items: <MacPopupItem<PeleStylePreset>>[
+              for (final p in PeleStylePreset.values)
+                MacPopupItem<PeleStylePreset>(
+                  value: p,
+                  label: p.label,
+                  dotColor:
+                      p == PeleStylePreset.custom
+                          ? swatchBg
+                          : parseHexColor(p.palette.bg),
+                  dotBorderColor:
+                      p == PeleStylePreset.custom
+                          ? swatchAccent
+                          : parseHexColor(p.palette.accent ?? '#5b7bd5'),
+                ),
+            ],
+            onChanged: (preset) {
               if (preset == PeleStylePreset.custom) {
                 setState(() {
                   _stylePreset = PeleStylePreset.custom;
@@ -1039,69 +1050,8 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                 _applyStylePreset(preset);
               }
             },
-            itemBuilder:
-                (_) => <PopupMenuEntry<PeleStylePreset>>[
-                  for (final p in PeleStylePreset.values)
-                    PopupMenuItem<PeleStylePreset>(
-                      value: p,
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            width: 14,
-                            height: 14,
-                            decoration: BoxDecoration(
-                              color: parseHexColor(p.palette.bg),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: parseHexColor(
-                                  p.palette.accent ?? '#5b7bd5',
-                                ),
-                                width: 2.5,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(child: Text(p.label)),
-                          if (_stylePreset == p)
-                            const Icon(Icons.check, size: 15),
-                        ],
-                      ),
-                    ),
-                ],
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.7),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Container(
-                    width: 11,
-                    height: 11,
-                    decoration: BoxDecoration(
-                      color: swatchBg,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: swatchAccent, width: 2.2),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Style: ${_stylePreset.label} ▾',
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           // Clean Engines Popover (1-Way / 2-Way / 3-Way + Individual Toggles)
           PopupMenuButton<String>(
             tooltip: 'Active Comparison Engines',
@@ -1167,12 +1117,19 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                   ),
                 ],
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              height: 26,
+              padding: const EdgeInsets.only(left: 9, right: 6),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF262A34)
+                        : Theme.of(context).colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.7),
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withValues(alpha: 0.13)
+                          : Colors.black.withValues(alpha: 0.14),
                 ),
               ),
               child: Row(
@@ -1191,28 +1148,34 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                   ],
                   const SizedBox(width: 2),
                   Text(
-                    '${_selectedEngines.length}-Way ▾',
+                    '${_selectedEngines.length}-Way',
                     style: const TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
                     ),
+                  ),
+                  const SizedBox(width: 3),
+                  Icon(
+                    Icons.unfold_more,
+                    size: 13,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ],
               ),
             ),
           ),
           const SizedBox(width: 6),
-          IconButton(
+          MacIconButton(
             tooltip: 'Run 15× Benchmark Across All Engines',
-            icon: const Icon(Icons.speed, size: 17),
-            visualDensity: VisualDensity.compact,
+            icon: Icons.speed,
             onPressed: () => _runPeleDartEngine(intensiveBenchmark: true),
           ),
-          IconButton(
+          const SizedBox(width: 2),
+          MacIconButton(
             tooltip:
                 'Toggle Playground Editor Position (Bottom / Left / Hidden)',
-            icon: Icon(_editorDockMode.icon, size: 17),
-            visualDensity: VisualDensity.compact,
+            icon: _editorDockMode.icon,
+            isActive: _editorDockMode != EditorDockMode.hidden,
             onPressed: () {
               setState(() {
                 _editorDockMode = switch (_editorDockMode) {
@@ -1223,16 +1186,13 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
               });
             },
           ),
-          IconButton(
+          const SizedBox(width: 2),
+          MacIconButton(
             tooltip:
                 widget.isDark
                     ? 'Switch App to Light UI'
                     : 'Switch App to Dark UI',
-            icon: Icon(
-              widget.isDark ? Icons.light_mode : Icons.dark_mode,
-              size: 17,
-            ),
-            visualDensity: VisualDensity.compact,
+            icon: widget.isDark ? Icons.light_mode : Icons.dark_mode,
             onPressed: widget.onToggleTheme,
           ),
         ],
@@ -1255,7 +1215,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                   e.$2 == _selectedPlaygroundSampleIndex,
             );
     return Container(
-      height: 36,
+      height: 34,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: cs.surface,
@@ -1265,27 +1225,25 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       ),
       child: Row(
         children: <Widget>[
-          IconButton(
+          MacIconButton(
             tooltip:
                 'Previous Diagram (↑ / ← / k)\nPrevious Folder: Alt+↑ or [',
-            icon: const Icon(Icons.chevron_left, size: 17),
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            icon: Icons.chevron_left,
+            size: 22,
+            iconSize: 15,
             onPressed: () => _navigateDiagramBy(-1),
           ),
-          IconButton(
+          MacIconButton(
             tooltip: 'Next Diagram (↓ / → / j)\nNext Folder: Alt+↓ or ]',
-            icon: const Icon(Icons.chevron_right, size: 17),
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            icon: Icons.chevron_right,
+            size: 22,
+            iconSize: 15,
             onPressed: () => _navigateDiagramBy(1),
           ),
           const SizedBox(width: 4),
           Text(
             _isAdHocCustom ? 'Custom Diagram' : _selectedSample.title,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
           ),
           if (activeEntryIdx >= 0 && entries.isNotEmpty) ...<Widget>[
             const SizedBox(width: 6),
@@ -1298,7 +1256,10 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                   '• Home / End: First / Last diagram\n'
                   '• Esc: Return focus from code editor to browser',
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 5,
+                  vertical: 1.5,
+                ),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHighest.withValues(alpha: 0.65),
                   borderRadius: BorderRadius.circular(4),
@@ -1315,7 +1276,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
               ),
             ),
           ],
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: SingleChildScrollView(
               controller: _subSampleScrollController,
@@ -1326,26 +1287,25 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                     if (i > 0) const SizedBox(width: 4),
                     InkWell(
                       key: _subSamplePillKey('pill:${_selectedSample.id}:$i'),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(5),
                       onTap: () => _selectSubSampleSource(samples[i].source, i),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 9,
-                          vertical: 4,
-                        ),
+                        height: 22,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color:
                               (!_isAdHocCustom &&
                                       _selectedPlaygroundSampleIndex == i)
-                                  ? cs.primaryContainer
+                                  ? cs.primary.withValues(alpha: 0.18)
                                   : Colors.transparent,
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(5),
                           border: Border.all(
                             color:
                                 (!_isAdHocCustom &&
                                         _selectedPlaygroundSampleIndex == i)
-                                    ? cs.primary.withValues(alpha: 0.4)
-                                    : cs.outlineVariant.withValues(alpha: 0.4),
+                                    ? cs.primary.withValues(alpha: 0.55)
+                                    : cs.outlineVariant.withValues(alpha: 0.35),
                           ),
                         ),
                         child: Text(
@@ -1355,12 +1315,12 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                             fontWeight:
                                 (!_isAdHocCustom &&
                                         _selectedPlaygroundSampleIndex == i)
-                                    ? FontWeight.w700
+                                    ? FontWeight.w600
                                     : FontWeight.w500,
                             color:
                                 (!_isAdHocCustom &&
                                         _selectedPlaygroundSampleIndex == i)
-                                    ? cs.onPrimaryContainer
+                                    ? cs.primary
                                     : cs.onSurfaceVariant,
                           ),
                         ),
@@ -1372,16 +1332,13 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          TextButton.icon(
+          MacToolbarButton(
+            height: 22,
+            icon: Icons.edit_note,
+            label: 'Blank Canvas',
             onPressed:
                 () =>
                     _startAdHocPlayground(initialText: playgroundDefaultSource),
-            icon: const Icon(Icons.edit_note, size: 14),
-            label: const Text('Blank Canvas', style: TextStyle(fontSize: 11)),
-            style: TextButton.styleFrom(
-              visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            ),
           ),
         ],
       ),
@@ -1416,7 +1373,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                   const SizedBox(width: 5),
                   Expanded(
                     child: Text(
-                      'example/diagrams/',
+                      'studio/diagrams/',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1427,52 +1384,40 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                       ),
                     ),
                   ),
-                  IconButton(
+                  MacIconButton(
                     tooltip:
-                        'Rescan example/diagrams/ for new .mmd / .mermaid files',
-                    icon: const Icon(Icons.refresh, size: 15),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 24,
-                      minHeight: 24,
-                    ),
+                        'Rescan studio/diagrams/ for new .mmd / .mermaid files',
+                    icon: Icons.refresh,
+                    size: 22,
+                    iconSize: 14,
                     onPressed: _rescanDiagramsFolder,
                   ),
-                  IconButton(
-                    tooltip: 'Reveal example/diagrams/ folder in Finder',
-                    icon: const Icon(Icons.folder_open, size: 15),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 24,
-                      minHeight: 24,
-                    ),
+                  MacIconButton(
+                    tooltip: 'Reveal studio/diagrams/ folder in Finder',
+                    icon: Icons.folder_open,
+                    size: 22,
+                    iconSize: 14,
                     onPressed: _openDiagramsFolderInFinder,
                   ),
-                  IconButton(
+                  MacIconButton(
                     tooltip: 'New Blank Diagram',
-                    icon: const Icon(Icons.add, size: 16),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 24,
-                      minHeight: 24,
-                    ),
+                    icon: Icons.add,
+                    size: 22,
+                    iconSize: 15,
                     onPressed: () => _startAdHocPlayground(initialText: ''),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
               SizedBox(
-                height: 29,
+                height: 26,
                 child: TextField(
                   controller: _searchController,
                   focusNode: _searchFocusNode,
                   decoration: InputDecoration(
                     hintText: 'Filter folders or .mmd files...',
-                    prefixIcon: const Icon(Icons.search, size: 14),
-                    prefixIconConstraints: const BoxConstraints(minWidth: 28),
+                    prefixIcon: const Icon(Icons.search, size: 13),
+                    prefixIconConstraints: const BoxConstraints(minWidth: 26),
                     isDense: true,
                     filled: true,
                     fillColor: cs.surfaceContainerHighest.withValues(
@@ -1480,65 +1425,47 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 8,
-                      vertical: 5,
+                      vertical: 4,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide: BorderSide(
+                        color: cs.outlineVariant.withValues(alpha: 0.35),
+                        width: 0.8,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide: BorderSide(
+                        color: cs.outlineVariant.withValues(alpha: 0.35),
+                        width: 0.8,
+                      ),
                     ),
                   ),
-                  style: const TextStyle(fontSize: 11.5),
+                  style: const TextStyle(fontSize: 11),
                   onChanged: (v) => setState(() => _searchQuery = v.trim()),
                 ),
               ),
               const SizedBox(height: 6),
-              Row(
-                children: <Widget>[
-                  for (final entry in <(int?, String)>[
-                    (null, 'All (${allSamples.length})'),
-                    (1, 'Core ($coreCount)'),
-                    (2, 'Ext ($extCount)'),
-                    if (customCount > 0) (3, 'Custom ($customCount)'),
-                  ]) ...<Widget>[
-                    if (entry.$1 != null) const SizedBox(width: 4),
-                    Expanded(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(6),
-                        onTap: () {
-                          _focusBrowserIfNeeded();
-                          setState(() => _tierFilter = entry.$1);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color:
-                                _tierFilter == entry.$1
-                                    ? cs.primaryContainer
-                                    : cs.surfaceContainerHighest.withValues(
-                                      alpha: 0.35,
-                                    ),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            entry.$2,
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight:
-                                  _tierFilter == entry.$1
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
-                              color:
-                                  _tierFilter == entry.$1
-                                      ? cs.onPrimaryContainer
-                                      : cs.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+              MacSegmentedControl<int?>(
+                height: 24,
+                fontSize: 10.5,
+                expand: true,
+                segments: <MacSegment<int?>>[
+                  MacSegment<int?>(
+                    value: null,
+                    label: 'All (${allSamples.length})',
+                  ),
+                  MacSegment<int?>(value: 1, label: 'Core ($coreCount)'),
+                  MacSegment<int?>(value: 2, label: 'Ext ($extCount)'),
+                  if (customCount > 0)
+                    MacSegment<int?>(value: 3, label: 'Custom ($customCount)'),
                 ],
+                selected: _tierFilter,
+                onChanged: (next) {
+                  _focusBrowserIfNeeded();
+                  setState(() => _tierFilter = next);
+                },
               ),
             ],
           ),
@@ -2075,7 +2002,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Container(
-          height: 34,
+          height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
@@ -2086,76 +2013,75 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
           child: Row(
             children: <Widget>[
               // Segmented editor tab switcher: Mermaid Source vs Style (--pele-* CSS)
-              Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: cs.surface,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    _buildEditorSubTabButton(
-                      context,
-                      tab: PlaygroundEditorTab.mermaid,
-                      icon: Icons.code,
-                      label: 'Mermaid',
-                    ),
-                    _buildEditorSubTabButton(
-                      context,
-                      tab: PlaygroundEditorTab.styleCss,
-                      icon: Icons.palette_outlined,
-                      label: 'Style (CSS)',
-                    ),
-                  ],
-                ),
+              MacSegmentedControl<PlaygroundEditorTab>(
+                height: 24,
+                fontSize: 11,
+                segments: const <MacSegment<PlaygroundEditorTab>>[
+                  MacSegment<PlaygroundEditorTab>(
+                    value: PlaygroundEditorTab.mermaid,
+                    icon: Icons.code,
+                    label: 'Mermaid',
+                  ),
+                  MacSegment<PlaygroundEditorTab>(
+                    value: PlaygroundEditorTab.styleCss,
+                    icon: Icons.palette_outlined,
+                    label: 'Style (CSS)',
+                  ),
+                ],
+                selected: _editorTab,
+                onChanged: (next) => setState(() => _editorTab = next),
               ),
               const Spacer(),
               if (!isStyleTab) ...<Widget>[
-                IconButton(
-                  tooltip:
-                      'Save Diagram as .mmd to example/diagrams/03_custom/',
-                  icon: const Icon(Icons.save_alt, size: 14),
-                  visualDensity: VisualDensity.compact,
+                MacIconButton(
+                  tooltip: 'Save Diagram as .mmd to studio/diagrams/03_custom/',
+                  icon: Icons.save_alt,
+                  size: 24,
+                  iconSize: 14,
                   onPressed: () => _promptSaveAsMmd(context),
                 ),
-                IconButton(
+                MacIconButton(
                   tooltip: 'Paste Mermaid from Clipboard',
-                  icon: const Icon(Icons.content_paste, size: 14),
-                  visualDensity: VisualDensity.compact,
+                  icon: Icons.content_paste,
+                  size: 24,
+                  iconSize: 14,
                   onPressed: _pasteFromClipboard,
                 ),
-                IconButton(
+                MacIconButton(
                   tooltip: 'Copy Mermaid Source',
-                  icon: const Icon(Icons.copy, size: 14),
-                  visualDensity: VisualDensity.compact,
+                  icon: Icons.copy,
+                  size: 24,
+                  iconSize: 14,
                   onPressed: () {
                     Clipboard.setData(
                       ClipboardData(text: _editorController.text),
                     );
                   },
                 ),
-                IconButton(
+                MacIconButton(
                   tooltip: 'Reset Sample Source',
-                  icon: const Icon(Icons.restore, size: 15),
-                  visualDensity: VisualDensity.compact,
+                  icon: Icons.restore,
+                  size: 24,
+                  iconSize: 15,
                   onPressed: () => _selectFamily(_selectedSample),
                 ),
               ] else ...<Widget>[
-                IconButton(
+                MacIconButton(
                   tooltip: 'Copy Custom Style CSS',
-                  icon: const Icon(Icons.copy, size: 14),
-                  visualDensity: VisualDensity.compact,
+                  icon: Icons.copy,
+                  size: 24,
+                  iconSize: 14,
                   onPressed: () {
                     Clipboard.setData(
                       ClipboardData(text: _styleCssController.text),
                     );
                   },
                 ),
-                IconButton(
+                MacIconButton(
                   tooltip: 'Reset Style to Default',
-                  icon: const Icon(Icons.restore, size: 15),
-                  visualDensity: VisualDensity.compact,
+                  icon: Icons.restore,
+                  size: 24,
+                  iconSize: 15,
                   onPressed:
                       () => _applyStylePreset(
                         widget.isDark
@@ -2164,16 +2090,14 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                       ),
                 ),
               ],
-              IconButton(
+              MacIconButton(
                 tooltip:
                     isLeftSplit
                         ? 'Dock Editor to Bottom'
                         : 'Dock Editor to Left Split',
-                icon: Icon(
-                  isLeftSplit ? Icons.dock : Icons.vertical_split,
-                  size: 14,
-                ),
-                visualDensity: VisualDensity.compact,
+                icon: isLeftSplit ? Icons.dock : Icons.vertical_split,
+                size: 24,
+                iconSize: 14,
                 onPressed: () {
                   setState(() {
                     _editorDockMode =
@@ -2183,10 +2107,11 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                   });
                 },
               ),
-              IconButton(
+              MacIconButton(
                 tooltip: 'Hide Editor',
-                icon: const Icon(Icons.close, size: 14),
-                visualDensity: VisualDensity.compact,
+                icon: Icons.close,
+                size: 24,
+                iconSize: 14,
                 onPressed: () {
                   setState(() {
                     _editorDockMode = EditorDockMode.hidden;
@@ -2403,46 +2328,6 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                   ),
         ),
       ],
-    );
-  }
-
-  Widget _buildEditorSubTabButton(
-    BuildContext context, {
-    required PlaygroundEditorTab tab,
-    required IconData icon,
-    required String label,
-  }) {
-    final selected = _editorTab == tab;
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(5),
-      onTap: () => setState(() => _editorTab = tab),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: selected ? cs.primaryContainer : Colors.transparent,
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              icon,
-              size: 12.5,
-              color: selected ? cs.onPrimaryContainer : cs.onSurfaceVariant,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? cs.onPrimaryContainer : cs.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

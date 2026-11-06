@@ -1,6 +1,6 @@
 # Pele Studio — macOS 3-Way Comparison & Visual Diff Workbench
 
-**Pele Studio** (`example/`) is a native macOS desktop companion application for `pele_dart`. It provides an interactive workbench for comparing **`pele_dart` (Pure Dart)**, **`obsidianmd/pele` (JS)**, and **`mermaid.js` (v12.1.0)** side-by-side across all **33 diagram families (232+ `.mmd` diagrams)**.
+**Pele Studio** (`studio/`) is a native macOS desktop companion application for `pele_dart`. It provides an interactive workbench for comparing **`pele_dart` (Pure Dart)**, **`obsidianmd/pele` (JS)**, and **`mermaid.js` (v12.1.0)** side-by-side across all **33 diagram families (232+ `.mmd` diagrams)**.
 
 ![Pele Studio — 3-Way Visual Render Workbench](images/studio/studio_3way_render.png)
 
@@ -17,17 +17,17 @@
 
 ## 2. Launching Pele Studio
 
-Run in **Release** mode (`--release`) to benchmark native Dart AOT speeds (Debug mode runs in the unoptimized Dart JIT VM and displays an amber `DEBUG JIT` badge):
+Run in **Release** mode (`--release`) from the `studio/` directory to benchmark native Dart AOT speeds (Debug mode runs in the unoptimized Dart JIT VM and displays an amber `DEBUG JIT` badge):
 
 ```bash
-cd example
+cd studio
 flutter run -d macos --release
 ```
 
-Or build the standalone macOS application bundle (`Pele Studio.app`):
+Or build and launch the standalone macOS application bundle (`Pele Studio.app`):
 
 ```bash
-cd example
+cd studio
 flutter build macos --release
 open "build/macos/Build/Products/Release/Pele Studio.app"
 ```
@@ -36,11 +36,11 @@ open "build/macos/Build/Products/Release/Pele Studio.app"
 
 ## 3. The 4 Inspection Modes
 
-Use the segmented control in the center of the top toolbar to switch between the 4 inspection modes:
+Use the macOS segmented control in the center of the top toolbar to switch between the 4 inspection modes:
 
-### 3.1 Visual Render (`✓ Visual Render`)
+### 3.1 Visual Render (`Visual Render`)
 - Displays **1-Way**, **2-Way**, or **3-Way** side-by-side diagram columns (`pele_dart`, `obsidianmd/pele`, `mermaid.js`).
-- **Synchronized Pan & Zoom**: Scroll or pinch to zoom and drag to pan inside the canvas; use the zoom toolbar (`-`, `100%`, `+`, `Reset`) at the bottom-right of the canvas.
+- **Synchronized Pan & Zoom**: Scroll or pinch to zoom and drag to pan inside the canvas.
 - **Resizable Columns**: Drag the vertical splitter bars between engine columns to resize them, or **double-click** any splitter to reset all columns to equal width.
 - **Per-Engine Timing Header**: Each column header displays the diagram's intrinsic dimensions (`W×H`), relative speed multiplier (`1.0×` in green for the fastest engine), and median pure SVG generation time (`ms`).
 
@@ -54,19 +54,15 @@ Select any two engines (`Engine A` and `Engine B`, or click `⇄` to swap them) 
 | :--- | :--- | :--- |
 | **Split-Curtain** | Drag the vertical cyan divider left and right across the canvas to reveal `Engine A` on the left and `Engine B` on the right. | Comparing node alignment, curves, and typography seamlessly across a single diagram. |
 | **Cyan / Magenta Overlay** | Composites both engines into a single image: matching pixels appear neutral gray, `Engine A`-only pixels glow **Cyan**, and `Engine B`-only pixels glow **Magenta**. | Spotting 1px stroke offsets or font baseline shifts. |
-| **Pixel-Diff Heatmap** | Dims matching pixels into a subtle monochrome silhouette and highlights any differing pixels in high-contrast **Neon Pink**, reporting the exact diff percentage badge in the corner. | Auditing 100% pixel parity or isolating subtle rasterizer differences between Skia/Impeller and WebKit CoreText. |
+| **Pixel-Diff Heatmap** | Dims matching pixels into a subtle monochrome silhouette and highlights any differing pixels in high-contrast **Neon Pink**, reporting the exact match percentage badge in the toolbar. | Auditing pixel parity or isolating subtle rasterizer differences between Skia/Impeller and WebKit CoreText. |
 | **In-Place Blink** | Automatically alternates (or manually flips) between `Engine A` and `Engine B` in place at the exact same coordinates. | Detecting tiny layout nudges or label position changes via human motion perception. |
 
-### 3.3 Raw SVG (`<> Raw SVG`)
-- Displays the raw SVG XML string emitted by each engine side-by-side.
-- Toggle between:
-  - **`Flattened SVG` (`SvgOutputMode.flattened`)**: Static SVG 1.1 with all `var(--pele-*)`, `color-mix()`, `calc()`, and `<tspan>` styles resolved.
-  - **`CSS Variables SVG` (`SvgOutputMode.cssVariables`)**: Theme-reactive SVG matching upstream `obsidianmd/pele` byte-for-byte.
-- Toggle **Pretty-Print** (`{}`) to format single-line SVG output into readable indented XML, or click **Copy** to copy the SVG to the macOS clipboard.
+### 3.3 Raw SVG (`Raw SVG`)
+- Displays the pretty-printed SVG XML emitted by each engine side-by-side with element counts (`<g>`, `<path>`, `<rect>`, `<text>`) and one-click clipboard copy.
 
 ### 3.4 SVG Text Diff (`SVG Text Diff`)
 - Computes an inline unified line-by-line diff between any two engines' SVG markup.
-- Toggle **Diffs Only** to hide unchanged lines, or click **Open in External Diff** to launch your preferred macOS diff viewer (`FileMerge / opendiff`, `VS Code`, `Meld`, or `Kaleidoscope`).
+- Toggle **Compare CSS-Var SVG** to verify 100% byte-for-byte upstream parity (`0` diff lines), toggle **Changes Only** to filter unchanged lines, or click **External Diff** to launch `FileMerge (opendiff)`, `VS Code`, `Kaleidoscope`, or `Beyond Compare`.
 
 ---
 
@@ -84,22 +80,16 @@ When browsing diagrams (with focus outside the text editors), you can step rapid
 | `Home` / `End` | Jump to the **First** or **Last** sample within the current diagram family |
 | `Esc` | Unfocus the search box or code editor and return keyboard navigation focus to the diagram browser |
 
-> **Tip:** Both the left `.mmd` file tree and the horizontal sample pill bar automatically scroll to keep the active diagram centered as you navigate with the keyboard, and you can also click the **`‹`** / **`›`** buttons in the sample bar.
+> **Tip:** Both the left `.mmd` file tree and the horizontal sample pill bar automatically scroll to keep the active diagram visible as you navigate with the keyboard, and you can also click the **`‹`** / **`›`** buttons in the sample bar.
 
 ---
 
 ## 5. Style Presets, Live CSS Editor & Custom `.mmd` Files
 
 ### Built-In Style Presets & Live `--pele-*` CSS Editor
-- Click the **`Style: ... ▾`** menu in the top toolbar to switch between 6 canned palettes:
-  - `Default Dark` (`PelePalette.dark`)
-  - `Default Light` (`PelePalette.light`)
-  - `Flexoki Paper`
-  - `Catppuccin Mocha`
-  - `Nord Blueprint`
-  - `Solarized Dark`
-- Switch the bottom Playground Editor from **`<> Mermaid`** to **`Style (CSS)`** to edit `--pele-*` CSS custom properties (`--pele-bg`, `--pele-fg`, `--pele-accent`, `--pele-radius`, `--pele-series-1..8`) live.
+- Click the **Style Preset** popup button (`Default Dark`, `Default Light`, `Flexoki Paper`, `Catppuccin Mocha`, `Nord Blueprint`, `Solarized Dark`) in the top toolbar to restyle all engines immediately.
+- Switch the bottom Playground Editor from **`Mermaid`** to **`Style (CSS)`** to edit `--pele-*` CSS custom properties (`--pele-bg`, `--pele-fg`, `--pele-accent`, `--pele-radius`, `--pele-series-1..8`) live.
 
-### Dynamic `.mmd` / `.mermaid` Folder Browser (`example/diagrams/`)
-- The left sidebar dynamically scans [`example/diagrams/`](../example/diagrams/README.md) (`01_core/<family>/*.mmd`, `02_extended/<family>/*.mmd`, and `03_custom/`).
-- **Add your own diagrams**: Drop any `.mmd` or `.mermaid` file into [`example/diagrams/03_custom/`](../example/diagrams/README.md) (or click **Save to `03_custom/` (`⬇`)** in the Playground Editor toolbar) and click **Rescan (`↻`)** in the sidebar header to browse it immediately.
+### Dynamic `.mmd` / `.mermaid` Folder Browser (`studio/diagrams/`)
+- The left sidebar dynamically scans [`studio/diagrams/`](../studio/diagrams/README.md) (`01_core/<family>/*.mmd`, `02_extended/<family>/*.mmd`, and `03_custom/`).
+- **Add your own diagrams**: Drop any `.mmd` or `.mermaid` file into [`studio/diagrams/03_custom/`](../studio/diagrams/README.md) (or click **Save (`⬇`)** in the Playground Editor toolbar) and click **Rescan (`↻`)** in the sidebar header to browse it immediately.

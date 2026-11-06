@@ -18,13 +18,13 @@ import 'dart:io';
 ///   `dart run tool/sync_upstream.dart --update-to <tag_or_ref>`
 ///     Checks out the target upstream Pele release in `.upstream/`, generates
 ///     `.upstream/diff_report.md` from the previous pinned commit, refreshes
-///     `example/assets/pele.bundle.js`, `example/assets/mermaid.min.js`,
-///     `example/lib/engine_runner.dart`, and standalone gallery SVGs via
+///     `studio/assets/pele.bundle.js`, `studio/assets/mermaid.min.js`,
+///     `studio/lib/engine_runner.dart`, and standalone gallery SVGs via
 ///     `tool/generate_doc_images.dart`.
 ///
 ///   `dart run tool/sync_upstream.dart --refresh-assets`
-///     Rebuilds `example/assets/pele.bundle.js`, syncs `example/assets/mermaid.min.js`
-///     and `example/lib/engine_runner.dart` to upstream's target Mermaid version,
+///     Rebuilds `studio/assets/pele.bundle.js`, syncs `studio/assets/mermaid.min.js`
+///     and `studio/lib/engine_runner.dart` to upstream's target Mermaid version,
 ///     and regenerates `docs/images/` and `docs/DIAGRAM_GALLERY.md`.
 ///
 ///   `dart run tool/sync_upstream.dart --pin <tag> [sha]`
@@ -495,7 +495,7 @@ Commands:
     Generate a categorized TypeScript-to-Dart diff report in .upstream/diff_report.md.
 
   dart run tool/sync_upstream.dart --refresh-assets [ref]
-    Rebuild example/assets/pele.bundle.js, sync example/assets/mermaid.min.js to upstream's target
+    Rebuild studio/assets/pele.bundle.js, sync studio/assets/mermaid.min.js to upstream's target
     Mermaid version, and regenerate docs/images/ and docs/DIAGRAM_GALLERY.md.
 
   dart run tool/sync_upstream.dart --pin <tag> [sha]
@@ -693,7 +693,7 @@ _UpstreamMermaidInfo _detectUpstreamMermaidInfo(
 }
 
 String? _detectBundledMermaidVersion(String root) {
-  final file = File('$root/example/assets/mermaid.min.js');
+  final file = File('$root/studio/assets/mermaid.min.js');
   if (!file.existsSync()) return null;
   final text = file.readAsStringSync();
   final matches = RegExp(r'version:"([0-9]+\.[0-9]+\.[0-9]+)"')
@@ -705,7 +705,7 @@ String? _detectBundledMermaidVersion(String root) {
 }
 
 String? _detectUiMermaidLabelVersion(String root) {
-  final file = File('$root/example/lib/engine_runner.dart');
+  final file = File('$root/studio/lib/engine_runner.dart');
   if (!file.existsSync()) return null;
   final text = file.readAsStringSync();
   final m = RegExp(r'mermaid\.js \(v([^)]+)\)').firstMatch(text);
@@ -1013,11 +1013,11 @@ String _proposeDartPath(String upstreamTsPath) {
 }
 
 Future<void> _refreshAllAssets(String root, Directory upstreamDir) async {
-  // 1. Rebuild example/assets/pele.bundle.js from .upstream/src/index.ts via bun build.
+  // 1. Rebuild studio/assets/pele.bundle.js from .upstream/src/index.ts via bun build.
   final bunFile = File('/opt/homebrew/bin/bun');
   if (bunFile.existsSync()) {
-    stdout.writeln('1. Rebuilding example/assets/pele.bundle.js via bun...');
-    final bundlePath = '$root/example/assets/pele.bundle.js';
+    stdout.writeln('1. Rebuilding studio/assets/pele.bundle.js via bun...');
+    final bundlePath = '$root/studio/assets/pele.bundle.js';
     final buildRes = await Process.run(bunFile.path, <String>[
       'build',
       '${upstreamDir.path}/src/index.ts',
@@ -1041,22 +1041,22 @@ Future<void> _refreshAllAssets(String root, Directory upstreamDir) async {
         }
       }
       stdout.writeln(
-        '   ✓ Built example/assets/pele.bundle.js (${bundleText.length} bytes)',
+        '   ✓ Built studio/assets/pele.bundle.js (${bundleText.length} bytes)',
       );
     }
   }
 
-  // 2. Sync example/assets/mermaid.min.js and example/lib/engine_runner.dart to upstream's target Mermaid version.
+  // 2. Sync studio/assets/mermaid.min.js and studio/lib/engine_runner.dart to upstream's target Mermaid version.
   final mermaidInfo = _detectUpstreamMermaidInfo(upstreamDir);
   final targetMermaidVer = mermaidInfo.mermaidVersion;
   final currentBundledVer = _detectBundledMermaidVersion(root);
-  final mermaidAssetFile = File('$root/example/assets/mermaid.min.js');
+  final mermaidAssetFile = File('$root/studio/assets/mermaid.min.js');
 
   if (currentBundledVer != targetMermaidVer || !mermaidAssetFile.existsSync()) {
     final url =
         'https://unpkg.com/mermaid@$targetMermaidVer/dist/mermaid.min.js';
     stdout.writeln(
-      '2. Syncing example/assets/mermaid.min.js ($currentBundledVer -> $targetMermaidVer) from $url...',
+      '2. Syncing studio/assets/mermaid.min.js ($currentBundledVer -> $targetMermaidVer) from $url...',
     );
     var downloaded = false;
     try {
@@ -1105,12 +1105,12 @@ Future<void> _refreshAllAssets(String root, Directory upstreamDir) async {
     }
   } else {
     stdout.writeln(
-      '2. example/assets/mermaid.min.js already at v$targetMermaidVer.',
+      '2. studio/assets/mermaid.min.js already at v$targetMermaidVer.',
     );
   }
 
   // Update engine_runner.dart label to mermaid.js (v<targetMermaidVer>).
-  final engineRunnerFile = File('$root/example/lib/engine_runner.dart');
+  final engineRunnerFile = File('$root/studio/lib/engine_runner.dart');
   if (engineRunnerFile.existsSync()) {
     final oldText = engineRunnerFile.readAsStringSync();
     final newText = oldText.replaceAll(
@@ -1120,7 +1120,7 @@ Future<void> _refreshAllAssets(String root, Directory upstreamDir) async {
     if (newText != oldText) {
       engineRunnerFile.writeAsStringSync(newText);
       stdout.writeln(
-        '   ✓ Updated example/lib/engine_runner.dart label to mermaid.js (v$targetMermaidVer)',
+        '   ✓ Updated studio/lib/engine_runner.dart label to mermaid.js (v$targetMermaidVer)',
       );
     }
   }

@@ -75,6 +75,6 @@ body:
     id: visual_difference
     attributes:
       label: Expected vs. Actual Visual Output
-      description: Describe the difference (or drag-and-drop screenshots from `pele.run`, GitHub Mermaid, or the `example/` 3-Way Comparison Studio).
+      description: Describe the difference (or drag-and-drop screenshots from `pele.run`, GitHub Mermaid, or the `studio/` 3-Way Comparison Studio).
     validations:
       required: true

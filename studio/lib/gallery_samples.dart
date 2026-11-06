@@ -25,7 +25,7 @@ class PlaygroundSampleItem {
   });
 }
 
-/// Primary folder / diagram family entry scanned from `example/diagrams/`.
+/// Primary folder / diagram family entry scanned from `studio/diagrams/`.
 class DiagramSample {
   final String id;
   final String title;
@@ -58,7 +58,7 @@ Directory? _customDiagramsRootOverride;
 List<DiagramSample>? _cachedGallerySamples;
 String? _cachedDefaultSource;
 
-/// Resolves the `example/diagrams` root directory across CLI tools, unit tests,
+/// Resolves the `studio/diagrams` root directory across CLI tools, unit tests,
 /// `flutter run`, and packaged macOS `.app` bundles.
 Directory resolveDiagramsRootDir() {
   if (_customDiagramsRootOverride != null &&
@@ -68,9 +68,9 @@ Directory resolveDiagramsRootDir() {
 
   final cwd = Directory.current.path;
   final candidates = <String>[
-    '$cwd/example/diagrams',
+    '$cwd/studio/diagrams',
     '$cwd/diagrams',
-    '$cwd/../example/diagrams',
+    '$cwd/../studio/diagrams',
   ];
 
   // Also walk up from the running executable or script path (handles macOS .app bundles).
@@ -81,7 +81,7 @@ Directory resolveDiagramsRootDir() {
     try {
       var dir = File(startPath).parent;
       for (var depth = 0; depth < 10; depth++) {
-        candidates.add('${dir.path}/example/diagrams');
+        candidates.add('${dir.path}/studio/diagrams');
         candidates.add('${dir.path}/diagrams');
         final parent = dir.parent;
         if (parent.path == dir.path) break;
@@ -99,10 +99,10 @@ Directory resolveDiagramsRootDir() {
     }
   }
 
-  return Directory('$cwd/example/diagrams').absolute;
+  return Directory('$cwd/studio/diagrams').absolute;
 }
 
-/// Default diagram loaded when opening the ad-hoc playground (`example/diagrams/_default.mmd`).
+/// Default diagram loaded when opening the ad-hoc playground (`studio/diagrams/_default.mmd`).
 String get playgroundDefaultSource {
   if (_cachedDefaultSource != null) return _cachedDefaultSource!;
   final root = resolveDiagramsRootDir();
@@ -124,12 +124,12 @@ String get playgroundDefaultSource {
 }
 
 /// Returns all diagram families and `.mmd` / `.mermaid` samples discovered under
-/// `example/diagrams/`.
+/// `studio/diagrams/`.
 List<DiagramSample> get gallerySamples {
   return _cachedGallerySamples ??= _scanDiagramsRoot(resolveDiagramsRootDir());
 }
 
-/// Rescans `example/diagrams/` (or a custom [rootDir]) on disk and refreshes
+/// Rescans `studio/diagrams/` (or a custom [rootDir]) on disk and refreshes
 /// [gallerySamples] and [playgroundDefaultSource].
 List<DiagramSample> reloadGallerySamples({Directory? rootDir}) {
   if (rootDir != null) {
@@ -140,7 +140,7 @@ List<DiagramSample> reloadGallerySamples({Directory? rootDir}) {
   return _cachedGallerySamples!;
 }
 
-/// Saves a new `.mmd` or `.mermaid` file into `example/diagrams/03_custom/`
+/// Saves a new `.mmd` or `.mermaid` file into `studio/diagrams/03_custom/`
 /// (or a specified subfolder) and rescans the gallery.
 File saveCustomMermaidDiagram({
   required String fileName,

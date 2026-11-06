@@ -11,7 +11,7 @@ Fixes #<!-- issue number, if applicable -->
 
 ## Quality Gate Checklist
 
-- [ ] `dart format --output=none --set-exit-if-changed lib test tool example/lib example/main.dart` passes.
+- [ ] `dart format --output=none --set-exit-if-changed lib test tool studio/lib example/main.dart` passes.
 - [ ] `dart analyze --fatal-infos lib test tool` reports 0 issues.
 - [ ] `dart test` passes 100% of unit and golden tests.
 - [ ] Added or updated unit tests in `test/` for any new functionality or bug fix.

@@ -8,7 +8,7 @@ This document defines the architectural invariants, directory conventions, trans
 
 `pele_dart` is a pure-Dart port of [`obsidianmd/pele`](https://github.com/obsidianmd/pele) that renders Mermaid diagrams into SVG synchronously without a browser or JavaScript runtime.
 
-* **SDK Boundary**: The root `pele_dart` package is pure Dart (`sdk: ^3.13.0`). **Never** add a dependency on `flutter` or `dart:ui` in the root `pubspec.yaml` `dependencies:`. (The macOS 3-way visual comparison workbench lives in `example/` with its own Flutter `pubspec.yaml`.)
+* **SDK Boundary**: The root `pele_dart` package is pure Dart (`sdk: ^3.13.0`). **Never** add a dependency on `flutter` or `dart:ui` in the root `pubspec.yaml` `dependencies:`. (The macOS 3-way visual comparison workbench lives in `studio/` with its own Flutter `pubspec.yaml`.)
 * **Runtime Dependencies**: Keep `dependencies:` minimal (`package:meta` only). Do not add heavy third-party parsing, layout, or DOM libraries.
 * **Synchronous & Deterministic**: Rendering (`renderMermaid()`) must execute synchronously with zero I/O, zero network access, and zero global mutable state across calls. Identical inputs, options, and text measurers must always produce byte-for-byte identical SVG output.
 
@@ -78,14 +78,14 @@ Before completing any task or committing changes, all quality gates must pass:
 
 3. **Formatting**:
    ```bash
-   dart format --output=none --set-exit-if-changed lib test tool example/lib
+   dart format --output=none --set-exit-if-changed lib test tool studio/lib example/main.dart
    ```
 
 4. **787-Diagram Upstream Differential Parity & Mermaid Version Check**:
    ```bash
    dart run tool/verify_against_upstream.dart
    ```
-   Verifies Mermaid version consistency across `UPSTREAM.md`, `.upstream/`, and `example/assets/mermaid.min.js`, and asserts 100% byte-for-byte SVG equality between `pele_dart` and `obsidianmd/pele (JS)` across all 33 canonical diagram families, 232 gallery diagrams, and 522 upstream corpus diagrams (`787/787`).
+   Verifies Mermaid version consistency across `UPSTREAM.md`, `.upstream/`, and `studio/assets/mermaid.min.js`, and asserts 100% byte-for-byte SVG equality between `pele_dart` and `obsidianmd/pele (JS)` across all 33 canonical diagram families, 232 gallery diagrams, and 522 upstream corpus diagrams (`787/787`).
 
 5. **Native AOT Benchmark Report & Regression Gate**:
    ```bash

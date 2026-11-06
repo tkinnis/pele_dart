@@ -5,7 +5,7 @@ import 'package:pele_dart/pele_dart.dart';
 import 'package:test/test.dart';
 
 // ignore: avoid_relative_lib_imports
-import '../example/lib/gallery_samples.dart';
+import '../studio/lib/gallery_samples.dart';
 
 void main() {
   group('Official pele.run/examples and pele.run/playground corpus', () {

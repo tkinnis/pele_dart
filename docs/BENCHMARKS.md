@@ -1,6 +1,6 @@
 # Performance Benchmarks & Upstream Sync Regression Gate
 
-This document reports the native **Dart AOT** rendering performance of `pele_dart` across all **33 diagram families** (**232 diagrams** in the official `example/diagrams/` gallery corpus) compared against upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (JavaScriptCore; see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned upstream release).
+This document reports the native **Dart AOT** rendering performance of `pele_dart` across all **33 diagram families** (**232 diagrams** in the official `studio/diagrams/` gallery corpus) compared against upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (JavaScriptCore; see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned upstream release).
 
 > **Automated Release Gate:** This report and the baseline in [`tool/benchmark_baseline.json`](../tool/benchmark_baseline.json) are generated and verified by [`tool/benchmark_suite.dart`](../tool/benchmark_suite.dart). Every upstream sync must pass `dart run tool/benchmark_suite.dart --update-docs --check-regressions` before pinning [`UPSTREAM.md`](../UPSTREAM.md) or cutting a release.
 

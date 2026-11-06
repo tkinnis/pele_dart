@@ -11,7 +11,7 @@
 
 Traditional Mermaid diagram rendering in Dart and Flutter applications requires running a multi-megabyte JavaScript bundle (`mermaid.min.js`) inside an offscreen browser engine (`WKWebView`, `WebKitGTK`, or `WebView2`) and executing complex DOM-inspection scripts (`getComputedStyle()`, `getPointAtLength()`, `<canvas>` rasterization) because Flutter’s `vector_graphics_compiler` and `flutter_svg` only support a static subset of SVG primitives.
 
-**`pele_dart`** eliminates the browser and JavaScript runtime entirely by providing a **pure Dart 3 library** ported 1:1 from [`obsidianmd/pele`](https://github.com/obsidianmd/pele)—Obsidian’s zero-dependency, synchronous, zero-DOM Mermaid rendering engine—augmented with a native **flattened SVG emitter** that outputs `vector_graphics_compiler`-ready SVG directly, plus a **macOS 3-way visual and SVG diff workbench (`example/`)** for human verification against upstream `obsidianmd/pele` and `mermaid.js`.
+**`pele_dart`** eliminates the browser and JavaScript runtime entirely by providing a **pure Dart 3 library** ported 1:1 from [`obsidianmd/pele`](https://github.com/obsidianmd/pele)—Obsidian’s zero-dependency, synchronous, zero-DOM Mermaid rendering engine—augmented with a native **flattened SVG emitter** that outputs `vector_graphics_compiler`-ready SVG directly, plus a **macOS 3-way visual and SVG diff workbench (`studio/`)** for human verification against upstream `obsidianmd/pele` and `mermaid.js`.
 
 ### 1.1 Primary Goals
 
@@ -21,7 +21,7 @@ Traditional Mermaid diagram rendering in Dart and Flutter applications requires 
    * **`SvgOutputMode.flattened`** *(Default for Native Vector Rendering)*: Directly emits pre-flattened SVG primitives compatible with `vector_graphics_compiler` (`encodeSvg`), eliminating the need for a post-render DOM flattener or a raster PNG `<canvas>` fallback.
    * **`SvgOutputMode.cssVariables`** *(Upstream Parity Mode)*: Emits byte-for-byte structurally identical SVG to upstream `obsidianmd/pele` (`var(--pele-*)` CSS custom properties, `<style>`, `<marker>` arrowheads, `dominant-baseline`) for differential testing against upstream Pele and standalone `.svg` file export.
 4. **Full Diagram Coverage**: Support all 33 diagram families present in `obsidianmd/pele` (recorded in [`UPSTREAM.md`](../UPSTREAM.md)).
-5. **macOS 3-Way Comparison & SVG Diff Workbench (`example/`)**: Provide a macOS desktop application to visually compare and inspect/diff the raw SVG output of any diagram across **`pele_dart`**, **`obsidianmd/pele` (JS)**, and **`mermaid.js`** in 1-way, 2-way, or 3-way views.
+5. **macOS 3-Way Comparison & SVG Diff Workbench (`studio/`)**: Provide a macOS desktop application to visually compare and inspect/diff the raw SVG output of any diagram across **`pele_dart`**, **`obsidianmd/pele` (JS)**, and **`mermaid.js`** in 1-way, 2-way, or 3-way views.
 6. **First-Class Upstream Syncability**: Maintain a strict 1:1 file and symbol mapping with `obsidianmd/pele/src/`, using [`UPSTREAM.md`](../UPSTREAM.md) as the single source of truth for the pinned upstream commit so future upstream commits and releases can be diffed and ported mechanically.
 7. **Defense-in-Depth DoS Safety Caps**: Enforce fine-grained pre-parse and post-parse resource budgets (source length, node/edge counts, subgraph depth, element count, path length, and dash segment budgets).
 
@@ -29,7 +29,7 @@ Traditional Mermaid diagram rendering in Dart and Flutter applications requires 
 
 * **DOM / HTML Label Execution**: Like upstream Pele, `pele_dart` never executes `<script>`, JS callbacks, or arbitrary HTML `<foreignObject>` trees.
 * **Mermaid ELK Layout Engine Emulation**: `pele_dart` uses Pele’s deterministic layered/compound/lane layout solvers (`lib/src/layout/`) rather than bundling `elkjs`.
-* **Flutter Widget Rendering Inside the Core Package**: The root `pele_dart` package outputs SVG strings, logical dimensions, accessibility metadata, and structured diagnostics; Flutter widget rendering lives only in downstream consumers and in the `example/` macOS comparison app.
+* **Flutter Widget Rendering Inside the Core Package**: The root `pele_dart` package outputs SVG strings, logical dimensions, accessibility metadata, and structured diagnostics; Flutter widget rendering lives only in downstream consumers and in the `studio/` macOS comparison app.
 
 ---
 
@@ -167,7 +167,7 @@ flowchart LR
 
 ### 3.2 Directory Layout (`1:1` with `obsidianmd/pele`)
 
-Every file in `obsidianmd/pele/src/` maps directly to `lib/src/` in `pele_dart`, while `example/` houses the pure-Dart CLI example and the macOS 3-way visual and SVG diff comparison application:
+Every file in `obsidianmd/pele/src/` maps directly to `lib/src/` in `pele_dart`, while `example/` houses the pure-Dart CLI example for `pub.dev` and `studio/` houses the macOS 3-way visual and SVG diff comparison application:
 
 ```text
 pele_dart/
@@ -233,9 +233,10 @@ pele_dart/
 │   ├── sync_upstream.dart           # Reads UPSTREAM.md, diffs obsidianmd/pele & refreshes assets
 │   ├── verify_against_upstream.dart # 787-diagram differential test runner (Bun Pele vs. pele_dart)
 │   └── generate_doc_images.dart     # Generates docs/images/**/*.svg and docs/DIAGRAM_GALLERY.md
-└── example/
-    ├── main.dart                    # Standalone pure-Dart CLI example (for pub.dev)
-    ├── README.md                    # Guide to CLI example & macOS 3-Way Comparison Studio
+├── example/
+│   ├── main.dart                    # Standalone pure-Dart CLI example (for pub.dev)
+│   └── README.md                    # Pure-Dart usage examples for pub.dev's Example tab
+└── studio/
     ├── pubspec.yaml                 # macOS Flutter Comparison Studio manifest
     ├── diagrams/                    # File-based .mmd/.mermaid gallery (01_core, 02_extended, 03_custom)
     ├── macos/
@@ -292,9 +293,9 @@ Because `obsidianmd/pele` is written in dependency-free strict TypeScript with z
 
 ---
 
-## 6. macOS 3-Way Gallery & Comparison Demo App (`example/`)
+## 6. macOS 3-Way Gallery & Comparison Demo App (`studio/`)
 
-To allow human developers to visually vet diagram fidelity and inspect/diff raw SVG markup across engines, `pele_dart` includes a **macOS-only Flutter desktop application** under `example/` (no iOS, Android, Windows, Linux, or Web targets in `example/`).
+To allow human developers to visually vet diagram fidelity and inspect/diff raw SVG markup across engines, `pele_dart` includes a **macOS-only Flutter desktop application** under `studio/` (no iOS, Android, Windows, Linux, or Web targets in `studio/`).
 
 ### 6.1 The Three Renderers
 
@@ -362,10 +363,10 @@ Port and unit-test the foundation modules in dependency order:
 5. `lib/src/svg/` (`palette.dart`, `ink.dart`, `theme.dart`, `builder.dart`, `shapes.dart`, `edges.dart`, `cluster.dart`, `title.dart`, `root.dart`, `flattener.dart`)
 6. `lib/src/preprocess.dart`, `lib/src/detect.dart`, `lib/src/core.dart`, `lib/src/diagrams/common/`, `lib/src/diagrams/registry.dart`
 
-### Phase 2: Tier-1 Diagrams (9 Diagram Families) + macOS 3-Way Comparison App (`example/`)
+### Phase 2: Tier-1 Diagrams (9 Diagram Families) + macOS 3-Way Comparison App (`studio/`)
 * Port the 9 highest-usage diagram types and their upstream `tests/compat/` and `tests/render/` test suites:
   * `flowchart`, `sequence`, `class`, `state`, `er`, `gantt`, `git`, `mindmap`, `pie`
-* Build the `example/` macOS 3-Way Gallery & SVG Diff Workbench so every ported diagram can be visually and structurally compared against `obsidianmd/pele` (JS) and `mermaid.js`.
+* Build the `studio/` macOS 3-Way Gallery & SVG Diff Workbench so every ported diagram can be visually and structurally compared against `obsidianmd/pele` (JS) and `mermaid.js`.
 
 ### Phase 3: Tier-2 Diagrams (Remaining 24 Diagram Families)
 Because Phase 1’s core is frozen and every diagram module under `lib/src/diagrams/<type>/` is hermetically isolated, port the remaining 24 diagram families in parallel batches:

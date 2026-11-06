@@ -68,7 +68,7 @@ dart run tool/sync_upstream.dart
 2. Compares the **Pinned Release Tag** and **Pinned Commit SHA** in `UPSTREAM.md` against:
    - The latest semver release tag published on GitHub (`v*`), listing every new release tag between your pinned version and the latest release.
    - Any unreleased commits on `origin/main` ahead of the latest tag.
-3. Inspects the target upstream ref's `scripts/bench-mermaid.mjs`, `website/package.json`, `website/pnpm-lock.yaml`, and `package.json` to detect the **Target Mermaid Version** and **Target Mermaid Parser**, and checks the header of `example/assets/mermaid.min.js`.
+3. Inspects the target upstream ref's `scripts/bench-mermaid.mjs`, `website/package.json`, `website/pnpm-lock.yaml`, and `package.json` to detect the **Target Mermaid Version** and **Target Mermaid Parser**, and checks the header of `studio/assets/mermaid.min.js`.
 4. Categorizes every changed upstream file into actionable buckets:
    - **Detection & Beta-to-Stable Renames (`src/detect.ts`)**: Highlights added/removed/renamed diagram detector regexes (such as `radar-beta` becoming `radar(-beta)?`).
    - **New Diagram Families (`src/diagrams/<new>/`)**: Flags brand-new diagram directories not yet present in `lib/src/diagrams/`.
@@ -98,9 +98,9 @@ dart run tool/sync_upstream.dart --update-to v1.14.0
 
 1. **Checks out the target ref** in `.upstream/`.
 2. **Generates `.upstream/diff_report.md`** containing the full categorized file matrix, detector changes, Mermaid version status, and unified `git diff` patches for every changed file in `src/`.
-3. **Re-bundles `example/assets/pele.bundle.js`** from `.upstream/src/index.ts` (via `bun build`) and appends the `globalThis.Pele` and `globalThis.PeleMetricsMeasurer` exports required by both the macOS 3-Way Comparison App and the CLI differential test runner.
-4. **Downloads the matching `mermaid.min.js`** from `https://unpkg.com/mermaid@<version>/dist/mermaid.min.js` into `example/assets/mermaid.min.js` and updates the engine label in `example/lib/engine_runner.dart` whenever the target Mermaid version changes.
-5. **Regenerates standalone documentation images** (`docs/images/diagrams/*.svg`, `docs/images/styles/*.svg`, and [`docs/DIAGRAM_GALLERY.md`](DIAGRAM_GALLERY.md)) via `tool/generate_doc_images.dart` from the `.mmd`/`.mermaid` files in `example/diagrams/`.
+3. **Re-bundles `studio/assets/pele.bundle.js`** from `.upstream/src/index.ts` (via `bun build`) and appends the `globalThis.Pele` and `globalThis.PeleMetricsMeasurer` exports required by both the macOS 3-Way Comparison App and the CLI differential test runner.
+4. **Downloads the matching `mermaid.min.js`** from `https://unpkg.com/mermaid@<version>/dist/mermaid.min.js` into `studio/assets/mermaid.min.js` and updates the engine label in `studio/lib/engine_runner.dart` whenever the target Mermaid version changes.
+5. **Regenerates standalone documentation images** (`docs/images/diagrams/*.svg`, `docs/images/styles/*.svg`, and [`docs/DIAGRAM_GALLERY.md`](DIAGRAM_GALLERY.md)) via `tool/generate_doc_images.dart` from the `.mmd`/`.mermaid` files in `studio/diagrams/`.
 
 > **Note:** When source files have changed (`totalChangedFiles > 0`), `--update-to-latest` stages `.upstream/` and leaves `UPSTREAM.md` at the old pin until the Dart port changes are complete and verified (unless `--pin` is also passed), so `dart run tool/sync_upstream.dart --diff` continues to know the exact `from..to` range being ported.
 
@@ -161,9 +161,9 @@ When `.upstream/diff_report.md` lists a new directory `src/diagrams/<new_type>/`
 
 When `dart run tool/sync_upstream.dart --check` reports `MERMAID VERSION UPDATE DETECTED`:
 
-1. Running `dart run tool/sync_upstream.dart --update-to-latest` (or `--refresh-assets`) automatically downloads `https://unpkg.com/mermaid@<targetVersion>/dist/mermaid.min.js` into `example/assets/mermaid.min.js` and updates the engine label in `example/lib/engine_runner.dart`.
+1. Running `dart run tool/sync_upstream.dart --update-to-latest` (or `--refresh-assets`) automatically downloads `https://unpkg.com/mermaid@<targetVersion>/dist/mermaid.min.js` into `studio/assets/mermaid.min.js` and updates the engine label in `studio/lib/engine_runner.dart`.
 2. Running `dart run tool/sync_upstream.dart --pin <tag> <sha>` updates `Target Mermaid Version` and `Target Mermaid Parser` in `UPSTREAM.md`.
-3. `dart run tool/verify_against_upstream.dart` verifies that `UPSTREAM.md`, `.upstream/`, `example/assets/mermaid.min.js`, and `example/lib/engine_runner.dart` all agree on the exact Mermaid version.
+3. `dart run tool/verify_against_upstream.dart` verifies that `UPSTREAM.md`, `.upstream/`, `studio/assets/mermaid.min.js`, and `studio/lib/engine_runner.dart` all agree on the exact Mermaid version.
 
 ---
 
@@ -176,9 +176,9 @@ dart run tool/verify_against_upstream.dart
 ```
 
 This tool verifies:
-1. **Mermaid Version Consistency**: Confirms `UPSTREAM.md`, `.upstream/`, `example/assets/mermaid.min.js`, and `example/lib/engine_runner.dart` are aligned.
-2. **Canonical 33-Family Suite (`33/33`)**: Renders all 33 diagram families in both `pele_dart` (`SvgOutputMode.cssVariables`) and `obsidianmd/pele` (`example/assets/pele.bundle.js` via Bun) and asserts 100% byte-for-byte SVG equality.
-3. **Full Showcase Gallery Suite (`232/232`)**: Renders all 232 gallery `.mmd` diagrams scanned from `example/diagrams/` by `example/lib/gallery_samples.dart` in both engines and asserts 100% byte-for-byte SVG equality.
+1. **Mermaid Version Consistency**: Confirms `UPSTREAM.md`, `.upstream/`, `studio/assets/mermaid.min.js`, and `studio/lib/engine_runner.dart` are aligned.
+2. **Canonical 33-Family Suite (`33/33`)**: Renders all 33 diagram families in both `pele_dart` (`SvgOutputMode.cssVariables`) and `obsidianmd/pele` (`studio/assets/pele.bundle.js` via Bun) and asserts 100% byte-for-byte SVG equality.
+3. **Full Showcase Gallery Suite (`232/232`)**: Renders all 232 gallery `.mmd` diagrams scanned from `studio/diagrams/` by `studio/lib/gallery_samples.dart` in both engines and asserts 100% byte-for-byte SVG equality.
 4. **Full Upstream Corpus Suite (`522/522`)**: Renders every diagram across all 30 `.upstream/tests/corpus/*.json` files in both engines and asserts 100% byte-for-byte SVG equality.
 
 Then run the standard Dart quality gates and the **Native AOT Benchmark Regression Gate**:
@@ -186,7 +186,7 @@ Then run the standard Dart quality gates and the **Native AOT Benchmark Regressi
 ```bash
 dart analyze --fatal-infos lib test tool example
 dart test
-dart format --output=none --set-exit-if-changed lib test tool example/lib
+dart format --output=none --set-exit-if-changed lib test tool studio/lib example/main.dart
 dart run tool/benchmark_suite.dart --update-docs --check-regressions
 ```
 

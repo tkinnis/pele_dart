@@ -32,7 +32,7 @@ jobs:
         run: dart pub get --no-example
 
       - name: Verify code formatting
-        run: dart format --output=none --set-exit-if-changed lib test tool example/lib example/main.dart
+        run: dart format --output=none --set-exit-if-changed lib test tool studio/lib example/main.dart
 
       - name: Run static analysis
         run: dart analyze --fatal-infos lib test tool

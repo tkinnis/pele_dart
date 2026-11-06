@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:pele_dart/pele_dart.dart';
 
 import 'engine_runner.dart';
+import 'mac_controls.dart';
 
 /// Pretty-prints a single-line or compact SVG string into indented multi-line XML
 /// so human inspection and line-by-line diffs are clean and readable.
@@ -457,93 +458,101 @@ class _SvgTextDiffViewState extends State<SvgTextDiffView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHigh,
             border: Border(
               bottom: BorderSide(color: Theme.of(context).dividerColor),
             ),
           ),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: <Widget>[
-              _buildEngineSelector('Base (A):', _engineA, (val) {
-                if (val != null) setState(() => _engineA = val);
-              }),
-              const Icon(Icons.arrow_forward, size: 15),
-              _buildEngineSelector('Compare (B):', _engineB, (val) {
-                if (val != null) setState(() => _engineB = val);
-              }),
-              FilterChip(
-                label: const Text(
-                  'Compare CSS-Var SVG (Upstream Parity)',
-                  style: TextStyle(fontSize: 12),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: <Widget>[
+                _buildEngineSelector('Base (A):', _engineA, (val) {
+                  setState(() => _engineA = val);
+                }),
+                const SizedBox(width: 4),
+                MacIconButton(
+                  tooltip: 'Swap Base (A) and Compare (B)',
+                  icon: Icons.swap_horiz,
+                  size: 24,
+                  iconSize: 15,
+                  onPressed: () {
+                    setState(() {
+                      final tmp = _engineA;
+                      _engineA = _engineB;
+                      _engineB = tmp;
+                    });
+                  },
                 ),
-                selected: _compareCssVarsForParity,
-                onSelected: (v) => setState(() => _compareCssVarsForParity = v),
-              ),
-              FilterChip(
-                label: const Text(
-                  'Changes Only',
-                  style: TextStyle(fontSize: 12),
+                const SizedBox(width: 4),
+                _buildEngineSelector('Compare (B):', _engineB, (val) {
+                  setState(() => _engineB = val);
+                }),
+                const SizedBox(width: 10),
+                MacToggleButton(
+                  label: 'Compare CSS-Var SVG',
+                  tooltip: 'Compare upstream-parity CSS-variable SVG markup',
+                  selected: _compareCssVarsForParity,
+                  onChanged:
+                      (v) => setState(() => _compareCssVarsForParity = v),
                 ),
-                selected: _changesOnly,
-                onSelected: (v) => setState(() => _changesOnly = v),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
+                const SizedBox(width: 6),
+                MacToggleButton(
+                  label: 'Changes Only',
+                  selected: _changesOnly,
+                  onChanged: (v) => setState(() => _changesOnly = v),
                 ),
-                decoration: BoxDecoration(
-                  color:
-                      addedCount == 0 && removedCount == 0
-                          ? Colors.green.withValues(alpha: 0.2)
-                          : Colors.amber.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  addedCount == 0 && removedCount == 0
-                      ? '100% Identical SVG ($equalCount lines)'
-                      : '=$equalCount   -$removedCount   +$addedCount lines',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(width: 8),
+                Container(
+                  height: 24,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color:
+                        addedCount == 0 && removedCount == 0
+                            ? Colors.green.withValues(alpha: 0.18)
+                            : Colors.amber.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(
+                      color:
+                          addedCount == 0 && removedCount == 0
+                              ? Colors.green.withValues(alpha: 0.45)
+                              : Colors.amber.withValues(alpha: 0.45),
+                    ),
+                  ),
+                  child: Text(
+                    addedCount == 0 && removedCount == 0
+                        ? '100% Identical SVG ($equalCount lines)'
+                        : '=$equalCount  -$removedCount  +$addedCount lines',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'Menlo',
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              DropdownButton<ExternalDiffTool>(
-                value: _externalTool,
-                isDense: true,
-                items:
-                    ExternalDiffTool.values
-                        .map(
-                          (t) => DropdownMenuItem<ExternalDiffTool>(
-                            value: t,
-                            child: Text(
-                              t.label,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                onChanged: (t) {
-                  if (t != null) setState(() => _externalTool = t);
-                },
-              ),
-              FilledButton.icon(
-                onPressed:
-                    () => _launchExternalDiffTool(formattedA, formattedB),
-                icon: const Icon(Icons.open_in_new, size: 15),
-                label: const Text(
-                  'Open in External Diff Tool',
-                  style: TextStyle(fontSize: 12),
+                const SizedBox(width: 10),
+                MacPopupButton<ExternalDiffTool>(
+                  value: _externalTool,
+                  items: <MacPopupItem<ExternalDiffTool>>[
+                    for (final t in ExternalDiffTool.values)
+                      MacPopupItem<ExternalDiffTool>(value: t, label: t.label),
+                  ],
+                  onChanged: (t) => setState(() => _externalTool = t),
                 ),
-              ),
-            ],
+                const SizedBox(width: 6),
+                MacToolbarButton(
+                  primary: true,
+                  onPressed:
+                      () => _launchExternalDiffTool(formattedA, formattedB),
+                  icon: Icons.open_in_new,
+                  label: 'External Diff',
+                ),
+              ],
+            ),
           ),
         ),
         Expanded(
@@ -645,34 +654,20 @@ class _SvgTextDiffViewState extends State<SvgTextDiffView> {
   Widget _buildEngineSelector(
     String label,
     ComparisonEngine current,
-    ValueChanged<ComparisonEngine?> onChanged,
+    ValueChanged<ComparisonEngine> onChanged,
   ) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(width: 6),
-        DropdownButton<ComparisonEngine>(
-          value: current,
-          isDense: true,
-          items:
-              ComparisonEngine.values
-                  .map(
-                    (e) => DropdownMenuItem<ComparisonEngine>(
-                      value: e,
-                      child: Text(
-                        e.label,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  )
-                  .toList(),
-          onChanged: onChanged,
-        ),
+    return MacPopupButton<ComparisonEngine>(
+      prefixLabel: label,
+      value: current,
+      items: <MacPopupItem<ComparisonEngine>>[
+        for (final e in ComparisonEngine.values)
+          MacPopupItem<ComparisonEngine>(
+            value: e,
+            label: e.label,
+            dotColor: e.accent,
+          ),
       ],
+      onChanged: onChanged,
     );
   }
 }

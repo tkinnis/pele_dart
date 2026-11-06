@@ -9,6 +9,7 @@ import 'package:vector_graphics/vector_graphics_compat.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart' as vgc;
 
 import 'engine_runner.dart';
+import 'mac_controls.dart';
 
 enum VisualDiffSubMode {
   splitCurtain('Split-Curtain', Icons.vertical_split),
@@ -373,21 +374,21 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
   }
 
   Widget _buildControlBar(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        color: cs.surfaceContainerHigh,
         border: Border(
           bottom: BorderSide(color: Theme.of(context).dividerColor),
         ),
       ),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 8,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: <Widget>[
-          _buildEngineDropdown('Engine A:', _engineA, (val) {
-            if (val != null) {
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: <Widget>[
+            _buildEngineDropdown('Engine A:', _engineA, (val) {
               setState(() {
                 _engineA = val;
                 _heatmapImage = null;
@@ -397,11 +398,29 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
                   (_) => _computeHeatmap(),
                 );
               }
-            }
-          }),
-          const Icon(Icons.compare_arrows, size: 16),
-          _buildEngineDropdown('Engine B:', _engineB, (val) {
-            if (val != null) {
+            }),
+            const SizedBox(width: 4),
+            MacIconButton(
+              tooltip: 'Swap Engine A and Engine B',
+              icon: Icons.swap_horiz,
+              size: 24,
+              iconSize: 15,
+              onPressed: () {
+                setState(() {
+                  final tmp = _engineA;
+                  _engineA = _engineB;
+                  _engineB = tmp;
+                  _heatmapImage = null;
+                });
+                if (_subMode == VisualDiffSubMode.pixelHeatmap) {
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => _computeHeatmap(),
+                  );
+                }
+              },
+            ),
+            const SizedBox(width: 4),
+            _buildEngineDropdown('Engine B:', _engineB, (val) {
               setState(() {
                 _engineB = val;
                 _heatmapImage = null;
@@ -411,114 +430,128 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
                   (_) => _computeHeatmap(),
                 );
               }
-            }
-          }),
-          const SizedBox(width: 8),
-          SegmentedButton<VisualDiffSubMode>(
-            segments:
-                VisualDiffSubMode.values
-                    .map(
-                      (m) => ButtonSegment<VisualDiffSubMode>(
-                        value: m,
-                        icon: Icon(m.icon, size: 15),
-                        label: Text(
-                          m.label,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                    )
-                    .toList(),
-            selected: <VisualDiffSubMode>{_subMode},
-            onSelectionChanged: (sel) {
-              final next = sel.first;
-              if (next != VisualDiffSubMode.blinkToggle) {
-                _toggleAutoBlink(false);
-              }
-              setState(() {
-                _subMode = next;
-              });
-              if (next == VisualDiffSubMode.pixelHeatmap) {
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _computeHeatmap(),
-                );
-              }
-            },
-          ),
-          if (_subMode == VisualDiffSubMode.colorOverlay) ...<Widget>[
-            const Text('Blend:', style: TextStyle(fontSize: 12)),
-            SizedBox(
-              width: 110,
-              child: Slider(
+            }),
+            const SizedBox(width: 12),
+            MacSegmentedControl<VisualDiffSubMode>(
+              height: 26,
+              fontSize: 11.5,
+              segments: <MacSegment<VisualDiffSubMode>>[
+                for (final m in VisualDiffSubMode.values)
+                  MacSegment<VisualDiffSubMode>(
+                    value: m,
+                    icon: m.icon,
+                    label: m.label,
+                  ),
+              ],
+              selected: _subMode,
+              onChanged: (next) {
+                if (next != VisualDiffSubMode.blinkToggle) {
+                  _toggleAutoBlink(false);
+                }
+                setState(() {
+                  _subMode = next;
+                });
+                if (next == VisualDiffSubMode.pixelHeatmap) {
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => _computeHeatmap(),
+                  );
+                }
+              },
+            ),
+            if (_subMode == VisualDiffSubMode.colorOverlay) ...<Widget>[
+              const SizedBox(width: 12),
+              Text(
+                'Blend:',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 4),
+              MacCompactSlider(
                 value: _overlayOpacity,
                 min: 0.15,
                 max: 0.9,
                 onChanged: (v) => setState(() => _overlayOpacity = v),
               ),
-            ),
-          ],
-          if (_subMode == VisualDiffSubMode.pixelHeatmap) ...<Widget>[
-            const Text('Tolerance:', style: TextStyle(fontSize: 12)),
-            SizedBox(
-              width: 100,
-              child: Slider(
+            ],
+            if (_subMode == VisualDiffSubMode.pixelHeatmap) ...<Widget>[
+              const SizedBox(width: 12),
+              Text(
+                'Tolerance: ±$_pixelTolerance',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 4),
+              MacCompactSlider(
                 value: _pixelTolerance.toDouble(),
                 min: 0,
                 max: 32,
                 divisions: 16,
-                label: '±$_pixelTolerance',
+                width: 88,
                 onChanged: (v) {
                   setState(() => _pixelTolerance = v.round());
                 },
                 onChangeEnd: (_) => _computeHeatmap(),
               ),
-            ),
-            FilledButton.tonalIcon(
-              onPressed: _computingHeatmap ? null : _computeHeatmap,
-              icon: const Icon(Icons.refresh, size: 15),
-              label: const Text('Recompute', style: TextStyle(fontSize: 12)),
-            ),
-            if (_matchPercentage != null)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color:
-                      _matchPercentage! >= 98.0
-                          ? Colors.green.withValues(alpha: 0.2)
-                          : Colors.amber.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${_matchPercentage!.toStringAsFixed(2)}% Pixel Match '
-                  '(${_diffPixelCount ?? 0} / ${_totalPixelCount ?? 0} diff px)',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+              const SizedBox(width: 6),
+              MacToolbarButton(
+                onPressed: _computingHeatmap ? null : _computeHeatmap,
+                icon: Icons.refresh,
+                label: 'Recompute',
+              ),
+              if (_matchPercentage != null) ...<Widget>[
+                const SizedBox(width: 8),
+                Container(
+                  height: 24,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color:
+                        _matchPercentage! >= 98.0
+                            ? Colors.green.withValues(alpha: 0.18)
+                            : Colors.amber.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(
+                      color:
+                          _matchPercentage! >= 98.0
+                              ? Colors.green.withValues(alpha: 0.45)
+                              : Colors.amber.withValues(alpha: 0.45),
+                    ),
+                  ),
+                  child: Text(
+                    '${_matchPercentage!.toStringAsFixed(2)}% Match '
+                    '(${_diffPixelCount ?? 0} diff px)',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'Menlo',
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
+              ],
+            ],
+            if (_subMode == VisualDiffSubMode.blinkToggle) ...<Widget>[
+              const SizedBox(width: 12),
+              MacToolbarButton(
+                onPressed: () => setState(() => _blinkShowB = !_blinkShowB),
+                icon: Icons.swap_horiz,
+                label: 'Showing: ${(_blinkShowB ? _engineB : _engineA).label}',
               ),
+              const SizedBox(width: 6),
+              MacToggleButton(
+                label: 'Auto-Blink (550ms)',
+                icon: Icons.timer_outlined,
+                selected: _autoBlink,
+                onChanged: _toggleAutoBlink,
+              ),
+            ],
           ],
-          if (_subMode == VisualDiffSubMode.blinkToggle) ...<Widget>[
-            FilledButton.tonalIcon(
-              onPressed: () => setState(() => _blinkShowB = !_blinkShowB),
-              icon: const Icon(Icons.swap_horiz, size: 15),
-              label: Text(
-                'Showing: ${(_blinkShowB ? _engineB : _engineA).label}',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-            FilterChip(
-              label: const Text(
-                'Auto-Blink (550ms)',
-                style: TextStyle(fontSize: 12),
-              ),
-              selected: _autoBlink,
-              onSelected: _toggleAutoBlink,
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -526,45 +559,20 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
   Widget _buildEngineDropdown(
     String prefix,
     ComparisonEngine current,
-    ValueChanged<ComparisonEngine?> onChanged,
+    ValueChanged<ComparisonEngine> onChanged,
   ) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          prefix,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(width: 6),
-        DropdownButton<ComparisonEngine>(
-          value: current,
-          isDense: true,
-          items:
-              ComparisonEngine.values
-                  .map(
-                    (e) => DropdownMenuItem<ComparisonEngine>(
-                      value: e,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: e.accent,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(e.label, style: const TextStyle(fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                  )
-                  .toList(),
-          onChanged: onChanged,
-        ),
+    return MacPopupButton<ComparisonEngine>(
+      prefixLabel: prefix,
+      value: current,
+      items: <MacPopupItem<ComparisonEngine>>[
+        for (final e in ComparisonEngine.values)
+          MacPopupItem<ComparisonEngine>(
+            value: e,
+            label: e.label,
+            dotColor: e.accent,
+          ),
       ],
+      onChanged: onChanged,
     );
   }
 

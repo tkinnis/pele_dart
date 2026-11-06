@@ -22,18 +22,8 @@ test/
 docs/
 
 # macOS Flutter 3-Way Comparison Studio app & multi-MB JS comparison bundles
-# (keep only example/README.md and example/main.dart in the published pub.dev archive)
-example/.dart_tool/
-example/.flutter-plugins-dependencies
-example/analysis_options.yaml
-example/assets/
-example/build/
-example/diagrams/
-example/lib/
-example/macos/
-example/pubspec.lock
-example/pubspec.yaml
-example/test/
+# (example/ contains only the pure-Dart CLI example for pub.dev)
+studio/
 
 # macOS / Editor
 .DS_Store

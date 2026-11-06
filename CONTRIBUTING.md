@@ -21,7 +21,7 @@ To keep `pele_dart` lightweight, deterministic, and easy to synchronize with ups
 3. **Dart-Specific Value-Add Extensions**:
    - Features specifically built for the Dart & Flutter ecosystem—such as [`SvgOutputMode.flattened`](lib/src/svg/flattener.dart) (for `vector_graphics` / `flutter_svg`), [`PelePalette`](lib/src/types.dart) theme tokens, and the pluggable [`TextMeasurer`](lib/src/text/measurer.dart) interface—live cleanly alongside the 1:1 upstream pipeline without altering default `render()` parity.
 4. **Core Library Palette Cleanliness**:
-   - `PelePalette` ships only with the two foundational base defaults (`PelePalette.light` and `PelePalette.dark`). Custom application palettes belong in consumer code or in `example/`.
+   - `PelePalette` ships only with the two foundational base defaults (`PelePalette.light` and `PelePalette.dark`). Custom application palettes belong in consumer code or in `studio/`.
 
 ---
 
@@ -29,7 +29,7 @@ To keep `pele_dart` lightweight, deterministic, and easy to synchronize with ups
 
 ### Prerequisites
 
-- **Dart SDK**: `^3.13.0` (or Flutter SDK for running the `example/` macOS comparison studio).
+- **Dart SDK**: `^3.13.0` (or Flutter SDK for running the `studio/` macOS comparison studio).
 - **Bun / Node.js** *(optional)*: Only needed when running `tool/sync_upstream.dart` or `tool/verify_against_upstream.dart` against a local `.upstream/` clone of `obsidianmd/pele`.
 
 ### Cloning & Installing Dependencies
@@ -48,7 +48,7 @@ Every pull request must pass all quality gates before merging:
 
 ### 1. Code Formatting
 ```bash
-dart format --output=none --set-exit-if-changed lib test tool example/lib example/main.dart
+dart format --output=none --set-exit-if-changed lib test tool studio/lib example/main.dart
 ```
 
 ### 2. Static Analysis (Zero Warnings / Infos)

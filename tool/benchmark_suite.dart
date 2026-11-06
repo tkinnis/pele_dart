@@ -7,7 +7,7 @@ import 'package:pele_dart/src/detect.dart';
 import 'package:pele_dart/src/preprocess.dart';
 
 // ignore: avoid_relative_lib_imports
-import '../example/lib/gallery_samples.dart';
+import '../studio/lib/gallery_samples.dart';
 
 /// Automated Native AOT Benchmark & Upstream Sync Regression Gate for `pele_dart`.
 ///
@@ -84,9 +84,7 @@ Future<void> main(List<String> args) async {
 
   final families = gallerySamples;
   if (families.isEmpty) {
-    stderr.writeln(
-      'Error: No diagram families found in $root/example/diagrams',
-    );
+    stderr.writeln('Error: No diagram families found in $root/studio/diagrams');
     exitCode = 1;
     return;
   }
@@ -436,7 +434,7 @@ Future<List<_JsSampleTiming>> _measurePeleJsCorpus(
   String root,
   List<_BenchSample> samples,
 ) async {
-  final bundleFile = File('$root/example/assets/pele.bundle.js');
+  final bundleFile = File('$root/studio/assets/pele.bundle.js');
   if (!bundleFile.existsSync()) {
     return List<_JsSampleTiming>.filled(
       samples.length,
@@ -833,7 +831,7 @@ String _buildBenchmarksMarkdown({
     ..writeln('# Performance Benchmarks & Upstream Sync Regression Gate')
     ..writeln()
     ..writeln(
-      'This document reports the native **Dart AOT** rendering performance of `pele_dart` across all **${familyResults.length} diagram families** (**$totalSamples diagrams** in the official `example/diagrams/` gallery corpus) compared against upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (JavaScriptCore; see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned upstream release).',
+      'This document reports the native **Dart AOT** rendering performance of `pele_dart` across all **${familyResults.length} diagram families** (**$totalSamples diagrams** in the official `studio/diagrams/` gallery corpus) compared against upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (JavaScriptCore; see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned upstream release).',
     )
     ..writeln()
     ..writeln(

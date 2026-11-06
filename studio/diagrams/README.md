@@ -1,7 +1,7 @@
-# Mermaid Diagram Gallery (`example/diagrams/`)
+# Mermaid Diagram Gallery (`studio/diagrams/`)
 
-This folder contains all Mermaid diagram files loaded dynamically by the
-`pele_dart` Comparison Studio (`example/`), test suite, and documentation tools.
+This folder contains all Mermaid diagram files loaded dynamically by
+**Pele Studio** (`studio/`), the test suite, and documentation tools.
 
 ## Supported File Extensions
 

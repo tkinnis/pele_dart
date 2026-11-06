@@ -1,18 +1,12 @@
-# `pele_dart` Examples & macOS 3-Way Comparison Studio
+# `pele_dart` Example
 
-This directory contains:
-1. **[`example/main.dart`](main.dart)**: A standalone pure-Dart CLI example showing how to render Mermaid diagrams to flattened SVG (`SvgOutputMode.flattened`) and CSS-variable SVG (`SvgOutputMode.cssVariables`), apply custom [`PelePalette`](../lib/src/types.dart) themes, reuse parsed models with `parse()`, and handle [`PeleError`](../lib/src/errors.dart) exceptions.
-2. **macOS 3-Way Comparison Studio (`example/lib/main.dart`)**: An interactive macOS desktop workbench that renders 232+ `.mmd` and `.mermaid` diagrams side-by-side across **`pele_dart` (Pure Dart)**, **`obsidianmd/pele` (JS)**, and **`mermaid.js`**.
-
----
-
-## 1. Pure-Dart Quick Example (`example/main.dart`)
-
-Run the pure-Dart CLI example from the repository root:
+Run the standalone pure-Dart CLI example from the repository root:
 
 ```bash
 dart run example/main.dart
 ```
+
+## Pure-Dart Usage (`example/main.dart`)
 
 ```dart
 import 'package:pele_dart/pele_dart.dart';
@@ -51,40 +45,21 @@ flowchart LR
     options: const RenderOptions(palette: customPalette),
   );
   print('Custom palette SVG length: ${customSvg.length} chars');
+
+  // 3. Two-phase parse() + render() for fast theme switching:
+  final ParsedDiagram parsed = parse(
+    'sequenceDiagram\n  Alice->>Bob: Ping\n  Bob-->>Alice: Pong',
+  );
+  final String darkSeq = render(
+    parsed,
+    const RenderOptions(palette: PelePalette.dark),
+  ).svg;
+  print('Parsed ${parsed.type} -> ${darkSeq.length} chars');
 }
 ```
 
----
+## Additional Guides & macOS Workbench
 
-## 2. Launching the macOS 3-Way Comparison Studio (`Pele Studio`)
-
-> **[Read the Complete Pele Studio User Guide (`docs/STUDIO_GUIDE.md`) →](../docs/STUDIO_GUIDE.md)**
-
-![Pele Studio — 3-Way Visual Render Workbench](../docs/images/studio/studio_3way_render.png)
-
-From the `example/` directory, run in `--release` mode to benchmark native Dart AOT speeds:
-
-```bash
-cd example
-flutter run -d macos --release
-```
-
-### Studio Features
-
-* **3-Engine Side-by-Side Comparison**:
-  * **`pele_dart` (Pure Dart)** — rendered natively in Dart via `flattenPeleSvg` + `vector_graphics`.
-  * **`obsidianmd/pele` (JS)** — upstream JavaScript reference bundle (see [`UPSTREAM.md`](../UPSTREAM.md)).
-  * **`mermaid.js`** — standard Mermaid browser renderer.
-* **4 Inspection Modes**:
-  1. **Visual Render**: Synchronized pan and zoom across all active engine columns with draggable column splitters and per-engine `p50` timing badges.
-  2. **Visual Diff**: Compare any two engines using **Split-Curtain Swipe**, **Cyan/Magenta Channel Overlay**, **Pixel-Diff Heatmap**, or **In-Place Blink Toggle**.
-  3. **Raw SVG**: Pretty-printed, syntax-readable SVG source for each engine (`SvgOutputMode.flattened` or `SvgOutputMode.cssVariables`) with one-click copy.
-  4. **SVG Text Diff**: Line-by-line unified diff between any two engines, plus an **Open in External Diff** launcher (`opendiff`, `code --diff`, `meld`, `ksdiff`).
-* **Full Keyboard Navigation**:
-  * Step through all 232+ diagrams with `↓` / `→` / `j` (Next Diagram) and `↑` / `←` / `k` (Previous Diagram), jump between the 33 diagram family folders with `Alt + ↓` / `]` and `Alt + ↑` / `[`, or press `1`–`9` (`Home` / `End`) to jump directly to a sample within the current family.
-* **Style Preset Selector & Live `Style (CSS)` Editor**:
-  * Switch between example style presets (`Default Dark`, `Default Light`, `Flexoki Paper`, `Catppuccin Mocha`, `Nord Blueprint`, `Solarized Dark`) in the top toolbar.
-  * Open the **`Style (CSS)`** tab in the bottom Playground Editor to type in your own `--pele-*` CSS custom properties and preview them live.
-* **Dynamic `.mmd` / `.mermaid` Folder Browser (`example/diagrams/`)**:
-  * The left sidebar dynamically scans [`example/diagrams/`](diagrams/README.md) (`01_core/<family>/*.mmd`, `02_extended/<family>/*.mmd`, `03_custom/`).
-  * Add new `.mmd` or `.mermaid` text files to any folder and click **Rescan (`↻`)** in the sidebar header—or click **Save as `.mmd` (`⬇`)** in the Playground Editor to save your current diagram to `example/diagrams/03_custom/`.
+* **[API User Manual (`docs/API_MANUAL.md`)](https://github.com/tkinnis/pele_dart/blob/main/docs/API_MANUAL.md)** — Complete API reference and Flutter `vector_graphics` widget guide.
+* **[Visual Diagram Gallery (`docs/DIAGRAM_GALLERY.md`)](https://github.com/tkinnis/pele_dart/blob/main/docs/DIAGRAM_GALLERY.md)** — Rendered SVG outputs and Mermaid source for all 33 diagram families.
+* **[Pele Studio User Guide (`docs/STUDIO_GUIDE.md`)](https://github.com/tkinnis/pele_dart/blob/main/docs/STUDIO_GUIDE.md)** — Native macOS 3-way comparison workbench (`cd studio && flutter run -d macos --release`).

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:pele_dart/pele_dart.dart';
 
 // ignore: avoid_relative_lib_imports
-import '../example/lib/gallery_samples.dart';
+import '../studio/lib/gallery_samples.dart';
 
 /// Verifies `pele_dart` structural header mappings against `UPSTREAM.md` and `.upstream/`,
 /// and runs differential and flattened-SVG verification across registered diagrams.
@@ -225,11 +225,11 @@ Future<void> main(List<String> args) async {
     }
   }
 
-  // Verify Mermaid version alignment across UPSTREAM.md and example/lib/engine_runner.dart.
+  // Verify Mermaid version alignment across UPSTREAM.md and studio/lib/engine_runner.dart.
   final pinnedMermaidVer = RegExp(
     r'\*\*Target Mermaid Version\*\*\s*\|\s*`([^`]+)`',
   ).firstMatch(md)?.group(1);
-  final engineRunnerFile = File('$root/example/lib/engine_runner.dart');
+  final engineRunnerFile = File('$root/studio/lib/engine_runner.dart');
   if (pinnedMermaidVer != null && engineRunnerFile.existsSync()) {
     final runnerText = engineRunnerFile.readAsStringSync();
     final uiMermaidVer = RegExp(r'mermaid\.js \(v([^)]+)\)')
