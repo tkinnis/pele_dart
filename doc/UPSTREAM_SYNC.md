@@ -100,7 +100,7 @@ dart run tool/sync_upstream.dart --update-to v1.14.0
 2. **Generates `.upstream/diff_report.md`** containing the full categorized file matrix, detector changes, Mermaid version status, and unified `git diff` patches for every changed file in `src/`.
 3. **Re-bundles `studio/assets/pele.bundle.js`** from `.upstream/src/index.ts` (via `bun build`) and appends the `globalThis.Pele` and `globalThis.PeleMetricsMeasurer` exports required by both the macOS 3-Way Comparison App and the CLI differential test runner.
 4. **Downloads the matching `mermaid.min.js`** from `https://unpkg.com/mermaid@<version>/dist/mermaid.min.js` into `studio/assets/mermaid.min.js` and updates the engine label in `studio/lib/engine_runner.dart` whenever the target Mermaid version changes.
-5. **Regenerates standalone documentation images** (`doc/images/diagrams/*.svg`, `doc/images/styles/*.svg`, and [`doc/DIAGRAM_GALLERY.md`](DIAGRAM_GALLERY.md)) via `tool/generate_doc_images.dart` from the `.mmd`/`.mermaid` files in `studio/diagrams/`.
+5. **Regenerates standalone documentation images** (`doc/images/diagrams/*.svg`, `doc/images/styles/*.svg`, [`doc/DIAGRAM_GALLERY.md`](DIAGRAM_GALLERY.md), and `doc/pele_diagrams.js`) via `tool/generate_doc_images.dart` from the `.mmd`/`.mermaid` files in `studio/diagrams/`.
 
 > **Note:** When source files have changed (`totalChangedFiles > 0`), `--update-to-latest` stages `.upstream/` and leaves `UPSTREAM.md` at the old pin until the Dart port changes are complete and verified (unless `--pin` is also passed), so `dart run tool/sync_upstream.dart --diff` continues to know the exact `from..to` range being ported.
 

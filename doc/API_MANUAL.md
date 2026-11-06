@@ -657,7 +657,7 @@ Define the `--pele-*` variables in your stylesheet to switch themes instantaneou
 ```css
 :root {
   --pele-bg: #ffffff;
-  --pele-fg: #24292e;
+  --pele-fg: #1f1f1f;
   --pele-surface-alt: #e6e6e6;
   --pele-critical: #e45756;
 }

@@ -51,6 +51,9 @@ pele_dart/
 ├── pubspec.yaml                     # Pure Dart package manifest (1:1 version lockstep with UPSTREAM.md)
 ├── analysis_options.yaml            # Strict analyzer & lint rules
 ├── doc/
+│   ├── index.html                   # Docsify GitHub Pages portal entrypoint (pele.run Flexoki theme)
+│   ├── _sidebar.md                  # Docsify sidebar navigation
+│   ├── pele_diagrams.js             # Pre-rendered SvgOutputMode.cssVariables diagrams for Docsify
 │   ├── API_MANUAL.md                # Public API reference & Flutter integration manual
 │   ├── ARCHITECTURE.md              # System architecture & internals (this document)
 │   ├── BENCHMARKS.md                # Native Dart AOT vs JS performance benchmarks & regression gate
@@ -113,7 +116,7 @@ pele_dart/
 │   ├── verify_against_upstream.dart # Differential test runner (Bun Pele vs. pele_dart)
 │   ├── benchmark_suite.dart         # Native AOT vs JS benchmark runner & regression gate
 │   ├── benchmark_baseline.json      # Per-family AOT timing baseline for regression checks
-│   └── generate_doc_images.dart     # Generates doc/images/**/*.svg and doc/DIAGRAM_GALLERY.md
+│   └── generate_doc_images.dart     # Generates doc/images/**/*.svg, doc/DIAGRAM_GALLERY.md & doc/pele_diagrams.js
 ├── example/
 │   ├── main.dart                    # Standalone pure-Dart CLI example (for pub.dev)
 │   └── README.md                    # Pure-Dart usage examples for pub.dev's Example tab

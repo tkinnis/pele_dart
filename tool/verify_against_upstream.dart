@@ -91,6 +91,13 @@ Future<void> main(List<String> args) async {
     }
   }
 
+  // Enforce 1:1 lockstep between PelePalette.light / const PelePalette() defaults
+  // and the CSS variable fallbacks in lib/src/svg/theme.dart (and .upstream/src/svg/theme.ts).
+  if (!_verifyDefaultPaletteMatchesThemeFallbacks(root, upstreamDir)) {
+    exitCode = 1;
+    return;
+  }
+
   // Verify all // Upstream: headers point to real files when .upstream exists.
   final libSrc = Directory('$root/lib/src');
   var verifiedHeaders = 0;
@@ -406,3 +413,148 @@ const Map<String, String> _sampleCorpus = <String, String>{
   'ishikawa': 'ishikawa-beta\n  Defect\n    People\n      Training\n    Process\n      Steps',
   'swimlane': 'swimlane-beta\n  subgraph Lane1\n    A --> B\n  end',
 };
+
+String _expandHex(String raw) {
+  final s = raw.trim().toLowerCase();
+  if (s.length == 4 && s.startsWith('#')) {
+    return '#${s[1]}${s[1]}${s[2]}${s[2]}${s[3]}${s[3]}';
+  }
+  return s;
+}
+
+bool _verifyDefaultPaletteMatchesThemeFallbacks(
+  String root,
+  Directory upstreamDir,
+) {
+  final sources = <(String label, String content)>[
+    (
+      'lib/src/svg/theme.dart',
+      File('$root/lib/src/svg/theme.dart').readAsStringSync(),
+    ),
+  ];
+  final upstreamThemeTs = File('${upstreamDir.path}/src/svg/theme.ts');
+  if (upstreamThemeTs.existsSync()) {
+    sources.add((
+      '.upstream/src/svg/theme.ts',
+      upstreamThemeTs.readAsStringSync(),
+    ));
+  }
+
+  const light = PelePalette.light;
+  const baseDefault = PelePalette();
+  final varRe = RegExp(r'var\((--pele-[a-z0-9-]+),([^)]+)\)');
+  final seriesArrayRe = RegExp(r'SERIES\s*=\s*\[([^\]]+)\]');
+  final hexLitRe = RegExp(r"'#[0-9a-fA-F]+'");
+
+  for (final (label, text) in sources) {
+    final fallbacks = <String, String>{};
+    for (final m in varRe.allMatches(text)) {
+      fallbacks[m.group(1)!.trim()] = m.group(2)!.trim();
+    }
+
+    final seriesMatch = seriesArrayRe.firstMatch(text);
+    if (seriesMatch != null) {
+      final colors = hexLitRe
+          .allMatches(seriesMatch.group(1)!)
+          .map((m) => m.group(0)!.replaceAll("'", ''))
+          .toList();
+      for (var i = 0; i < colors.length; i++) {
+        fallbacks['--pele-series-${i + 1}'] = colors[i];
+      }
+    }
+
+    final expectedChecks = <(String token, String actual, String? expected)>[
+      (
+        '--pele-bg',
+        _expandHex(light.bg),
+        _expandHex(fallbacks['--pele-bg'] ?? ''),
+      ),
+      (
+        '--pele-bg (ctor)',
+        _expandHex(baseDefault.bg),
+        _expandHex(fallbacks['--pele-bg'] ?? ''),
+      ),
+      (
+        '--pele-fg',
+        _expandHex(light.fg),
+        _expandHex(fallbacks['--pele-fg'] ?? ''),
+      ),
+      (
+        '--pele-fg (ctor)',
+        _expandHex(baseDefault.fg),
+        _expandHex(fallbacks['--pele-fg'] ?? ''),
+      ),
+      (
+        '--pele-muted',
+        _expandHex(light.muted ?? ''),
+        _expandHex(fallbacks['--pele-muted'] ?? ''),
+      ),
+      (
+        '--pele-line',
+        _expandHex(light.line ?? ''),
+        _expandHex(fallbacks['--pele-line'] ?? ''),
+      ),
+      (
+        '--pele-surface',
+        _expandHex(light.surface ?? ''),
+        _expandHex(fallbacks['--pele-surface'] ?? ''),
+      ),
+      (
+        '--pele-surface-alt',
+        _expandHex(light.surfaceAlt),
+        _expandHex(fallbacks['--pele-surface-alt'] ?? ''),
+      ),
+      (
+        '--pele-surface-alt (ctor)',
+        _expandHex(baseDefault.surfaceAlt),
+        _expandHex(fallbacks['--pele-surface-alt'] ?? ''),
+      ),
+      (
+        '--pele-border',
+        _expandHex(light.border ?? ''),
+        _expandHex(fallbacks['--pele-border'] ?? ''),
+      ),
+      (
+        '--pele-accent',
+        _expandHex(light.accent ?? ''),
+        _expandHex(fallbacks['--pele-accent'] ?? ''),
+      ),
+      (
+        '--pele-critical',
+        _expandHex(light.critical),
+        _expandHex(fallbacks['--pele-critical'] ?? ''),
+      ),
+      (
+        '--pele-critical (ctor)',
+        _expandHex(baseDefault.critical),
+        _expandHex(fallbacks['--pele-critical'] ?? ''),
+      ),
+      (
+        '--pele-radius',
+        '${light.radius.toInt()}px',
+        fallbacks['--pele-radius'],
+      ),
+      (
+        '--pele-radius (ctor)',
+        '${baseDefault.radius.toInt()}px',
+        fallbacks['--pele-radius'],
+      ),
+      for (var i = 0; i < 8; i++)
+        (
+          '--pele-series-${i + 1}',
+          _expandHex(light.colors[i]),
+          _expandHex(fallbacks['--pele-series-${i + 1}'] ?? ''),
+        ),
+    ];
+
+    for (final (token, actual, expected) in expectedChecks) {
+      if (expected == null || expected.isEmpty || actual != expected) {
+        stderr.writeln(
+          'Error: PelePalette.light $token ($actual) does not match $label fallback ($expected)',
+        );
+        return false;
+      }
+    }
+  }
+  return true;
+}

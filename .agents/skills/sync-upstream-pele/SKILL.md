@@ -69,7 +69,7 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 * Apply the exact algorithmic and structural change in Dart 3 while respecting the TypeScript-to-Dart semantic rules in [`AGENTS.md`](../../../AGENTS.md) and the 5 Dart AOT hot-path invariants in [`doc/ARCHITECTURE.md` (§5)](../../../doc/ARCHITECTURE.md#5-native-dart-aot-performance-architecture):
   - 32-bit signed/unsigned bitwise math (`.toSigned(32)` / `.toUnsigned(32)`), out-of-bounds-safe slicing (`jsSlice` / `jsSubstr`), and trailing-zero-stripped number formatting (`fmtNum()`).
   - Preserve `O(1)` first-character `switch` dispatch in [`lib/src/detect.dart`](../../../lib/src/detect.dart), paired `re:` + fast `match` closures in [`lib/src/diagrams/common/tokens.dart`](../../../lib/src/diagrams/common/tokens.dart), `codeUnitAt` slice scanning in `outline.dart` / `label.dart` / `preprocess.dart` / `yaml.dart`, and lazy `_MDate._w` evaluation in [`lib/src/diagrams/gantt/dates.dart`](../../../lib/src/diagrams/gantt/dates.dart).
-  - If `src/svg/theme.ts` or `src/svg/root.ts` changes CSS variables or `SERIES` colors, update both `lib/src/svg/theme.dart` / `lib/src/svg/root.dart` **and** `lib/src/svg/flattener.dart` + `lib/src/types.dart` (`PelePalette`) so `SvgOutputMode.flattened` stays 100% aligned with `SvgOutputMode.cssVariables`.
+  - If `src/svg/theme.ts` or `src/svg/root.ts` changes CSS variable fallbacks (`ROOT_STYLE`, `RADIUS`, `CRITICAL`, `SERIES`) or font tokens, update both `lib/src/svg/theme.dart` / `lib/src/svg/root.dart` **and** `lib/src/svg/flattener.dart` + `lib/src/types.dart` (`PelePalette` and `PelePalette.light`) so `SvgOutputMode.flattened` defaults stay 100% aligned with upstream `src/svg/theme.ts` (enforced by `tool/verify_against_upstream.dart`).
 
 ### B. Beta-to-Stable Diagram Promotions or Detector Changes (`M src/detect.ts`)
 * When upstream promotes a diagram from `<name>-beta` to `<name>` (or adds an alias in `src/detect.ts`):
@@ -95,7 +95,7 @@ Before cutting or pushing any release, regenerate all standalone diagram and sty
 
 ```bash
 # 1. Regenerate clean standalone SVG renders of every diagram family (doc/images/diagrams/*.svg),
-#    themed style previews (doc/images/styles/*.svg), and doc/DIAGRAM_GALLERY.md
+#    themed style previews (doc/images/styles/*.svg), doc/DIAGRAM_GALLERY.md, and doc/pele_diagrams.js
 dart run tool/generate_doc_images.dart
 
 # 2. Format and static analysis (0 warnings/errors/infos)
