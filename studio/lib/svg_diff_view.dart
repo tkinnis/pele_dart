@@ -83,12 +83,11 @@ class RawSvgOutputView extends StatelessWidget {
 
   Widget _buildSvgSourcePanel(BuildContext context, ComparisonEngine engine) {
     final out = outputs[engine];
-    final rawSvg =
-        out == null
-            ? ''
-            : (engine == ComparisonEngine.peleDart
-                ? out.svgForMode(peleDartMode)
-                : out.cssVarsSvg);
+    final rawSvg = out == null
+        ? ''
+        : (engine == ComparisonEngine.peleDart
+              ? out.svgForMode(peleDartMode)
+              : out.cssVarsSvg);
     final formatted = prettyPrintSvg(rawSvg);
     final lines = formatted.isEmpty ? const <String>[] : formatted.split('\n');
 
@@ -140,81 +139,79 @@ class RawSvgOutputView extends StatelessWidget {
               IconButton(
                 tooltip: 'Copy formatted SVG to clipboard',
                 icon: const Icon(Icons.copy, size: 16),
-                onPressed:
-                    formatted.isEmpty
-                        ? null
-                        : () {
-                          Clipboard.setData(ClipboardData(text: formatted));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Copied ${engine.label} SVG (${lines.length} lines)',
-                              ),
-                              duration: const Duration(seconds: 2),
+                onPressed: formatted.isEmpty
+                    ? null
+                    : () {
+                        Clipboard.setData(ClipboardData(text: formatted));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Copied ${engine.label} SVG (${lines.length} lines)',
                             ),
-                          );
-                        },
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
               ),
             ],
           ),
         ),
         Expanded(
-          child:
-              out?.error != null
-                  ? Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: SelectableText(
-                      out!.error!,
-                      style: const TextStyle(
-                        color: Colors.redAccent,
-                        fontFamily: 'Menlo',
-                        fontSize: 12,
-                      ),
+          child: out?.error != null
+              ? Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SelectableText(
+                    out!.error!,
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontFamily: 'Menlo',
+                      fontSize: 12,
                     ),
-                  )
-                  : ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: lines.length,
-                    itemBuilder: (context, index) {
-                      final line = lines[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 1,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            SizedBox(
-                              width: 42,
-                              child: Text(
-                                '${index + 1}',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  fontFamily: 'Menlo',
-                                  fontSize: 11,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant
-                                      .withValues(alpha: 0.6),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: SelectableText(
-                                line,
-                                style: const TextStyle(
-                                  fontFamily: 'Menlo',
-                                  fontSize: 11.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
                   ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: lines.length,
+                  itemBuilder: (context, index) {
+                    final line = lines[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 1,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          SizedBox(
+                            width: 42,
+                            child: Text(
+                              '${index + 1}',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                fontFamily: 'Menlo',
+                                fontSize: 11,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withValues(alpha: 0.6),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: SelectableText(
+                              line,
+                              style: const TextStyle(
+                                fontFamily: 'Menlo',
+                                fontSize: 11.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -439,20 +436,22 @@ class _SvgTextDiffViewState extends State<SvgTextDiffView> {
   Widget build(BuildContext context) {
     final formattedA = prettyPrintSvg(_svgFor(_engineA));
     final formattedB = prettyPrintSvg(_svgFor(_engineB));
-    final linesA =
-        formattedA.isEmpty ? const <String>[] : formattedA.split('\n');
-    final linesB =
-        formattedB.isEmpty ? const <String>[] : formattedB.split('\n');
+    final linesA = formattedA.isEmpty
+        ? const <String>[]
+        : formattedA.split('\n');
+    final linesB = formattedB.isEmpty
+        ? const <String>[]
+        : formattedB.split('\n');
 
     final diffLines = _computeLineDiff(linesA, linesB);
     final addedCount = diffLines.where((d) => d.kind == _DiffKind.added).length;
-    final removedCount =
-        diffLines.where((d) => d.kind == _DiffKind.removed).length;
+    final removedCount = diffLines
+        .where((d) => d.kind == _DiffKind.removed)
+        .length;
     final equalCount = diffLines.where((d) => d.kind == _DiffKind.equal).length;
-    final visibleLines =
-        _changesOnly
-            ? diffLines.where((d) => d.kind != _DiffKind.equal).toList()
-            : diffLines;
+    final visibleLines = _changesOnly
+        ? diffLines.where((d) => d.kind != _DiffKind.equal).toList()
+        : diffLines;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -496,8 +495,8 @@ class _SvgTextDiffViewState extends State<SvgTextDiffView> {
                   label: 'Compare CSS-Var SVG',
                   tooltip: 'Compare upstream-parity CSS-variable SVG markup',
                   selected: _compareCssVarsForParity,
-                  onChanged:
-                      (v) => setState(() => _compareCssVarsForParity = v),
+                  onChanged: (v) =>
+                      setState(() => _compareCssVarsForParity = v),
                 ),
                 const SizedBox(width: 6),
                 MacToggleButton(
@@ -511,16 +510,14 @@ class _SvgTextDiffViewState extends State<SvgTextDiffView> {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color:
-                        addedCount == 0 && removedCount == 0
-                            ? Colors.green.withValues(alpha: 0.18)
-                            : Colors.amber.withValues(alpha: 0.18),
+                    color: addedCount == 0 && removedCount == 0
+                        ? Colors.green.withValues(alpha: 0.18)
+                        : Colors.amber.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(5),
                     border: Border.all(
-                      color:
-                          addedCount == 0 && removedCount == 0
-                              ? Colors.green.withValues(alpha: 0.45)
-                              : Colors.amber.withValues(alpha: 0.45),
+                      color: addedCount == 0 && removedCount == 0
+                          ? Colors.green.withValues(alpha: 0.45)
+                          : Colors.amber.withValues(alpha: 0.45),
                     ),
                   ),
                   child: Text(
@@ -546,8 +543,8 @@ class _SvgTextDiffViewState extends State<SvgTextDiffView> {
                 const SizedBox(width: 6),
                 MacToolbarButton(
                   primary: true,
-                  onPressed:
-                      () => _launchExternalDiffTool(formattedA, formattedB),
+                  onPressed: () =>
+                      _launchExternalDiffTool(formattedA, formattedB),
                   icon: Icons.open_in_new,
                   label: 'External Diff',
                 ),
@@ -556,96 +553,93 @@ class _SvgTextDiffViewState extends State<SvgTextDiffView> {
           ),
         ),
         Expanded(
-          child:
-              visibleLines.isEmpty
-                  ? const Center(
-                    child: Text(
-                      'No line differences between selected engines!',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  )
-                  : ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: visibleLines.length,
-                    itemBuilder: (context, index) {
-                      final d = visibleLines[index];
-                      Color? rowBg;
-                      String prefix = ' ';
-                      Color prefixColor =
-                          Theme.of(context).colorScheme.onSurfaceVariant;
-                      if (d.kind == _DiffKind.added) {
-                        rowBg = Colors.green.withValues(alpha: 0.16);
-                        prefix = '+';
-                        prefixColor = Colors.greenAccent;
-                      } else if (d.kind == _DiffKind.removed) {
-                        rowBg = Colors.red.withValues(alpha: 0.16);
-                        prefix = '-';
-                        prefixColor = Colors.redAccent;
-                      }
-                      return Container(
-                        color: rowBg,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 1.5,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            SizedBox(
-                              width: 38,
-                              child: Text(
-                                d.lineA?.toString() ?? '',
-                                textAlign: TextAlign.right,
-                                style: const TextStyle(
-                                  fontFamily: 'Menlo',
-                                  fontSize: 11,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            SizedBox(
-                              width: 38,
-                              child: Text(
-                                d.lineB?.toString() ?? '',
-                                textAlign: TextAlign.right,
-                                style: const TextStyle(
-                                  fontFamily: 'Menlo',
-                                  fontSize: 11,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            SizedBox(
-                              width: 14,
-                              child: Text(
-                                prefix,
-                                style: TextStyle(
-                                  fontFamily: 'Menlo',
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: prefixColor,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: SelectableText(
-                                d.text,
-                                style: const TextStyle(
-                                  fontFamily: 'Menlo',
-                                  fontSize: 11.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+          child: visibleLines.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No line differences between selected engines!',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: visibleLines.length,
+                  itemBuilder: (context, index) {
+                    final d = visibleLines[index];
+                    Color? rowBg;
+                    String prefix = ' ';
+                    Color prefixColor = Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant;
+                    if (d.kind == _DiffKind.added) {
+                      rowBg = Colors.green.withValues(alpha: 0.16);
+                      prefix = '+';
+                      prefixColor = Colors.greenAccent;
+                    } else if (d.kind == _DiffKind.removed) {
+                      rowBg = Colors.red.withValues(alpha: 0.16);
+                      prefix = '-';
+                      prefixColor = Colors.redAccent;
+                    }
+                    return Container(
+                      color: rowBg,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 1.5,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          SizedBox(
+                            width: 38,
+                            child: Text(
+                              d.lineA?.toString() ?? '',
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(
+                                fontFamily: 'Menlo',
+                                fontSize: 11,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          SizedBox(
+                            width: 38,
+                            child: Text(
+                              d.lineB?.toString() ?? '',
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(
+                                fontFamily: 'Menlo',
+                                fontSize: 11,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          SizedBox(
+                            width: 14,
+                            child: Text(
+                              prefix,
+                              style: TextStyle(
+                                fontFamily: 'Menlo',
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                                color: prefixColor,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: SelectableText(
+                              d.text,
+                              style: const TextStyle(
+                                fontFamily: 'Menlo',
+                                fontSize: 11.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
         ),
       ],
     );

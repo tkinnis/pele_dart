@@ -18,8 +18,8 @@ UPSTREAM.md
 tool/
 test/
 
-# Documentation SVGs & deep design docs (served on pub.dev via GitHub repository links)
-docs/
+# Documentation SVGs & deep architecture docs (served on pub.dev via GitHub repository links)
+doc/
 
 # macOS Flutter 3-Way Comparison Studio app & multi-MB JS comparison bundles
 # (example/ contains only the pure-Dart CLI example for pub.dev)

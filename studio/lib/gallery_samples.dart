@@ -156,10 +156,9 @@ File saveCustomMermaidDiagram({
     cleanName = '$cleanName.mmd';
   }
   final file = File('${targetDir.path}/$cleanName');
-  final header =
-      (label != null && label.trim().isNotEmpty)
-          ? '%% label: ${label.trim()}\n'
-          : '';
+  final header = (label != null && label.trim().isNotEmpty)
+      ? '%% label: ${label.trim()}\n'
+      : '';
   file.writeAsStringSync('$header${source.trimRight()}\n');
   reloadGallerySamples();
   return file;
@@ -195,12 +194,11 @@ List<DiagramSample> _scanDiagramsRoot(Directory rootDir) {
       final sample = _loadFamilyDirectory(
         categoryDir,
         categoryFolder: categoryName,
-        defaultTier:
-            categoryName.startsWith('01_')
-                ? 1
-                : categoryName.startsWith('02_')
-                ? 2
-                : 3,
+        defaultTier: categoryName.startsWith('01_')
+            ? 1
+            : categoryName.startsWith('02_')
+            ? 2
+            : 3,
       );
       if (sample != null) {
         results.add(sample);
@@ -208,24 +206,21 @@ List<DiagramSample> _scanDiagramsRoot(Directory rootDir) {
     }
 
     // Scan family subdirectories inside this category folder (e.g. 01_core/flowchart/)
-    final subDirs =
-        categoryDir.listSync().whereType<Directory>().where((d) {
-            final name = d.path.split(Platform.pathSeparator).last;
-            return !name.startsWith('.') && name != 'showcase';
-          }).toList()
-          ..sort((a, b) => a.path.compareTo(b.path));
+    final subDirs = categoryDir.listSync().whereType<Directory>().where((d) {
+      final name = d.path.split(Platform.pathSeparator).last;
+      return !name.startsWith('.') && name != 'showcase';
+    }).toList()..sort((a, b) => a.path.compareTo(b.path));
 
     final categorySamples = <DiagramSample>[];
     for (final familyDir in subDirs) {
       final sample = _loadFamilyDirectory(
         familyDir,
         categoryFolder: categoryName,
-        defaultTier:
-            categoryName.startsWith('01_')
-                ? 1
-                : categoryName.startsWith('02_')
-                ? 2
-                : 3,
+        defaultTier: categoryName.startsWith('01_')
+            ? 1
+            : categoryName.startsWith('02_')
+            ? 2
+            : 3,
       );
       if (sample != null) {
         categorySamples.add(sample);
@@ -309,10 +304,9 @@ DiagramSample? _loadFamilyDirectory(
   final diagramType = (meta['diagramType'] as String?) ?? id;
   final beta = (meta['beta'] as bool?) ?? false;
   final tier = (meta['tier'] as int?) ?? defaultTier;
-  final primarySource =
-      showcaseSources.isNotEmpty
-          ? showcaseSources.first
-          : playgroundSamples.first.source;
+  final primarySource = showcaseSources.isNotEmpty
+      ? showcaseSources.first
+      : playgroundSamples.first.source;
 
   return DiagramSample(
     id: id,
@@ -324,10 +318,9 @@ DiagramSample? _loadFamilyDirectory(
     categoryFolder: categoryFolder,
     folderPath: familyDir.path,
     source: primarySource,
-    showcaseSources:
-        showcaseSources.isNotEmpty
-            ? showcaseSources
-            : <String>[playgroundSamples.first.source],
+    showcaseSources: showcaseSources.isNotEmpty
+        ? showcaseSources
+        : <String>[playgroundSamples.first.source],
     playgroundSamples: playgroundSamples,
   );
 }

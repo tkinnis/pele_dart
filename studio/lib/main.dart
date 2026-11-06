@@ -108,10 +108,9 @@ class _ResizableSplitterState extends State<ResizableSplitter> {
     final baseColor = Theme.of(context).dividerColor;
 
     final handle = MouseRegion(
-      cursor:
-          isVerticalDivider
-              ? SystemMouseCursors.resizeColumn
-              : SystemMouseCursors.resizeRow,
+      cursor: isVerticalDivider
+          ? SystemMouseCursors.resizeColumn
+          : SystemMouseCursors.resizeRow,
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       child: GestureDetector(
@@ -181,10 +180,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
   final ScrollController _subSampleScrollController = ScrollController();
   final Map<String, GlobalKey> _sidebarRowKeys = <String, GlobalKey>{};
   final Map<String, GlobalKey> _subSamplePillKeys = <String, GlobalKey>{};
-  String _activeSource =
-      gallerySamples.first.playgroundSamples.isNotEmpty
-          ? gallerySamples.first.playgroundSamples.first.source
-          : gallerySamples.first.source;
+  String _activeSource = gallerySamples.first.playgroundSamples.isNotEmpty
+      ? gallerySamples.first.playgroundSamples.first.source
+      : gallerySamples.first.source;
   String _searchQuery = '';
   int? _tierFilter;
   final Set<String> _expandedFamilyIds = <String>{gallerySamples.first.id};
@@ -374,14 +372,13 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
   void _navigateDiagramBy(int delta) {
     final entries = _filteredDiagramEntries;
     if (entries.isEmpty) return;
-    final currentIndex =
-        _isAdHocCustom
-            ? -1
-            : entries.indexWhere(
-              (e) =>
-                  e.$1.id == _selectedSample.id &&
-                  e.$2 == _selectedPlaygroundSampleIndex,
-            );
+    final currentIndex = _isAdHocCustom
+        ? -1
+        : entries.indexWhere(
+            (e) =>
+                e.$1.id == _selectedSample.id &&
+                e.$2 == _selectedPlaygroundSampleIndex,
+          );
     final int nextIndex;
     if (currentIndex < 0) {
       nextIndex = delta >= 0 ? 0 : entries.length - 1;
@@ -401,10 +398,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
   void _navigateFamilyBy(int delta) {
     final families = _filteredFamilies;
     if (families.isEmpty) return;
-    final currentIndex =
-        _isAdHocCustom
-            ? -1
-            : families.indexWhere((s) => s.id == _selectedSample.id);
+    final currentIndex = _isAdHocCustom
+        ? -1
+        : families.indexWhere((s) => s.id == _selectedSample.id);
     final int nextIndex;
     if (currentIndex < 0) {
       nextIndex = delta >= 0 ? 0 : families.length - 1;
@@ -548,8 +544,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
 
   void _applyStylePreset(PeleStylePreset preset) {
     _cssDebounceTimer?.cancel();
-    final nextPalette =
-        preset == PeleStylePreset.custom ? _activePalette : preset.palette;
+    final nextPalette = preset == PeleStylePreset.custom
+        ? _activePalette
+        : preset.palette;
     final editorCss = formatPaletteToCss(nextPalette);
     final webViewCss = formatPaletteToCss(nextPalette, selector: 'body, .pele');
     setState(() {
@@ -599,10 +596,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
   void _selectFamily(DiagramSample sample, {bool toggleExpand = false}) {
     _debounceTimer?.cancel();
     _focusBrowserIfNeeded();
-    final initialSource =
-        sample.playgroundSamples.isNotEmpty
-            ? sample.playgroundSamples.first.source
-            : sample.source;
+    final initialSource = sample.playgroundSamples.isNotEmpty
+        ? sample.playgroundSamples.first.source
+        : sample.source;
     setState(() {
       if (toggleExpand) {
         if (_expandedFamilyIds.contains(sample.id) &&
@@ -721,8 +717,8 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
               child: const Text('Cancel'),
             ),
             FilledButton(
-              onPressed:
-                  () => Navigator.of(ctx).pop(nameController.text.trim()),
+              onPressed: () =>
+                  Navigator.of(ctx).pop(nameController.text.trim()),
               child: const Text('Save .mmd'),
             ),
           ],
@@ -824,8 +820,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                     ),
                     ResizableSplitter(
                       axis: Axis.horizontal,
-                      tooltip:
-                          'Drag to resize diagram sidebar (double-click to reset)',
+                      tooltip: 'Drag to resize diagram sidebar (double-click to reset)',
                       onDoubleTap: () => setState(() => _sidebarWidth = 232.0),
                       onDragDelta: (dx) {
                         setState(() {
@@ -844,10 +839,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                     ),
                     ResizableSplitter(
                       axis: Axis.horizontal,
-                      tooltip:
-                          'Drag to resize playground editor (double-click to reset)',
-                      onDoubleTap:
-                          () => setState(() => _editorLeftWidth = 340.0),
+                      tooltip: 'Drag to resize playground editor (double-click to reset)',
+                      onDoubleTap: () =>
+                          setState(() => _editorLeftWidth = 340.0),
                       onDragDelta: (dx) {
                         setState(() {
                           _editorLeftWidth = (_editorLeftWidth + dx).clamp(
@@ -872,8 +866,8 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                                   child: Opacity(
                                     opacity:
                                         _activeTab == InspectionTab.visualRender
-                                            ? 1.0
-                                            : 0.0,
+                                        ? 1.0
+                                        : 0.0,
                                     child: _buildVisualRenderPanels(context),
                                   ),
                                 ),
@@ -911,11 +905,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                             EditorDockMode.bottomDock) ...<Widget>[
                           ResizableSplitter(
                             axis: Axis.vertical,
-                            tooltip:
-                                'Drag to resize bottom playground editor (double-click to reset)',
-                            onDoubleTap:
-                                () =>
-                                    setState(() => _editorBottomHeight = 195.0),
+                            tooltip: 'Drag to resize bottom playground editor (double-click to reset)',
+                            onDoubleTap: () =>
+                                setState(() => _editorBottomHeight = 195.0),
                             onDragDelta: (dy) {
                               setState(() {
                                 _editorBottomHeight = (_editorBottomHeight - dy)
@@ -962,15 +954,13 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       child: Row(
         children: <Widget>[
           MacIconButton(
-            tooltip:
-                _showGallerySidebar
-                    ? 'Hide Diagram Sidebar'
-                    : 'Show Diagram Sidebar',
+            tooltip: _showGallerySidebar
+                ? 'Hide Diagram Sidebar'
+                : 'Show Diagram Sidebar',
             icon: Icons.view_sidebar_outlined,
             isActive: _showGallerySidebar,
-            onPressed:
-                () =>
-                    setState(() => _showGallerySidebar = !_showGallerySidebar),
+            onPressed: () =>
+                setState(() => _showGallerySidebar = !_showGallerySidebar),
           ),
           const SizedBox(width: 6),
           Image.asset(
@@ -978,12 +968,11 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
             width: 19,
             height: 19,
             filterQuality: FilterQuality.medium,
-            errorBuilder:
-                (_, __, ___) => const Icon(
-                  Icons.auto_graph,
-                  color: Color(0xFF00B4D8),
-                  size: 17,
-                ),
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.auto_graph,
+              color: Color(0xFF00B4D8),
+              size: 17,
+            ),
           ),
           const SizedBox(width: 6),
           const Text(
@@ -1027,14 +1016,12 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                 MacPopupItem<PeleStylePreset>(
                   value: p,
                   label: p.label,
-                  dotColor:
-                      p == PeleStylePreset.custom
-                          ? swatchBg
-                          : parseHexColor(p.palette.bg),
-                  dotBorderColor:
-                      p == PeleStylePreset.custom
-                          ? swatchAccent
-                          : parseHexColor(p.palette.accent ?? '#5b7bd5'),
+                  dotColor: p == PeleStylePreset.custom
+                      ? swatchBg
+                      : parseHexColor(p.palette.bg),
+                  dotBorderColor: p == PeleStylePreset.custom
+                      ? swatchAccent
+                      : parseHexColor(p.palette.accent ?? '#5b7bd5'),
                 ),
             ],
             onChanged: (preset) {
@@ -1090,46 +1077,43 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                 _resetEngineWeights();
               });
             },
-            itemBuilder:
-                (_) => <PopupMenuEntry<String>>[
-                  for (final eng in ComparisonEngine.values)
-                    CheckedPopupMenuItem<String>(
-                      value: 'toggle:${eng.id}',
-                      checked: _selectedEngines.contains(eng),
-                      child: Text(eng.label),
-                    ),
-                  const PopupMenuDivider(),
-                  const PopupMenuItem(
-                    value: '3way_all',
-                    child: Text('3-Way: All 3 Engines'),
-                  ),
-                  const PopupMenuItem(
-                    value: '2way_pele',
-                    child: Text('2-Way: pele_dart vs pele (JS)'),
-                  ),
-                  const PopupMenuItem(
-                    value: '2way_mermaid',
-                    child: Text('2-Way: pele_dart vs mermaid.js'),
-                  ),
-                  const PopupMenuItem(
-                    value: '1way_dart',
-                    child: Text('1-Way: pele_dart Only'),
-                  ),
-                ],
+            itemBuilder: (_) => <PopupMenuEntry<String>>[
+              for (final eng in ComparisonEngine.values)
+                CheckedPopupMenuItem<String>(
+                  value: 'toggle:${eng.id}',
+                  checked: _selectedEngines.contains(eng),
+                  child: Text(eng.label),
+                ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: '3way_all',
+                child: Text('3-Way: All 3 Engines'),
+              ),
+              const PopupMenuItem(
+                value: '2way_pele',
+                child: Text('2-Way: pele_dart vs pele (JS)'),
+              ),
+              const PopupMenuItem(
+                value: '2way_mermaid',
+                child: Text('2-Way: pele_dart vs mermaid.js'),
+              ),
+              const PopupMenuItem(
+                value: '1way_dart',
+                child: Text('1-Way: pele_dart Only'),
+              ),
+            ],
             child: Container(
               height: 26,
               padding: const EdgeInsets.only(left: 9, right: 6),
               decoration: BoxDecoration(
-                color:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF262A34)
-                        : Theme.of(context).colorScheme.surfaceContainerLow,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF262A34)
+                    : Theme.of(context).colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withValues(alpha: 0.13)
-                          : Colors.black.withValues(alpha: 0.14),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withValues(alpha: 0.13)
+                      : Colors.black.withValues(alpha: 0.14),
                 ),
               ),
               child: Row(
@@ -1188,10 +1172,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
           ),
           const SizedBox(width: 2),
           MacIconButton(
-            tooltip:
-                widget.isDark
-                    ? 'Switch App to Light UI'
-                    : 'Switch App to Dark UI',
+            tooltip: widget.isDark
+                ? 'Switch App to Light UI'
+                : 'Switch App to Dark UI',
             icon: widget.isDark ? Icons.light_mode : Icons.dark_mode,
             onPressed: widget.onToggleTheme,
           ),
@@ -1206,14 +1189,13 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
     final samples = _selectedSample.playgroundSamples;
     final cs = Theme.of(context).colorScheme;
     final entries = _filteredDiagramEntries;
-    final activeEntryIdx =
-        _isAdHocCustom
-            ? -1
-            : entries.indexWhere(
-              (e) =>
-                  e.$1.id == _selectedSample.id &&
-                  e.$2 == _selectedPlaygroundSampleIndex,
-            );
+    final activeEntryIdx = _isAdHocCustom
+        ? -1
+        : entries.indexWhere(
+            (e) =>
+                e.$1.id == _selectedSample.id &&
+                e.$2 == _selectedPlaygroundSampleIndex,
+          );
     return Container(
       height: 34,
       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -1296,16 +1278,16 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                         decoration: BoxDecoration(
                           color:
                               (!_isAdHocCustom &&
-                                      _selectedPlaygroundSampleIndex == i)
-                                  ? cs.primary.withValues(alpha: 0.18)
-                                  : Colors.transparent,
+                                  _selectedPlaygroundSampleIndex == i)
+                              ? cs.primary.withValues(alpha: 0.18)
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(5),
                           border: Border.all(
                             color:
                                 (!_isAdHocCustom &&
-                                        _selectedPlaygroundSampleIndex == i)
-                                    ? cs.primary.withValues(alpha: 0.55)
-                                    : cs.outlineVariant.withValues(alpha: 0.35),
+                                    _selectedPlaygroundSampleIndex == i)
+                                ? cs.primary.withValues(alpha: 0.55)
+                                : cs.outlineVariant.withValues(alpha: 0.35),
                           ),
                         ),
                         child: Text(
@@ -1314,14 +1296,14 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                             fontSize: 11,
                             fontWeight:
                                 (!_isAdHocCustom &&
-                                        _selectedPlaygroundSampleIndex == i)
-                                    ? FontWeight.w600
-                                    : FontWeight.w500,
+                                    _selectedPlaygroundSampleIndex == i)
+                                ? FontWeight.w600
+                                : FontWeight.w500,
                             color:
                                 (!_isAdHocCustom &&
-                                        _selectedPlaygroundSampleIndex == i)
-                                    ? cs.primary
-                                    : cs.onSurfaceVariant,
+                                    _selectedPlaygroundSampleIndex == i)
+                                ? cs.primary
+                                : cs.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -1336,9 +1318,8 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
             height: 22,
             icon: Icons.edit_note,
             label: 'Blank Canvas',
-            onPressed:
-                () =>
-                    _startAdHocPlayground(initialText: playgroundDefaultSource),
+            onPressed: () =>
+                _startAdHocPlayground(initialText: playgroundDefaultSource),
           ),
         ],
       ),
@@ -1494,21 +1475,19 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                             InkWell(
                               key: _sidebarRowKey('family:${sample.id}'),
                               borderRadius: BorderRadius.circular(6),
-                              onTap:
-                                  () =>
-                                      _selectFamily(sample, toggleExpand: true),
+                              onTap: () =>
+                                  _selectFamily(sample, toggleExpand: true),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 7,
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color:
-                                      isSelectedFamily
-                                          ? cs.primaryContainer.withValues(
-                                            alpha: 0.55,
-                                          )
-                                          : Colors.transparent,
+                                  color: isSelectedFamily
+                                      ? cs.primaryContainer.withValues(
+                                          alpha: 0.55,
+                                        )
+                                      : Colors.transparent,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Row(
@@ -1526,10 +1505,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                                           ? Icons.folder_open
                                           : Icons.folder_outlined,
                                       size: 14,
-                                      color:
-                                          isSelectedFamily
-                                              ? cs.primary
-                                              : cs.onSurfaceVariant,
+                                      color: isSelectedFamily
+                                          ? cs.primary
+                                          : cs.onSurfaceVariant,
                                     ),
                                     const SizedBox(width: 6),
                                     Expanded(
@@ -1539,14 +1517,12 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 12,
-                                          fontWeight:
-                                              isSelectedFamily
-                                                  ? FontWeight.w700
-                                                  : FontWeight.w500,
-                                          color:
-                                              isSelectedFamily
-                                                  ? cs.onPrimaryContainer
-                                                  : cs.onSurface,
+                                          fontWeight: isSelectedFamily
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                          color: isSelectedFamily
+                                              ? cs.onPrimaryContainer
+                                              : cs.onSurface,
                                         ),
                                       ),
                                     ),
@@ -1636,8 +1612,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
   }) {
     final cs = Theme.of(context).colorScheme;
     final item = sample.playgroundSamples[fileIndex];
-    final displayFile =
-        item.fileName.isNotEmpty ? item.fileName : '${item.label}.mmd';
+    final displayFile = item.fileName.isNotEmpty
+        ? item.fileName
+        : '${item.label}.mmd';
     return Padding(
       key: _sidebarRowKey('file:${sample.id}:$fileIndex'),
       padding: const EdgeInsets.symmetric(vertical: 0.5),
@@ -1647,10 +1624,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
           decoration: BoxDecoration(
-            color:
-                isSelectedFile
-                    ? cs.primary.withValues(alpha: 0.16)
-                    : Colors.transparent,
+            color: isSelectedFile
+                ? cs.primary.withValues(alpha: 0.16)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(5),
           ),
           child: Row(
@@ -1658,10 +1634,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
               Icon(
                 Icons.description_outlined,
                 size: 12.5,
-                color:
-                    isSelectedFile
-                        ? cs.primary
-                        : cs.onSurfaceVariant.withValues(alpha: 0.7),
+                color: isSelectedFile
+                    ? cs.primary
+                    : cs.onSurfaceVariant.withValues(alpha: 0.7),
               ),
               const SizedBox(width: 5),
               Expanded(
@@ -1672,12 +1647,12 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontFamily: 'Menlo',
-                    fontWeight:
-                        isSelectedFile ? FontWeight.w700 : FontWeight.w400,
-                    color:
-                        isSelectedFile
-                            ? cs.primary
-                            : cs.onSurfaceVariant.withValues(alpha: 0.9),
+                    fontWeight: isSelectedFile
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                    color: isSelectedFile
+                        ? cs.primary
+                        : cs.onSurfaceVariant.withValues(alpha: 0.9),
                   ),
                 ),
               ),
@@ -1699,8 +1674,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
               if (i > 0)
                 ResizableSplitter(
                   axis: Axis.horizontal,
-                  tooltip:
-                      'Drag to resize engine columns (double-click to equalize)',
+                  tooltip: 'Drag to resize engine columns (double-click to equalize)',
                   onDoubleTap: _resetEngineWeights,
                   onDragDelta: (dx) {
                     final leftEngine = active[i - 1];
@@ -1768,10 +1742,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
     final out = _outputs[engine];
     final bgColor = parseHexColor(
       _activePalette.bg,
-      fallback:
-          _stylePreset.isDarkCanvas
-              ? const Color(0xFF14171F)
-              : const Color(0xFFFFFFFF),
+      fallback: _stylePreset.isDarkCanvas
+          ? const Color(0xFF14171F)
+          : const Color(0xFFFFFFFF),
     );
     final cs = Theme.of(context).colorScheme;
 
@@ -1787,8 +1760,8 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
     }
     final ratio =
         (out != null && out.error == null && fastestMs != null && fastestMs > 0)
-            ? out.svgGenMs / fastestMs
-            : null;
+        ? out.svgGenMs / fastestMs
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1879,10 +1852,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                       fontSize: 10.5,
                       fontFamily: 'Menlo',
                       fontWeight: FontWeight.w600,
-                      color:
-                          ratio <= 1.05
-                              ? Colors.green
-                              : cs.onSurfaceVariant.withValues(alpha: 0.8),
+                      color: ratio <= 1.05
+                          ? Colors.green
+                          : cs.onSurfaceVariant.withValues(alpha: 0.8),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -1912,26 +1884,25 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
         Expanded(
           child: Container(
             color: bgColor,
-            child:
-                engine == ComparisonEngine.peleDart
-                    ? _buildPeleDartVisualCanvas(out)
-                    : WebViewEngineCanvas(
-                      key: GlobalObjectKey(engine),
-                      engine: engine,
-                      source: _activeSource,
-                      isDark: _stylePreset.isDarkCanvas,
-                      customPalette: _activePalette,
-                      customCss: _activeStyleCss,
-                      isVisible: _activeTab == InspectionTab.visualRender,
-                      benchmarkNonce: _benchmarkNonce,
-                      onRendered: (res) {
-                        if (mounted) {
-                          setState(() {
-                            _outputs[engine] = res;
-                          });
-                        }
-                      },
-                    ),
+            child: engine == ComparisonEngine.peleDart
+                ? _buildPeleDartVisualCanvas(out)
+                : WebViewEngineCanvas(
+                    key: GlobalObjectKey(engine),
+                    engine: engine,
+                    source: _activeSource,
+                    isDark: _stylePreset.isDarkCanvas,
+                    customPalette: _activePalette,
+                    customCss: _activeStyleCss,
+                    isVisible: _activeTab == InspectionTab.visualRender,
+                    benchmarkNonce: _benchmarkNonce,
+                    onRendered: (res) {
+                      if (mounted) {
+                        setState(() {
+                          _outputs[engine] = res;
+                        });
+                      }
+                    },
+                  ),
           ),
         ),
       ],
@@ -2082,28 +2053,25 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                   icon: Icons.restore,
                   size: 24,
                   iconSize: 15,
-                  onPressed:
-                      () => _applyStylePreset(
-                        widget.isDark
-                            ? PeleStylePreset.dark
-                            : PeleStylePreset.light,
-                      ),
+                  onPressed: () => _applyStylePreset(
+                    widget.isDark
+                        ? PeleStylePreset.dark
+                        : PeleStylePreset.light,
+                  ),
                 ),
               ],
               MacIconButton(
-                tooltip:
-                    isLeftSplit
-                        ? 'Dock Editor to Bottom'
-                        : 'Dock Editor to Left Split',
+                tooltip: isLeftSplit
+                    ? 'Dock Editor to Bottom'
+                    : 'Dock Editor to Left Split',
                 icon: isLeftSplit ? Icons.dock : Icons.vertical_split,
                 size: 24,
                 iconSize: 14,
                 onPressed: () {
                   setState(() {
-                    _editorDockMode =
-                        isLeftSplit
-                            ? EditorDockMode.bottomDock
-                            : EditorDockMode.leftSplit;
+                    _editorDockMode = isLeftSplit
+                        ? EditorDockMode.bottomDock
+                        : EditorDockMode.leftSplit;
                   });
                 },
               ),
@@ -2157,18 +2125,14 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color:
-                                _stylePreset == preset
-                                    ? cs.primaryContainer
-                                    : cs.surface,
+                            color: _stylePreset == preset
+                                ? cs.primaryContainer
+                                : cs.surface,
                             borderRadius: BorderRadius.circular(5),
                             border: Border.all(
-                              color:
-                                  _stylePreset == preset
-                                      ? cs.primary
-                                      : cs.outlineVariant.withValues(
-                                        alpha: 0.5,
-                                      ),
+                              color: _stylePreset == preset
+                                  ? cs.primary
+                                  : cs.outlineVariant.withValues(alpha: 0.5),
                             ),
                           ),
                           child: Row(
@@ -2189,10 +2153,9 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                                 preset.label,
                                 style: TextStyle(
                                   fontSize: 10.5,
-                                  fontWeight:
-                                      _stylePreset == preset
-                                          ? FontWeight.w700
-                                          : FontWeight.w500,
+                                  fontWeight: _stylePreset == preset
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -2208,44 +2171,41 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child:
-                isStyleTab
-                    ? TextField(
-                      controller: _styleCssController,
-                      focusNode: _styleCssFocusNode,
-                      maxLines: null,
-                      expands: true,
-                      style: const TextStyle(
-                        fontFamily: 'Menlo',
-                        fontSize: 11.5,
-                        height: 1.45,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText:
-                            'Edit --pele-* CSS variables here (e.g. --pele-bg: #14171f; --pele-accent: #527fff;)...',
-                        border: InputBorder.none,
-                        isDense: true,
-                      ),
-                      onChanged: _onStyleCssChanged,
-                    )
-                    : TextField(
-                      controller: _editorController,
-                      focusNode: _editorFocusNode,
-                      maxLines: null,
-                      expands: true,
-                      style: const TextStyle(
-                        fontFamily: 'Menlo',
-                        fontSize: 12,
-                        height: 1.4,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText:
-                            'Type or paste any Mermaid diagram here (e.g. flowchart TD, sequenceDiagram, mindmap...)',
-                        border: InputBorder.none,
-                        isDense: true,
-                      ),
-                      onChanged: _onEditorTextChanged,
+            child: isStyleTab
+                ? TextField(
+                    controller: _styleCssController,
+                    focusNode: _styleCssFocusNode,
+                    maxLines: null,
+                    expands: true,
+                    style: const TextStyle(
+                      fontFamily: 'Menlo',
+                      fontSize: 11.5,
+                      height: 1.45,
                     ),
+                    decoration: const InputDecoration(
+                      hintText: 'Edit --pele-* CSS variables here (e.g. --pele-bg: #14171f; --pele-accent: #527fff;)...',
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                    onChanged: _onStyleCssChanged,
+                  )
+                : TextField(
+                    controller: _editorController,
+                    focusNode: _editorFocusNode,
+                    maxLines: null,
+                    expands: true,
+                    style: const TextStyle(
+                      fontFamily: 'Menlo',
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'Type or paste any Mermaid diagram here (e.g. flowchart TD, sequenceDiagram, mindmap...)',
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                    onChanged: _onEditorTextChanged,
+                  ),
           ),
         ),
         // Playground status / diagnostic footer
@@ -2253,79 +2213,74 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
           height: 26,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
-            color:
-                hasError
-                    ? Colors.red.withValues(alpha: 0.15)
-                    : cs.surfaceContainerLow,
+            color: hasError
+                ? Colors.red.withValues(alpha: 0.15)
+                : cs.surfaceContainerLow,
             border: Border(
               top: BorderSide(color: Theme.of(context).dividerColor),
             ),
           ),
-          child:
-              hasError
-                  ? Row(
-                    children: <Widget>[
-                      const Icon(
-                        Icons.error_outline,
-                        size: 13,
-                        color: Colors.redAccent,
-                      ),
-                      const SizedBox(width: 6),
-                      if (dartOut?.errorLine != null)
-                        Text(
-                          'Line ${dartOut!.errorLine}${dartOut.errorColumn != null ? ":${dartOut.errorColumn}" : ""} — ',
-                          style: const TextStyle(
-                            fontFamily: 'Menlo',
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                      Expanded(
-                        child: Text(
-                          dartOut!.error!.split('\n').first,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: 'Menlo',
-                            fontSize: 10.5,
-                            color: Colors.redAccent,
-                          ),
+          child: hasError
+              ? Row(
+                  children: <Widget>[
+                    const Icon(
+                      Icons.error_outline,
+                      size: 13,
+                      color: Colors.redAccent,
+                    ),
+                    const SizedBox(width: 6),
+                    if (dartOut?.errorLine != null)
+                      Text(
+                        'Line ${dartOut!.errorLine}${dartOut.errorColumn != null ? ":${dartOut.errorColumn}" : ""} — ',
+                        style: const TextStyle(
+                          fontFamily: 'Menlo',
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.redAccent,
                         ),
                       ),
-                    ],
-                  )
-                  : Row(
-                    children: <Widget>[
-                      Icon(
+                    Expanded(
+                      child: Text(
+                        dartOut!.error!.split('\n').first,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Menlo',
+                          fontSize: 10.5,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  children: <Widget>[
+                    Icon(
+                      isStyleTab
+                          ? Icons.palette_outlined
+                          : Icons.check_circle_outline,
+                      size: 13,
+                      color: isStyleTab
+                          ? parseHexColor(_activePalette.accent ?? '#527fff')
+                          : Colors.green,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
                         isStyleTab
-                            ? Icons.palette_outlined
-                            : Icons.check_circle_outline,
-                        size: 13,
-                        color:
-                            isStyleTab
-                                ? parseHexColor(
-                                  _activePalette.accent ?? '#527fff',
-                                )
-                                : Colors.green,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          isStyleTab
-                              ? 'Style: ${_stylePreset.label} • Edit any --pele-* hex value above to restyle live'
-                              : '${dartOut?.detectedType ?? _selectedSample.diagramType} • ${_activeSource.split("\n").length} lines • Style: ${_stylePreset.label}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontFamily: 'Menlo',
-                            color: cs.onSurfaceVariant,
-                          ),
+                            ? 'Style: ${_stylePreset.label} • Edit any --pele-* hex value above to restyle live'
+                            : '${dartOut?.detectedType ?? _selectedSample.diagramType} • ${_activeSource.split("\n").length} lines • Style: ${_stylePreset.label}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontFamily: 'Menlo',
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
         ),
       ],
     );

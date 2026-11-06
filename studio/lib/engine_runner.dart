@@ -149,8 +149,9 @@ PelePalette parsePaletteFromCss(
 
   double? parsePx(String? raw) {
     if (raw == null) return null;
-    final numStr =
-        raw.replaceAll(RegExp(r'px$', caseSensitive: false), '').trim();
+    final numStr = raw
+        .replaceAll(RegExp(r'px$', caseSensitive: false), '')
+        .trim();
     return double.tryParse(numStr);
   }
 
@@ -226,14 +227,12 @@ String formatPaletteToCss(PelePalette p, {String selector = '.pele'}) {
   final resolvedSurface = p.surface ?? mixHex(p.fg, p.bg, 0.05);
   final resolvedBorder = p.border ?? mixHex(p.fg, p.bg, 0.45);
   final resolvedAccent = p.accent ?? '#5b7bd5';
-  final rad =
-      p.radius == p.radius.truncateToDouble()
-          ? '${p.radius.toInt()}px'
-          : '${p.radius}px';
-  final sb =
-      StringBuffer('$selector {\n')
-        ..writeln('  --pele-bg: ${p.bg};')
-        ..writeln('  --pele-fg: ${p.fg};');
+  final rad = p.radius == p.radius.truncateToDouble()
+      ? '${p.radius.toInt()}px'
+      : '${p.radius}px';
+  final sb = StringBuffer('$selector {\n')
+    ..writeln('  --pele-bg: ${p.bg};')
+    ..writeln('  --pele-fg: ${p.fg};');
   if (p.fgOnLight != null) {
     sb.writeln('  --pele-fg-on-light: ${p.fgOnLight};');
   }
@@ -451,9 +450,11 @@ class MemoryVectorBytesLoader extends BytesLoader {
 
 /// Parses width and height from an SVG string's `viewBox` or `width`/`height` attributes.
 (double, double) parseSvgDimensions(String svg) {
-  final vb = RegExp(
-    r'viewBox="([^"]+)"',
-  ).firstMatch(svg)?.group(1)?.trim().split(RegExp(r'[\s,]+'));
+  final vb = RegExp(r'viewBox="([^"]+)"')
+      .firstMatch(svg)
+      ?.group(1)
+      ?.trim()
+      .split(RegExp(r'[\s,]+'));
   if (vb != null && vb.length == 4) {
     final w = double.tryParse(vb[2]);
     final h = double.tryParse(vb[3]);
@@ -1113,19 +1114,18 @@ async function rasterizeSvgToPng(svgEl, customCss) {
   Future<void> _triggerRender({bool intensiveBenchmark = false}) async {
     final c = _controller;
     if (c == null || !_pageReady) return;
-    final encodedSource = jsonEncode(
-      widget.source,
-    ).replaceAll('\u2028', r'\u2028').replaceAll('\u2029', r'\u2029');
+    final encodedSource = jsonEncode(widget.source)
+        .replaceAll('\u2028', r'\u2028')
+        .replaceAll('\u2029', r'\u2029');
     final palette =
         widget.customPalette ??
         (widget.isDark ? PelePalette.dark : PelePalette.light);
-    final effectiveCss =
-        widget.customCss.trim().isNotEmpty
-            ? widget.customCss
-            : formatPaletteToCss(palette, selector: 'body, .pele');
-    final encodedCss = jsonEncode(
-      effectiveCss,
-    ).replaceAll('\u2028', r'\u2028').replaceAll('\u2029', r'\u2029');
+    final effectiveCss = widget.customCss.trim().isNotEmpty
+        ? widget.customCss
+        : formatPaletteToCss(palette, selector: 'body, .pele');
+    final encodedCss = jsonEncode(effectiveCss)
+        .replaceAll('\u2028', r'\u2028')
+        .replaceAll('\u2029', r'\u2029');
     final encodedBg = jsonEncode(palette.bg);
     final isDarkLiteral = widget.isDark ? 'true' : 'false';
     final maxRuns = intensiveBenchmark ? 15 : 7;
@@ -1159,14 +1159,12 @@ async function rasterizeSvgToPng(svgEl, customCss) {
         final palette =
             widget.customPalette ??
             (widget.isDark ? PelePalette.dark : PelePalette.light);
-        final flattened =
-            widget.engine == ComparisonEngine.peleJs
-                ? flattenPeleSvg(svg, palette: palette)
-                : svg;
-        final compiledBytes =
-            widget.engine == ComparisonEngine.peleJs
-                ? tryCompileVectorBytes(flattened, 'pele_js_preview')
-                : null;
+        final flattened = widget.engine == ComparisonEngine.peleJs
+            ? flattenPeleSvg(svg, palette: palette)
+            : svg;
+        final compiledBytes = widget.engine == ComparisonEngine.peleJs
+            ? tryCompileVectorBytes(flattened, 'pele_js_preview')
+            : null;
         widget.onRendered(
           EngineRenderOutput(
             engine: widget.engine,

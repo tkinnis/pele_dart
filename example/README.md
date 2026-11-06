@@ -60,6 +60,6 @@ flowchart LR
 
 ## Additional Guides & macOS Workbench
 
-* **[API User Manual (`docs/API_MANUAL.md`)](https://github.com/tkinnis/pele_dart/blob/main/docs/API_MANUAL.md)** — Complete API reference and Flutter `vector_graphics` widget guide.
-* **[Visual Diagram Gallery (`docs/DIAGRAM_GALLERY.md`)](https://github.com/tkinnis/pele_dart/blob/main/docs/DIAGRAM_GALLERY.md)** — Rendered SVG outputs and Mermaid source for all 33 diagram families.
-* **[Pele Studio User Guide (`docs/STUDIO_GUIDE.md`)](https://github.com/tkinnis/pele_dart/blob/main/docs/STUDIO_GUIDE.md)** — Native macOS 3-way comparison workbench (`cd studio && flutter run -d macos --release`).
+* **[API User Manual (`doc/API_MANUAL.md`)](https://github.com/tkinnis/pele_dart/blob/main/doc/API_MANUAL.md)** — Complete API reference and Flutter `vector_graphics` widget guide.
+* **[Visual Diagram Gallery (`doc/DIAGRAM_GALLERY.md`)](https://github.com/tkinnis/pele_dart/blob/main/doc/DIAGRAM_GALLERY.md)** — Rendered SVG outputs and Mermaid source for all 33 diagram families.
+* **[Pele Studio User Guide (`doc/STUDIO_GUIDE.md`)](https://github.com/tkinnis/pele_dart/blob/main/doc/STUDIO_GUIDE.md)** — Native macOS 3-way comparison workbench (`cd studio && flutter run -d macos --release`).

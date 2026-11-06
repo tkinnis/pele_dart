@@ -6,18 +6,18 @@ import 'package:pele_dart/pele_dart.dart';
 import '../studio/lib/gallery_samples.dart';
 
 /// Generates clean, standalone SVG images of:
-///   1. All 33 Mermaid diagram families rendered by `pele_dart` (`docs/images/diagrams/<id>.svg`)
-///   2. 9 themed/styled diagram renders (`docs/images/styles/style_<name>.svg`)
-///   3. The visual catalog document (`docs/DIAGRAM_GALLERY.md`)
+///   1. All 33 Mermaid diagram families rendered by `pele_dart` (`doc/images/diagrams/<id>.svg`)
+///   2. 9 themed/styled diagram renders (`doc/images/styles/style_<name>.svg`)
+///   3. The visual catalog document (`doc/DIAGRAM_GALLERY.md`)
 ///
 /// Each SVG is a pure `pele_dart` diagram render (zero host-app chrome) wrapped
 /// with an explicit background `<rect>` matching its [PelePalette.bg] so it
 /// renders cleanly on both light and dark Markdown viewers.
 void main(List<String> args) {
   final root = Directory.current.path;
-  final diagramsDir = Directory('$root/docs/images/diagrams')
+  final diagramsDir = Directory('$root/doc/images/diagrams')
     ..createSync(recursive: true);
-  final stylesDir = Directory('$root/docs/images/styles')
+  final stylesDir = Directory('$root/doc/images/styles')
     ..createSync(recursive: true);
 
   stdout.writeln(
@@ -26,7 +26,7 @@ void main(List<String> args) {
     '═══════════════════════════════════════════════════════════',
   );
 
-  // 1. Render all 33 diagram families into docs/images/diagrams/<id>.svg
+  // 1. Render all 33 diagram families into doc/images/diagrams/<id>.svg
   var diagramCount = 0;
   final galleryMd = StringBuffer()
     ..writeln('# `pele_dart` Visual Diagram Gallery (33 Diagram Families)')
@@ -103,13 +103,13 @@ void main(List<String> args) {
       ..writeln();
   }
 
-  File('$root/docs/DIAGRAM_GALLERY.md').writeAsStringSync(galleryMd.toString());
+  File('$root/doc/DIAGRAM_GALLERY.md').writeAsStringSync(galleryMd.toString());
   stdout.writeln(
-    '✓ Rendered $diagramCount/33 standalone diagram images in docs/images/diagrams/\n'
-    '✓ Generated docs/DIAGRAM_GALLERY.md',
+    '✓ Rendered $diagramCount/33 standalone diagram images in doc/images/diagrams/\n'
+    '✓ Generated doc/DIAGRAM_GALLERY.md',
   );
 
-  // 2. Render style comparison images for docs/API_MANUAL.md
+  // 2. Render style comparison images for doc/API_MANUAL.md
   const styleShowcaseSource = '''
 flowchart LR
   subgraph Client
@@ -322,7 +322,7 @@ mindmap
     );
   }
 
-  stdout.writeln('✓ Rendered 9 styled showcase images in docs/images/styles/');
+  stdout.writeln('✓ Rendered 9 styled showcase images in doc/images/styles/');
 }
 
 /// Inserts a rounded background `<rect>` inside the root `<svg>` element matching

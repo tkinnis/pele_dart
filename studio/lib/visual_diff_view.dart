@@ -190,8 +190,9 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
           } else {
             // Dimmed grayscale baseline pixel
             final luma = ((rA * 299 + gA * 587 + bA * 114) ~/ 1000);
-            final dimmed =
-                widget.isDark ? (luma * 45 ~/ 100) : (210 + (luma - 210) ~/ 3);
+            final dimmed = widget.isDark
+                ? (luma * 45 ~/ 100)
+                : (210 + (luma - 210) ~/ 3);
             outRgba[idx] = dimmed.clamp(0, 255);
             outRgba[idx + 1] = dimmed.clamp(0, 255);
             outRgba[idx + 2] = dimmed.clamp(0, 255);
@@ -251,8 +252,9 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
       );
     }
 
-    final bgColor =
-        widget.isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFFFF);
+    final bgColor = widget.isDark
+        ? const Color(0xFF1E1E1E)
+        : const Color(0xFFFFFFFF);
     final w = out.width > 0 ? out.width : 600.0;
     final h = out.height > 0 ? out.height : 400.0;
 
@@ -511,16 +513,14 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color:
-                        _matchPercentage! >= 98.0
-                            ? Colors.green.withValues(alpha: 0.18)
-                            : Colors.amber.withValues(alpha: 0.18),
+                    color: _matchPercentage! >= 98.0
+                        ? Colors.green.withValues(alpha: 0.18)
+                        : Colors.amber.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(5),
                     border: Border.all(
-                      color:
-                          _matchPercentage! >= 98.0
-                              ? Colors.green.withValues(alpha: 0.45)
-                              : Colors.amber.withValues(alpha: 0.45),
+                      color: _matchPercentage! >= 98.0
+                          ? Colors.green.withValues(alpha: 0.45)
+                          : Colors.amber.withValues(alpha: 0.45),
                     ),
                   ),
                   child: Text(
@@ -720,17 +720,19 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
         }
         final diffStats =
             (_diffPixelCount != null &&
-                    _totalPixelCount != null &&
-                    _matchPercentage != null)
-                ? '  •  $_diffPixelCount / $_totalPixelCount px differ (${_matchPercentage!.toStringAsFixed(2)}% match)'
-                : '';
+                _totalPixelCount != null &&
+                _matchPercentage != null)
+            ? '  •  $_diffPixelCount / $_totalPixelCount px differ (${_matchPercentage!.toStringAsFixed(2)}% match)'
+            : '';
         return Stack(
           children: <Widget>[
             Positioned.fill(
               child: InteractiveViewer(
                 minScale: 0.25,
                 maxScale: 8.0,
-                child: Center(child: RawImage(image: img, fit: BoxFit.contain)),
+                child: Center(
+                  child: RawImage(image: img, fit: BoxFit.contain),
+                ),
               ),
             ),
             Positioned(

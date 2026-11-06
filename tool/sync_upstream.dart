@@ -25,7 +25,7 @@ import 'dart:io';
 ///   `dart run tool/sync_upstream.dart --refresh-assets`
 ///     Rebuilds `studio/assets/pele.bundle.js`, syncs `studio/assets/mermaid.min.js`
 ///     and `studio/lib/engine_runner.dart` to upstream's target Mermaid version,
-///     and regenerates `docs/images/` and `docs/DIAGRAM_GALLERY.md`.
+///     and regenerates `doc/images/` and `doc/DIAGRAM_GALLERY.md`.
 ///
 ///   `dart run tool/sync_upstream.dart --pin <tag> [sha]`
 ///     Updates `UPSTREAM.md` with the specified release tag, commit SHA, date,
@@ -220,7 +220,7 @@ Future<void> main(List<String> args) async {
         '   Next steps:\n'
         '     1. Port the modified/added files listed above into lib/src/ and test/\n'
         '     2. Verify 100% parity: dart run tool/verify_against_upstream.dart && dart test\n'
-        '     3. Verify AOT benchmarks & update docs/BENCHMARKS.md: dart run tool/benchmark_suite.dart --update-docs --check-regressions\n'
+        '     3. Verify AOT benchmarks & update doc/BENCHMARKS.md: dart run tool/benchmark_suite.dart --update-docs --check-regressions\n'
         '     4. Finalize UPSTREAM.md pin: dart run tool/sync_upstream.dart --pin $targetTagOrRef $targetSha',
       );
     }
@@ -486,7 +486,7 @@ Commands:
 
   dart run tool/sync_upstream.dart --update-to-latest
     Update .upstream/ to the latest tagged obsidianmd/pele release, generate .upstream/diff_report.md,
-    refresh pele.bundle.js, mermaid.min.js, and docs/images/, and update UPSTREAM.md.
+    refresh pele.bundle.js, mermaid.min.js, and doc/images/, and update UPSTREAM.md.
 
   dart run tool/sync_upstream.dart --update-to <tag_or_ref>
     Update .upstream/ to a specific release tag or commit SHA.
@@ -496,7 +496,7 @@ Commands:
 
   dart run tool/sync_upstream.dart --refresh-assets [ref]
     Rebuild studio/assets/pele.bundle.js, sync studio/assets/mermaid.min.js to upstream's target
-    Mermaid version, and regenerate docs/images/ and docs/DIAGRAM_GALLERY.md.
+    Mermaid version, and regenerate doc/images/ and doc/DIAGRAM_GALLERY.md.
 
   dart run tool/sync_upstream.dart --pin <tag> [sha]
     Update UPSTREAM.md with the given release tag and commit SHA.
@@ -1125,8 +1125,8 @@ Future<void> _refreshAllAssets(String root, Directory upstreamDir) async {
     }
   }
 
-  // 3. Regenerate clean standalone SVG diagram images (docs/images/diagrams/*.svg),
-  //    styled showcase images (docs/images/styles/*.svg), and docs/DIAGRAM_GALLERY.md.
+  // 3. Regenerate clean standalone SVG diagram images (doc/images/diagrams/*.svg),
+  //    styled showcase images (doc/images/styles/*.svg), and doc/DIAGRAM_GALLERY.md.
   final docGenScript = File('$root/tool/generate_doc_images.dart');
   if (docGenScript.existsSync()) {
     stdout.writeln(
@@ -1137,7 +1137,7 @@ Future<void> _refreshAllAssets(String root, Directory upstreamDir) async {
     ], workingDirectory: root);
     if (imgRes.exitCode == 0) {
       stdout.writeln(
-        '   ✓ Regenerated docs/images/diagrams/*.svg, docs/images/styles/*.svg, and docs/DIAGRAM_GALLERY.md',
+        '   ✓ Regenerated doc/images/diagrams/*.svg, doc/images/styles/*.svg, and doc/DIAGRAM_GALLERY.md',
       );
     } else {
       stderr.writeln('   ⚠️ Failed to regenerate doc images: ${imgRes.stderr}');

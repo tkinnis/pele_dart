@@ -18,7 +18,7 @@ import '../studio/lib/gallery_samples.dart';
 ///     `obsidianmd/pele` (JS), and prints the summary table.
 ///
 ///   `dart run tool/benchmark_suite.dart --update-docs [--update-baseline]`
-///     Regenerates `docs/BENCHMARKS.md` (and `tool/benchmark_baseline.json`
+///     Regenerates `doc/BENCHMARKS.md` (and `tool/benchmark_baseline.json`
 ///     when `--update-baseline` is passed or if the baseline file does not exist).
 ///
 ///   `dart run tool/benchmark_suite.dart --check-regressions`
@@ -30,7 +30,18 @@ Future<void> main(List<String> args) async {
     return;
   }
 
-  final root = Directory.current.path;
+  var root = Directory.current.path;
+  for (final arg in args) {
+    if (arg.startsWith('--root=')) {
+      root = arg.substring('--root='.length);
+    }
+  }
+  if (!File('$root/UPSTREAM.md').existsSync()) {
+    final scriptRoot = File.fromUri(Platform.script).parent.parent.path;
+    if (File('$scriptRoot/UPSTREAM.md').existsSync()) {
+      root = scriptRoot;
+    }
+  }
 
   // If invoked via `dart run` (JIT VM), self-compile to a native AOT binary
   // so benchmarks always reflect true Release/AOT machine code.
@@ -62,6 +73,7 @@ Future<void> main(List<String> args) async {
       }
       final proc = await Process.start(aotBin, <String>[
         '--aot-worker',
+        '--root=$root',
         ...args,
       ], workingDirectory: root);
       await Future.wait(<Future<void>>[
@@ -239,7 +251,7 @@ Future<void> main(List<String> args) async {
   }
 
   if (updateDocs) {
-    final docsFile = File('$root/docs/BENCHMARKS.md');
+    final docsFile = File('$root/doc/BENCHMARKS.md');
     docsFile.writeAsStringSync(
       _buildBenchmarksMarkdown(
         familyResults: familyResults,
@@ -254,7 +266,7 @@ Future<void> main(List<String> args) async {
       ),
     );
     if (!jsonOutput) {
-      stdout.writeln('Updated benchmark documentation: docs/BENCHMARKS.md');
+      stdout.writeln('Updated benchmark documentation: doc/BENCHMARKS.md');
     }
   }
 
@@ -364,7 +376,7 @@ Usage:
   dart run tool/benchmark_suite.dart [options]
 
 Options:
-  --update-docs        Regenerate docs/BENCHMARKS.md with current native AOT benchmark results.
+  --update-docs        Regenerate doc/BENCHMARKS.md with current native AOT benchmark results.
   --update-baseline    Update tool/benchmark_baseline.json with current per-family AOT baselines.
   --check-regressions  Fail with exit code 1 if any diagram family or corpus total regresses.
   --json               Emit machine-readable JSON output.
@@ -848,7 +860,7 @@ String _buildBenchmarksMarkdown({
       '| **Run native AOT benchmark suite & print console table** | `dart run tool/benchmark_suite.dart` |',
     )
     ..writeln(
-      '| **Update `docs/BENCHMARKS.md` and check for regressions** | `dart run tool/benchmark_suite.dart --update-docs --check-regressions` |',
+      '| **Update `doc/BENCHMARKS.md` and check for regressions** | `dart run tool/benchmark_suite.dart --update-docs --check-regressions` |',
     )
     ..writeln(
       '| **Update baseline after intentional optimizations** | `dart run tool/benchmark_suite.dart --update-docs --update-baseline` |',
@@ -891,7 +903,7 @@ String _buildBenchmarksMarkdown({
     )
     ..writeln()
     ..writeln(
-      '> **Bar Series 1 (Left):** `pele_dart` Native AOT (µs) &nbsp;|&nbsp; **Bar Series 2 (Right):** `obsidianmd/pele` JS (µs) — *Lower is faster*',
+      '> **Tall Background Bar (`bar` 1):** `obsidianmd/pele` JS (µs) &nbsp;|&nbsp; **Short Foreground Bar + Line (`bar` 2 / `line`):** `pele_dart` Native AOT (µs) — *Lower is faster*',
     )
     ..writeln()
     ..writeln('```mermaid')
@@ -901,8 +913,9 @@ String _buildBenchmarksMarkdown({
     )
     ..writeln('  x-axis [$coreLabels]')
     ..writeln('  y-axis "Mean Render Time (µs)" 0 --> $coreYMax')
-    ..writeln('  bar [$coreAotBars]')
     ..writeln('  bar [$coreJsBars]')
+    ..writeln('  bar [$coreAotBars]')
+    ..writeln('  line [$coreAotBars]')
     ..writeln('```')
     ..writeln()
     ..writeln(
@@ -983,7 +996,7 @@ String _buildBenchmarksMarkdown({
     )
     ..writeln()
     ..writeln(
-      'When syncing new upstream `obsidianmd/pele` commits (see [`docs/UPSTREAM_SYNC.md`](UPSTREAM_SYNC.md) and [`.agents/skills/sync-upstream-pele/SKILL.md`](../.agents/skills/sync-upstream-pele/SKILL.md)), newly ported TypeScript code can introduce Dart AOT regressions if JavaScript idioms (such as sticky/backtracking regex loops or per-character string allocations) are translated naively.',
+      'When syncing new upstream `obsidianmd/pele` commits (see [`doc/UPSTREAM_SYNC.md`](UPSTREAM_SYNC.md) and [`.agents/skills/sync-upstream-pele/SKILL.md`](../.agents/skills/sync-upstream-pele/SKILL.md)), newly ported TypeScript code can introduce Dart AOT regressions if JavaScript idioms (such as sticky/backtracking regex loops or per-character string allocations) are translated naively.',
     )
     ..writeln()
     ..writeln(

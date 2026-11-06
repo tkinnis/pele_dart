@@ -4,7 +4,7 @@ version: 1.13.0
 homepage: https://github.com/tkinnis/pele_dart
 repository: https://github.com/tkinnis/pele_dart
 issue_tracker: https://github.com/tkinnis/pele_dart/issues
-documentation: https://github.com/tkinnis/pele_dart/blob/main/docs/API_MANUAL.md
+documentation: https://github.com/tkinnis/pele_dart/blob/main/doc/API_MANUAL.md
 
 topics:
   - mermaid
@@ -17,10 +17,10 @@ environment:
   sdk: ^3.13.0
 
 dependencies:
-  meta: ^1.16.0
+  meta: ^1.19.0
 
 dev_dependencies:
-  lints: ^6.0.0
-  test: ^1.26.0
-  vector_graphics_compiler: ^1.3.0
-  xml: ^6.6.1
+  lints: ^6.1.0
+  test: ^1.33.0
+  vector_graphics_compiler: ^1.3.4
+  xml: ^7.0.1

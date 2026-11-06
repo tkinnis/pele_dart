@@ -45,20 +45,18 @@ class MacSegmentedControl<T> extends StatelessWidget {
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final trackColor =
-        isDark
-            ? const Color(0xFF181B22)
-            : cs.surfaceContainerHighest.withValues(alpha: 0.85);
-    final activePillColor =
-        isDark ? const Color(0xFF323846) : const Color(0xFFFFFFFF);
-    final activeBorderColor =
-        isDark
-            ? Colors.white.withValues(alpha: 0.14)
-            : Colors.black.withValues(alpha: 0.12);
-    final trackBorderColor =
-        isDark
-            ? Colors.white.withValues(alpha: 0.08)
-            : Colors.black.withValues(alpha: 0.10);
+    final trackColor = isDark
+        ? const Color(0xFF181B22)
+        : cs.surfaceContainerHighest.withValues(alpha: 0.85);
+    final activePillColor = isDark
+        ? const Color(0xFF323846)
+        : const Color(0xFFFFFFFF);
+    final activeBorderColor = isDark
+        ? Colors.white.withValues(alpha: 0.14)
+        : Colors.black.withValues(alpha: 0.12);
+    final trackBorderColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.10);
 
     final children = <Widget>[];
     final selectedIdx = segments.indexWhere((s) => s.value == selected);
@@ -73,10 +71,9 @@ class MacSegmentedControl<T> extends StatelessWidget {
           Container(
             width: 1,
             height: height - 10,
-            color:
-                hideDivider
-                    ? Colors.transparent
-                    : cs.outlineVariant.withValues(alpha: isDark ? 0.35 : 0.45),
+            color: hideDivider
+                ? Colors.transparent
+                : cs.outlineVariant.withValues(alpha: isDark ? 0.35 : 0.45),
           ),
         );
       }
@@ -150,12 +147,11 @@ class _MacSegmentButtonState extends State<_MacSegmentButton> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final fgColor =
-        widget.isSelected
-            ? cs.onSurface
-            : (_hovering
-                ? cs.onSurface.withValues(alpha: 0.92)
-                : cs.onSurfaceVariant);
+    final fgColor = widget.isSelected
+        ? cs.onSurface
+        : (_hovering
+              ? cs.onSurface.withValues(alpha: 0.92)
+              : cs.onSurfaceVariant);
 
     Widget content = MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -168,27 +164,24 @@ class _MacSegmentButtonState extends State<_MacSegmentButton> {
           duration: const Duration(milliseconds: 90),
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
-            color:
-                widget.isSelected
-                    ? widget.activePillColor
-                    : (_hovering
-                        ? cs.onSurface.withValues(alpha: 0.05)
-                        : Colors.transparent),
+            color: widget.isSelected
+                ? widget.activePillColor
+                : (_hovering
+                      ? cs.onSurface.withValues(alpha: 0.05)
+                      : Colors.transparent),
             borderRadius: BorderRadius.circular(4.5),
-            border:
-                widget.isSelected
-                    ? Border.all(color: widget.activeBorderColor, width: 0.8)
-                    : null,
-            boxShadow:
-                widget.isSelected
-                    ? <BoxShadow>[
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.18),
-                        blurRadius: 2,
-                        offset: const Offset(0, 0.5),
-                      ),
-                    ]
-                    : null,
+            border: widget.isSelected
+                ? Border.all(color: widget.activeBorderColor, width: 0.8)
+                : null,
+            boxShadow: widget.isSelected
+                ? <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 2,
+                      offset: const Offset(0, 0.5),
+                    ),
+                  ]
+                : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -204,8 +197,9 @@ class _MacSegmentButtonState extends State<_MacSegmentButton> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: widget.fontSize,
-                  fontWeight:
-                      widget.isSelected ? FontWeight.w600 : FontWeight.w500,
+                  fontWeight: widget.isSelected
+                      ? FontWeight.w600
+                      : FontWeight.w500,
                   color: fgColor,
                 ),
               ),
@@ -301,10 +295,9 @@ class _MacPopupButtonState<T> extends State<MacPopupButton<T>> {
               children: <Widget>[
                 SizedBox(
                   width: 16,
-                  child:
-                      item.value == widget.value
-                          ? const Icon(Icons.check, size: 13)
-                          : null,
+                  child: item.value == widget.value
+                      ? const Icon(Icons.check, size: 13)
+                      : null,
                 ),
                 if (item.dotColor != null) ...<Widget>[
                   Container(
@@ -313,13 +306,9 @@ class _MacPopupButtonState<T> extends State<MacPopupButton<T>> {
                     decoration: BoxDecoration(
                       color: item.dotColor,
                       shape: BoxShape.circle,
-                      border:
-                          item.dotBorderColor != null
-                              ? Border.all(
-                                color: item.dotBorderColor!,
-                                width: 1.8,
-                              )
-                              : null,
+                      border: item.dotBorderColor != null
+                          ? Border.all(color: item.dotBorderColor!, width: 1.8)
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -328,10 +317,9 @@ class _MacPopupButtonState<T> extends State<MacPopupButton<T>> {
                   item.label,
                   style: TextStyle(
                     fontSize: 11.5,
-                    fontWeight:
-                        item.value == widget.value
-                            ? FontWeight.w600
-                            : FontWeight.w400,
+                    fontWeight: item.value == widget.value
+                        ? FontWeight.w600
+                        : FontWeight.w400,
                   ),
                 ),
               ],
@@ -355,14 +343,12 @@ class _MacPopupButtonState<T> extends State<MacPopupButton<T>> {
       orElse: () => widget.items.first,
     );
 
-    final bgColor =
-        isDark
-            ? (_hovering ? const Color(0xFF323846) : const Color(0xFF262A34))
-            : (_hovering ? cs.surfaceContainerHighest : cs.surfaceContainerLow);
-    final borderColor =
-        isDark
-            ? Colors.white.withValues(alpha: 0.13)
-            : Colors.black.withValues(alpha: 0.14);
+    final bgColor = isDark
+        ? (_hovering ? const Color(0xFF323846) : const Color(0xFF262A34))
+        : (_hovering ? cs.surfaceContainerHighest : cs.surfaceContainerLow);
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.13)
+        : Colors.black.withValues(alpha: 0.14);
 
     Widget button = MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -389,13 +375,12 @@ class _MacPopupButtonState<T> extends State<MacPopupButton<T>> {
                   decoration: BoxDecoration(
                     color: activeItem.dotColor,
                     shape: BoxShape.circle,
-                    border:
-                        activeItem.dotBorderColor != null
-                            ? Border.all(
-                              color: activeItem.dotBorderColor!,
-                              width: 1.8,
-                            )
-                            : null,
+                    border: activeItem.dotBorderColor != null
+                        ? Border.all(
+                            color: activeItem.dotBorderColor!,
+                            width: 1.8,
+                          )
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -491,22 +476,20 @@ class _MacIconButtonState extends State<MacIconButton> {
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(5),
-            border:
-                widget.isActive
-                    ? Border.all(
-                      color: cs.primary.withValues(alpha: 0.45),
-                      width: 1,
-                    )
-                    : null,
+            border: widget.isActive
+                ? Border.all(
+                    color: cs.primary.withValues(alpha: 0.45),
+                    width: 1,
+                  )
+                : null,
           ),
           alignment: Alignment.center,
           child: Icon(
             widget.icon,
             size: widget.iconSize,
-            color:
-                !enabled
-                    ? cs.onSurfaceVariant.withValues(alpha: 0.38)
-                    : (widget.isActive ? cs.primary : cs.onSurfaceVariant),
+            color: !enabled
+                ? cs.onSurfaceVariant.withValues(alpha: 0.38)
+                : (widget.isActive ? cs.primary : cs.onSurfaceVariant),
           ),
         ),
       ),
@@ -557,26 +540,23 @@ class _MacToolbarButtonState extends State<MacToolbarButton> {
     final Color border;
 
     if (widget.primary) {
-      bg =
-          _hovering && enabled
-              ? cs.primary.withValues(alpha: 0.9)
-              : cs.primary.withValues(alpha: 0.8);
+      bg = _hovering && enabled
+          ? cs.primary.withValues(alpha: 0.9)
+          : cs.primary.withValues(alpha: 0.8);
       fg = cs.onPrimary;
       border = cs.primary;
     } else {
-      bg =
-          isDark
-              ? (_hovering && enabled
-                  ? const Color(0xFF323846)
-                  : const Color(0xFF262A34))
-              : (_hovering && enabled
-                  ? cs.surfaceContainerHighest
-                  : cs.surfaceContainerLow);
+      bg = isDark
+          ? (_hovering && enabled
+                ? const Color(0xFF323846)
+                : const Color(0xFF262A34))
+          : (_hovering && enabled
+                ? cs.surfaceContainerHighest
+                : cs.surfaceContainerLow);
       fg = enabled ? cs.onSurface : cs.onSurfaceVariant.withValues(alpha: 0.45);
-      border =
-          isDark
-              ? Colors.white.withValues(alpha: 0.13)
-              : Colors.black.withValues(alpha: 0.14);
+      border = isDark
+          ? Colors.white.withValues(alpha: 0.13)
+          : Colors.black.withValues(alpha: 0.14);
     }
 
     Widget btn = MouseRegion(
@@ -654,22 +634,18 @@ class _MacToggleButtonState extends State<MacToggleButton> {
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final bg =
-        widget.selected
-            ? cs.primary.withValues(alpha: isDark ? 0.22 : 0.15)
-            : (isDark
-                ? (_hovering
-                    ? const Color(0xFF323846)
-                    : const Color(0xFF262A34))
-                : (_hovering
+    final bg = widget.selected
+        ? cs.primary.withValues(alpha: isDark ? 0.22 : 0.15)
+        : (isDark
+              ? (_hovering ? const Color(0xFF323846) : const Color(0xFF262A34))
+              : (_hovering
                     ? cs.surfaceContainerHighest
                     : cs.surfaceContainerLow));
-    final border =
-        widget.selected
-            ? cs.primary.withValues(alpha: 0.65)
-            : (isDark
-                ? Colors.white.withValues(alpha: 0.13)
-                : Colors.black.withValues(alpha: 0.14));
+    final border = widget.selected
+        ? cs.primary.withValues(alpha: 0.65)
+        : (isDark
+              ? Colors.white.withValues(alpha: 0.13)
+              : Colors.black.withValues(alpha: 0.14));
     final fg = widget.selected ? cs.primary : cs.onSurface;
 
     Widget btn = MouseRegion(
@@ -703,8 +679,9 @@ class _MacToggleButtonState extends State<MacToggleButton> {
                 widget.label,
                 style: TextStyle(
                   fontSize: 11.5,
-                  fontWeight:
-                      widget.selected ? FontWeight.w600 : FontWeight.w500,
+                  fontWeight: widget.selected
+                      ? FontWeight.w600
+                      : FontWeight.w500,
                   color: fg,
                 ),
               ),

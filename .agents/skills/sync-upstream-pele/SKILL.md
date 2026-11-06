@@ -89,9 +89,9 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 3. Register the diagram in [`lib/src/diagrams/registry.dart`](../../../lib/src/diagrams/registry.dart) matching `src/diagrams/registry.ts`.
 4. Export the new diagram entrypoint if upstream exports it in `src/index.ts`.
 5. Add a canonical sample to `_sampleCorpus` in [`tool/verify_against_upstream.dart`](../../../tool/verify_against_upstream.dart).
-6. Create `example/diagrams/02_extended/<new_type>/` with `family.json`, playground `.mmd` files (`01_*.mmd`..`06_*.mmd`), and `showcase/showcase_*.mmd` files from `.upstream/website/src/lib/examples.ts` and `.upstream/tests/corpus/<new_type>-docs.json`, and update the family/sample counts in [`test/gallery_corpus_test.dart`](../../../test/gallery_corpus_test.dart).
+6. Create `studio/diagrams/02_extended/<new_type>/` with `family.json`, playground `.mmd` files (`01_*.mmd`..`06_*.mmd`), and `showcase/showcase_*.mmd` files from `.upstream/website/src/lib/examples.ts` and `.upstream/tests/corpus/<new_type>-docs.json`, and update the family/sample counts in [`test/gallery_corpus_test.dart`](../../../test/gallery_corpus_test.dart).
 7. Add dedicated unit tests in `test/diagrams/<new_type>_test.dart` testing both `SvgOutputMode.cssVariables` and `SvgOutputMode.flattened`.
-8. Add the new diagram row to the Module Sync Matrix in [`UPSTREAM.md`](../../../UPSTREAM.md) and the Supported Diagrams table in [`docs/API_MANUAL.md`](../../../docs/API_MANUAL.md).
+8. Add the new diagram row to the Module Sync Matrix in [`UPSTREAM.md`](../../../UPSTREAM.md) and the Supported Diagrams table in [`doc/API_MANUAL.md`](../../../doc/API_MANUAL.md).
 
 ---
 
@@ -100,12 +100,12 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 Before cutting or pushing any release, regenerate all standalone diagram and style images, run the differential parity suite, and run the **Native AOT Benchmark & Regression Gate**. **All gates must pass with 0 diffs, 0 regressions, and 0 issues**:
 
 ```bash
-# 1. Regenerate clean standalone SVG renders of every diagram family (docs/images/diagrams/*.svg),
-#    themed style previews (docs/images/styles/*.svg), and docs/DIAGRAM_GALLERY.md
+# 1. Regenerate clean standalone SVG renders of every diagram family (doc/images/diagrams/*.svg),
+#    themed style previews (doc/images/styles/*.svg), and doc/DIAGRAM_GALLERY.md
 dart run tool/generate_doc_images.dart
 
 # 2. Format and static analysis (0 warnings/errors/infos)
-dart format lib test tool example/lib example/main.dart
+dart format lib test tool studio/lib example/main.dart
 dart analyze --fatal-infos lib test tool example
 
 # 3. Full unit, gallery corpus, and upstream differential test suite
@@ -119,12 +119,12 @@ dart run tool/benchmark_suite.dart --update-docs --check-regressions
 ```
 
 Confirm that:
-* `tool/generate_doc_images.dart` generates clean standalone SVG renders (zero host-app UI chrome) for every diagram family in `docs/images/diagrams/` and every styled showcase sample in `docs/images/styles/`, and updates [`docs/DIAGRAM_GALLERY.md`](../../../docs/DIAGRAM_GALLERY.md).
+* `tool/generate_doc_images.dart` generates clean standalone SVG renders (zero host-app UI chrome) for every diagram family in `doc/images/diagrams/` and every styled showcase sample in `doc/images/styles/`, and updates [`doc/DIAGRAM_GALLERY.md`](../../../doc/DIAGRAM_GALLERY.md).
 * `tool/verify_against_upstream.dart` outputs `"status":"ok"` with:
   * `exactUpstreamMatches` == total canonical diagrams
   * `exactGalleryMatches` == `totalGallerySamples`
   * `exactCorpusMatches` == `totalCorpusSamples` (all 522+ `.upstream/tests/corpus/*.json` diagrams)
-* `tool/benchmark_suite.dart --update-docs --check-regressions` refreshes [`docs/BENCHMARKS.md`](../../../docs/BENCHMARKS.md) and prints `✅ BENCHMARK REGRESSION GATE PASSED`. If any diagram family or phase (`PARSE` or `RENDER`) regresses after syncing upstream changes, optimize the newly synced hot path (using `codeUnitAt` scanners or fast token matchers) and re-run before proceeding to release.
+* `tool/benchmark_suite.dart --update-docs --check-regressions` refreshes [`doc/BENCHMARKS.md`](../../../doc/BENCHMARKS.md) and prints `✅ BENCHMARK REGRESSION GATE PASSED`. If any diagram family or phase (`PARSE` or `RENDER`) regresses after syncing upstream changes, optimize the newly synced hot path (using `codeUnitAt` scanners or fast token matchers) and re-run before proceeding to release.
 
 ---
 

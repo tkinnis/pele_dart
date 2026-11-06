@@ -72,7 +72,7 @@ dart run tool/verify_against_upstream.dart
 If your change affects rendering output, themes, or documentation examples, regenerate the embedded SVG gallery and verify XML validity:
 ```bash
 dart run tool/generate_doc_images.dart
-xmllint --noout docs/images/diagrams/*.svg docs/images/styles/*.svg
+xmllint --noout doc/images/diagrams/*.svg doc/images/styles/*.svg
 ```
 
 ---

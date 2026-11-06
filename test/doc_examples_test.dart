@@ -89,7 +89,7 @@ flowchart LR
       }
     });
 
-    test('docs/API_MANUAL.md code examples compile and execute', () {
+    test('doc/API_MANUAL.md code examples compile and execute', () {
       const source = '''
 flowchart LR
   A[Client] -->|HTTPS| B(Load Balancer)
@@ -331,15 +331,15 @@ flowchart LR
     });
 
     test(
-      'Every ```mermaid code block in README.md and docs/*.md renders cleanly',
+      'Every ```mermaid code block in README.md and doc/*.md renders cleanly',
       () {
         final docFiles = <String>[
           'README.md',
-          'docs/API_MANUAL.md',
-          'docs/BENCHMARKS.md',
-          'docs/DESIGN.md',
-          'docs/DIAGRAM_GALLERY.md',
-          'docs/STUDIO_GUIDE.md',
+          'doc/API_MANUAL.md',
+          'doc/ARCHITECTURE.md',
+          'doc/BENCHMARKS.md',
+          'doc/DIAGRAM_GALLERY.md',
+          'doc/STUDIO_GUIDE.md',
         ];
         final fenceRe = RegExp(r'```mermaid\n([\s\S]*?)```');
         var totalBlocks = 0;
@@ -415,14 +415,14 @@ flowchart LR
       for (final docPath in <String>[
         'README.md',
         'example/README.md',
-        'docs/API_MANUAL.md',
-        'docs/BENCHMARKS.md',
-        'docs/DESIGN.md',
+        'doc/API_MANUAL.md',
+        'doc/ARCHITECTURE.md',
+        'doc/BENCHMARKS.md',
         'SECURITY.md',
         'CONTRIBUTING.md',
         'CODE_OF_CONDUCT.md',
         'AGENTS.md',
-        'docs/UPSTREAM_SYNC.md',
+        'doc/UPSTREAM_SYNC.md',
       ]) {
         final docText = File(docPath).readAsStringSync();
         expect(
@@ -444,12 +444,12 @@ flowchart LR
         'AGENTS.md',
         'UPSTREAM.md',
         'example/README.md',
-        'docs/API_MANUAL.md',
-        'docs/BENCHMARKS.md',
-        'docs/DIAGRAM_GALLERY.md',
-        'docs/STUDIO_GUIDE.md',
-        'docs/UPSTREAM_SYNC.md',
-        'docs/DESIGN.md',
+        'doc/API_MANUAL.md',
+        'doc/ARCHITECTURE.md',
+        'doc/BENCHMARKS.md',
+        'doc/DIAGRAM_GALLERY.md',
+        'doc/STUDIO_GUIDE.md',
+        'doc/UPSTREAM_SYNC.md',
       ];
       final linkRe = RegExp(r'!?\[[^\]]*\]\(([^)]+)\)');
 

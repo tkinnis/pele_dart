@@ -21,7 +21,7 @@ This document defines the architectural invariants, directory conventions, trans
 * **1:1 Version Lockstep (`pubspec.yaml` ↔ `UPSTREAM.md` ↔ `lib/src/diagrams/info/render.dart` ↔ Git Tag)**:
   * `pele_dart`'s `major.minor.patch` version in `pubspec.yaml` and `peleVersion` in `lib/src/diagrams/info/render.dart` must **always** match `Target Release` in `UPSTREAM.md` (i.e., `version: <X.Y.Z>` for upstream `v<X.Y.Z>`, tagged as `v<X.Y.Z>`).
   * If a Dart-only hotfix is required between upstream `obsidianmd/pele` releases, increment only the Dart build suffix (`<X.Y.Z>+1`, `<X.Y.Z>+2`, tagged as `v<X.Y.Z>+1`) so `major.minor.patch` remains strictly locked to the synced upstream release.
-  * Never hardcode release version numbers in documentation prose (`README.md`, `docs/*.md`, `SECURITY.md`); all docs must reference `UPSTREAM.md` or `pubspec.yaml`.
+  * Never hardcode release version numbers in documentation prose (`README.md`, `doc/*.md`, `SECURITY.md`); all docs must reference `UPSTREAM.md` or `pubspec.yaml`.
   * This invariant is automatically enforced by `tool/sync_upstream.dart`, `tool/verify_against_upstream.dart`, and `test/doc_examples_test.dart`.
 * Every upstream file `src/<dir>/<name>.ts` in `obsidianmd/pele` maps to `lib/src/<dir>/<snake_name>.dart` in `pele_dart`.
 * Every file in `lib/src/` must begin with a static header comment recording its upstream counterpart path (without a commit SHA suffix):
@@ -91,12 +91,12 @@ Before completing any task or committing changes, all quality gates must pass:
    ```bash
    dart run tool/benchmark_suite.dart --update-docs --check-regressions
    ```
-   Compiles `pele_dart` to native AOT (`dart compile exe`), benchmarks all 33 diagram families (232 gallery diagrams) against `obsidianmd/pele (JS)`, updates [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md), and enforces non-regression against [`tool/benchmark_baseline.json`](tool/benchmark_baseline.json).
+   Compiles `pele_dart` to native AOT (`dart compile exe`), benchmarks all 33 diagram families (232 gallery diagrams) against `obsidianmd/pele (JS)`, updates [`doc/BENCHMARKS.md`](doc/BENCHMARKS.md), and enforces non-regression against [`tool/benchmark_baseline.json`](tool/benchmark_baseline.json).
 
 6. **Upstream Sync & Release Workflow**:
    * Check for new `obsidianmd/pele` releases, commits, or target `mermaid.js` updates with `dart run tool/sync_upstream.dart` (`--check`).
-   * Follow [`docs/UPSTREAM_SYNC.md`](docs/UPSTREAM_SYNC.md) and the workspace skill [`.agents/skills/sync-upstream-pele/SKILL.md`](.agents/skills/sync-upstream-pele/SKILL.md) to stage updates (`--update-to-latest`), port changes 1:1, refresh assets (`--refresh-assets`), verify parity (`tool/verify_against_upstream.dart`), verify benchmarks (`tool/benchmark_suite.dart --update-docs --check-regressions`), and update `UPSTREAM.md` (`--pin`).
-   * Keep [`docs/API_MANUAL.md`](docs/API_MANUAL.md) and [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) updated whenever public options, APIs, supported diagram families, or upstream releases change.
+   * Follow [`doc/UPSTREAM_SYNC.md`](doc/UPSTREAM_SYNC.md) and the workspace skill [`.agents/skills/sync-upstream-pele/SKILL.md`](.agents/skills/sync-upstream-pele/SKILL.md) to stage updates (`--update-to-latest`), port changes 1:1, refresh assets (`--refresh-assets`), verify parity (`tool/verify_against_upstream.dart`), verify benchmarks (`tool/benchmark_suite.dart --update-docs --check-regressions`), and update `UPSTREAM.md` (`--pin`).
+   * Keep [`doc/API_MANUAL.md`](doc/API_MANUAL.md) and [`doc/BENCHMARKS.md`](doc/BENCHMARKS.md) updated whenever public options, APIs, supported diagram families, or upstream releases change.
 
 7. **Commit Policy**:
    * Follow **Conventional Commits** (`feat(flowchart): ...`, `fix(layout): ...`, `test(sequence): ...`, `docs(design): ...`).
