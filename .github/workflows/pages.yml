@@ -1,0 +1,52 @@
+name: Deploy Documentation to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Stage & Deploy Docsify Portal
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Stage documentation site
+        run: |
+          mkdir -p _site/doc _site/example _site/studio/diagrams _site/lib
+          cp README.md UPSTREAM.md CHANGELOG.md CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md LICENSE AGENTS.md pubspec.yaml _site/
+          cp -R doc/* _site/doc/
+          cp -R example/* _site/example/
+          cp studio/README.md _site/studio/
+          cp studio/diagrams/README.md _site/studio/diagrams/
+          cp lib/pele_dart.dart _site/lib/
+          cp doc/index.html _site/index.html
+          cp doc/_sidebar.md _site/_sidebar.md
+          cp doc/pele_diagrams.js _site/pele_diagrams.js
+          touch _site/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -98,6 +98,8 @@ final Uint8List vectorBytes = encodeSvg(
 
 ## Documentation
 
+Browse the interactive **[Documentation Portal](https://tkinnis.github.io/pele_dart/)** or jump directly to a guide:
+
 | Guide | Description |
 | :--- | :--- |
 | **[API User Manual](doc/API_MANUAL.md)** | Complete reference for `render`, `parse`, `detectType`, `supports`, `PelePalette`, `PeleError`, custom resolvers, and Flutter integration. |
