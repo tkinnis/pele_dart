@@ -1,4 +1,4 @@
-# `pele_dart`
+# pele_dart
 
 [![pub package](https://img.shields.io/pub/v/pele_dart.svg)](https://pub.dev/packages/pele_dart)
 [![CI](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml/badge.svg)](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml)
@@ -10,8 +10,6 @@ A fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG ren
 
 **`pele_dart`** is a 1:1 pure-Dart port of [**`obsidianmd/pele`**](https://github.com/obsidianmd/pele) ([`pele.run`](https://pele.run))—the lightweight, synchronous, zero-dependency TypeScript Mermaid renderer created by [**Steph Ango (`kepano`)**](https://github.com/kepano) and the [**Obsidian**](https://obsidian.md) team—augmented with a native SVG 1.1 flattener for Flutter's `vector_graphics_compiler` (`encodeSvg`).
 
----
-
 ## Highlights
 
 * **Pure Dart 3 (`sdk: ^3.13.0`)**: Zero browser (`WKWebView` / `WebKitGTK` / `WebView2`), zero JavaScript runtime (`QuickJS` / `JavaScriptCore`), and zero Flutter SDK dependency in the core package. Runs synchronously in CLI tools, servers, background Dart isolates (`Isolate.run`), and Flutter apps.
@@ -22,29 +20,29 @@ A fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG ren
   * **`SvgOutputMode.cssVariables`** *(Upstream Parity)*: Emits upstream `obsidianmd/pele`'s exact theme-reactive `var(--pele-*)` SVG markup.
 * **Built-in Safety & Resource Limits**: Escapes diagram text, sanitizes link/image URL schemes (`http`, `https`, `mailto`, `tel`), and enforces configurable DoS budgets (`limit`, `maxEdges`, recursion depth, and `outputLimit`).
 
----
-
 ## Visual Showcase
 
-Every image below is a standalone SVG generated directly by `pele_dart` in pure Dart (`SvgOutputMode.flattened`) with zero browser or JavaScript runtime.
+Every image below is a standalone SVG generated directly by `pele_dart` in pure Dart (`SvgOutputMode.flattened`) with zero browser or JavaScript runtime. [**Browse all supported diagram families in the Visual Diagram Gallery →**](doc/DIAGRAM_GALLERY.md)
 
-> **[Browse All Supported Diagram Families in the Visual Diagram Gallery →](doc/DIAGRAM_GALLERY.md)**
+**Flowchart (`flowchart`)**
 
-| Flowchart (`flowchart`) | Sequence Diagram (`sequenceDiagram`) |
+![Flowchart](doc/images/diagrams/flowchart.svg)
+
+| Sequence Diagram (`sequenceDiagram`) | Class Diagram (`classDiagram`) |
 | :---: | :---: |
-| ![Flowchart](doc/images/diagrams/flowchart.svg) | ![Sequence Diagram](doc/images/diagrams/sequence.svg) |
-| **State Diagram (`stateDiagram-v2`)** | **Architecture (`architecture-beta`)** |
-| ![State Diagram](doc/images/diagrams/state.svg) | ![Architecture](doc/images/diagrams/architecture.svg) |
+| ![Sequence Diagram](doc/images/diagrams/sequence.svg) | ![Class Diagram](doc/images/diagrams/class.svg) |
 
 ### Custom Styling & Palettes
 
 Use the built-in defaults (`PelePalette.light` or `PelePalette.dark`) or supply a custom `PelePalette(...)`, `--pele-*` CSS variables, or in-diagram Mermaid `classDef` / `style` directives (see [**Theming & Customization in the API Manual**](doc/API_MANUAL.md#5-theming-styling--customization)):
 
-| Default Light (`PelePalette.light`) | Custom Palette Example (Catppuccin Mocha) |
-| :---: | :---: |
-| ![Default Light](doc/images/styles/style_light.svg) | ![Catppuccin Mocha](doc/images/styles/style_catppuccin_mocha.svg) |
+**Default Light (`PelePalette.light`)**
 
----
+![Default Light](doc/images/styles/style_light.svg)
+
+**Custom Palette Example (Catppuccin Mocha)**
+
+![Catppuccin Mocha](doc/images/styles/style_catppuccin_mocha.svg)
 
 ## Installation & Quick Start
 
@@ -79,7 +77,7 @@ flowchart LR
 }
 ```
 
-### Flutter `vector_graphics_compiler` Integration
+### Flutter Vector Graphics Integration
 
 ```dart
 final result = render(
@@ -101,8 +99,6 @@ final Uint8List vectorBytes = encodeSvg(
 
 See the [**API User Manual**](doc/API_MANUAL.md) for two-phase `parse()` + `render()`, `PeleError` diagnostics, custom `PelePalette` tokens, `TextMeasurer` / `IconResolver` / `MathResolver` hooks, and complete Flutter widget examples.
 
----
-
 ## Supported Diagram Families
 
 `pele_dart` supports every diagram family in `obsidianmd/pele` (browse rendered SVG outputs and sample source in the [Visual Diagram Gallery](doc/DIAGRAM_GALLERY.md)):
@@ -111,8 +107,6 @@ See the [**API User Manual**](doc/API_MANUAL.md) for two-phase `parse()` + `rend
 | :--- | :--- |
 | **Core Mermaid** | `flowchart` (`graph`, `flowchart-elk`), `sequenceDiagram`, `classDiagram`, `stateDiagram-v2` (`stateDiagram`), `erDiagram`, `gantt`, `gitGraph`, `mindmap`, `pie`, `info` |
 | **Extended & Beta** | `architecture-beta`, `C4Context` (`C4Container`, `C4Component`, `C4Dynamic`, `C4Deployment`), `kanban`, `sankey`, `xychart-beta`, `block-beta`, `packet-beta`, `timeline`, `journey`, `quadrantChart`, `requirementDiagram`, `radar-beta`, `treemap-beta`, `treeView-beta`, `railroad-beta`, `agentflow-beta`, `ishikawa-beta`, `venn-beta`, `wardley-beta`, `cynefin-beta`, `swimlane-beta`, `usecase-beta`, `eventmodeling` |
-
----
 
 ## Documentation & Workbench
 
@@ -124,8 +118,6 @@ See the [**API User Manual**](doc/API_MANUAL.md) for two-phase `parse()` + `rend
 | **[Pele Studio User Guide](doc/STUDIO_GUIDE.md)** | Guide to **Pele Studio** (`studio/`), the macOS 3-way visual & SVG diff workbench comparing `pele_dart`, `obsidianmd/pele` (JS), and `mermaid.js`. |
 
 **Architecture & Maintainer Docs:** [Architecture & Internals](doc/ARCHITECTURE.md) · [Upstream Tracking](UPSTREAM.md) · [Upstream Sync Guide](doc/UPSTREAM_SYNC.md) · [Contributing Guide](CONTRIBUTING.md)
-
----
 
 ## Credits & License
 
