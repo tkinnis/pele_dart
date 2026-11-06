@@ -1,0 +1,83 @@
+name: Upstream Release Monitor
+
+on:
+  schedule:
+    # Check daily at 13:00 UTC for new upstream obsidianmd/pele releases
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-upstream:
+    name: Check obsidianmd/pele for New Releases
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install dependencies
+        run: dart pub get --no-example
+
+      - name: Check upstream obsidianmd/pele releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dart run tool/sync_upstream.dart --check --json > upstream_status.json
+          cat upstream_status.json
+
+          HAS_NEW=$(jq -r '.hasNewRelease' upstream_status.json)
+          PINNED_RELEASE=$(jq -r '.pinnedRelease' upstream_status.json)
+          LATEST_RELEASE=$(jq -r '.latestRelease' upstream_status.json)
+          LATEST_COMMIT=$(jq -r '.latestReleaseCommit' upstream_status.json)
+          LATEST_DATE=$(jq -r '.latestReleaseDate' upstream_status.json)
+
+          if [ "$HAS_NEW" != "true" ]; then
+            echo "✅ pele_dart is up to date with upstream obsidianmd/pele ($PINNED_RELEASE)."
+            exit 0
+          fi
+
+          ISSUE_TITLE="chore(upstream): sync obsidianmd/pele ${LATEST_RELEASE}"
+          EXISTING_COUNT=$(gh issue list --state open --search "\"${ISSUE_TITLE}\" in:title" --json number --jq 'length')
+
+          if [ "$EXISTING_COUNT" != "0" ]; then
+            echo "ℹ️ Open tracking issue for ${LATEST_RELEASE} already exists; skipping duplicate creation."
+            exit 0
+          fi
+
+          {
+            echo "## Upstream Release Available: \`obsidianmd/pele\` \`${LATEST_RELEASE}\`"
+            echo ""
+            echo "| Field | Value |"
+            echo "| :--- | :--- |"
+            echo "| **Current Pinned Release** | \`${PINNED_RELEASE}\` |"
+            echo "| **New Upstream Release** | [\`${LATEST_RELEASE}\`](https://github.com/obsidianmd/pele/releases/tag/${LATEST_RELEASE}) |"
+            echo "| **Upstream Commit SHA** | \`${LATEST_COMMIT}\` |"
+            echo "| **Release Date** | \`${LATEST_DATE}\` |"
+            echo ""
+            echo "### Sync Instructions"
+            echo ""
+            echo "Ask your coding agent to sync using the [\`sync-upstream-pele\`](.agents/skills/sync-upstream-pele/SKILL.md) skill, or run:"
+            echo ""
+            echo "\`\`\`bash"
+            echo "dart run tool/sync_upstream.dart --update-to ${LATEST_RELEASE}"
+            echo "\`\`\`"
+            echo ""
+            if [ -f .upstream/diff_report.md ]; then
+              echo "---"
+              echo ""
+              cat .upstream/diff_report.md
+            fi
+          } > issue_body.md
+
+          gh issue create \
+            --title "$ISSUE_TITLE" \
+            --label "enhancement" \
+            --body-file issue_body.md

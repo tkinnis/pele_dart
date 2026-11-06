@@ -298,7 +298,7 @@ void main() {
       final flatSvg = renderMermaid(src, options: _flatOptions);
       expect(flatSvg, isNot(contains('var(--')));
       expect(flatSvg, contains('Content Team'));
-      expect(flatSvg, contains('rx="6"'));
+      expect(flatSvg, contains('rx="4"'));
     });
 
     test(

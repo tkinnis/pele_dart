@@ -56,7 +56,10 @@ Every Dart file under `lib/src/` maps 1:1 to an upstream TypeScript file under `
 
 ## 3. Checking for Upstream Releases & Mermaid Version Changes
 
-You do not need to manually watch the `obsidianmd/pele` repository. Run a single command from the repository root:
+You do not need to manually watch the `obsidianmd/pele` repository:
+
+- **Automated GitHub Actions Monitor**: The scheduled [Upstream Release Monitor workflow](../.github/workflows/upstream-monitor.yml) runs daily (and on `workflow_dispatch`), executes `dart run tool/sync_upstream.dart --check --json`, and automatically opens a deduplicated GitHub Issue (`chore(upstream): sync obsidianmd/pele <version>`) embedding the categorized `.upstream/diff_report.md` migration summary whenever a new upstream release is published.
+- **Local CLI Check**: Run a single command from the repository root at any time:
 
 ```bash
 dart run tool/sync_upstream.dart

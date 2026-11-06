@@ -668,7 +668,7 @@ void main() {
         options: _flatOptions,
       );
       expect(flatSvg, isNot(contains('var(--')));
-      expect(flatSvg, contains('rx="6"'));
+      expect(flatSvg, contains('rx="4"'));
     });
 
     test('keeps the dashes of an animated relationship, without motion', () {
