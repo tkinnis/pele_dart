@@ -18,8 +18,8 @@ void main() {
 
       final lightOut = flattenPeleSvg(svg, palette: PelePalette.light);
       expect(lightOut, isNot(contains('var(--')));
-      expect(lightOut, contains('fill="#24292e"'));
-      expect(lightOut, contains('rx="6"'));
+      expect(lightOut, contains('fill="#1f1f1f"'));
+      expect(lightOut, contains('rx="4"'));
       expect(lightOut, contains('font-weight="bold"'));
       expect(lightOut, contains('font-family="Menlo"'));
       expect(lightOut, contains('fill="#4c78a8"'));
@@ -134,7 +134,7 @@ void main() {
           '</svg>';
       final flat = flattenPeleSvg(svg, palette: PelePalette.light);
       expect(flat, isNot(contains('currentColor')));
-      expect(flat, contains('stroke="#24292e"'));
+      expect(flat, contains('stroke="#1f1f1f"'));
       expect(flat, contains('<tspan dy="3" font-size="10">i</tspan>'));
       expect(flat, contains('<tspan dy="-4" font-size="10">2</tspan>'));
     });

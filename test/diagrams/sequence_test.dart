@@ -175,7 +175,7 @@ void main() {
       expect(flatResult.height, cssResult.height);
       expect(flatResult.svg, isNot(contains('var(--')));
       expect(flatResult.svg, isNot(contains('color-mix(')));
-      expect(flatResult.svg, contains('fill="#24292e"'));
+      expect(flatResult.svg, contains('fill="#1f1f1f"'));
     });
 
     test('is detected and parsed to a sequence model', () {

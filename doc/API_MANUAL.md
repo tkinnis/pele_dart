@@ -174,7 +174,7 @@ Clears any cached text width measurements (no-op for the stateless built-in `met
 
 Out of the box, `pele_dart` ships two default palettes in the core package:
 
-- **`PelePalette.light`** *(default)*: High-contrast light palette (`bg: '#ffffff'`, `fg: '#24292e'`, `surfaceAlt: '#e6e6e6'`, `critical: '#e45756'`).
+- **`PelePalette.light`** *(default)*: Matches upstream `obsidianmd/pele` CSS variable fallbacks (`bg: '#ffffff'`, `fg: '#1f1f1f'`, `muted: '#6e6e6e'`, `surface: '#f3f3f3'`, `surfaceAlt: '#e6e6e6'`, `border: '#8a8a8a'`, `accent: '#5b7bd5'`, `critical: '#e45756'`, `radius: 4`).
 - **`PelePalette.dark`**: High-contrast dark palette (`bg: '#1e1e1e'`, `fg: '#e1e4e8'`, `surfaceAlt: '#3f3f46'`, `critical: '#f87171'`).
 
 ```dart
@@ -287,18 +287,18 @@ You only need to specify the tokens you want to customize. If `muted`, `line`, `
 | `PelePalette` Field | CSS Variable | Default / Derived Formula | Description |
 | :--- | :--- | :--- | :--- |
 | `bg` | `--pele-bg` | `'#ffffff'` (light) / `'#1e1e1e'` (dark) | Canvas background color used for label halos and color mixing |
-| `fg` | `--pele-fg` | `'#24292e'` (light) / `'#e1e4e8'` (dark) | Primary text and foreground color |
-| `muted` | `--pele-muted` | `60% fg + 40% bg` | Secondary labels, captions, cardinality, and axis ticks |
+| `fg` | `--pele-fg` | `'#1f1f1f'` (light) / `'#e1e4e8'` (dark) | Primary text and foreground color |
+| `muted` | `--pele-muted` | `'#6e6e6e'` (light) / `60% fg + 40% bg` | Secondary labels, captions, cardinality, and axis ticks |
 | `line` | `--pele-line` | `fg` | Connector edges, arrows, lifelines, and dividers |
-| `surface` | `--pele-surface` | `5% fg + 95% bg` | Default node, box, and card fill |
+| `surface` | `--pele-surface` | `'#f3f3f3'` (light) / `5% fg + 95% bg` | Default node, box, and card fill |
 | `surfaceAlt` | `--pele-surface-alt` | `'#e6e6e6'` (light) / `'#3f3f46'` (dark) | Secondary container, cluster, and table header fill |
-| `border` | `--pele-border` | `45% fg + 55% bg` | Node, subgraph, and container border stroke |
+| `border` | `--pele-border` | `'#8a8a8a'` (light) / `45% fg + 55% bg` | Node, subgraph, and container border stroke |
 | `accent` | `--pele-accent` | `'#5b7bd5'` | Primary highlight, active state, and milestone accent |
 | `code` | `--pele-code` | `8% fg + 92% bg` | Inline code pill background fill |
 | `critical` | `--pele-critical` | `'#e45756'` (light) / `'#f87171'` (dark) | Critical path (Gantt) and danger/error accents |
-| `fgOnLight` | `--pele-fg-on-light` | `null` (upstream fallback `#24292e`) | Contrast text color placed over bright categorical fills |
+| `fgOnLight` | `--pele-fg-on-light` | `null` (upstream fallback `#1f1f1f`) | Contrast text color placed over bright categorical fills |
 | `fgOnDark` | `--pele-fg-on-dark` | `null` (upstream fallback `#fff`) | Contrast text color placed over dark categorical fills |
-| `radius` | `--pele-radius` | `6` (`px`) | Default corner radius for rounded boxes and cards |
+| `radius` | `--pele-radius` | `4` (`px`) | Default corner radius for rounded boxes and cards |
 | `strokeWidth` | `--pele-stroke-width` | `1.25` (`px`) | Standard node and edge stroke width |
 | `thickStrokeWidth` | `--pele-thick-stroke-width` | `2.5` (`px`) | Thick edge and highlighted border stroke width |
 | `hairlineStrokeWidth` | `--pele-hairline-stroke-width` | `0.5` (`px`) | Subtle gridline and divider stroke width |

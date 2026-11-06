@@ -73,7 +73,7 @@ class PelePalette {
   /// blends of [fg] and [bg] as upstream `obsidianmd/pele`.
   const PelePalette({
     this.bg = '#ffffff',
-    this.fg = '#24292e',
+    this.fg = '#1f1f1f',
     this.fgOnLight,
     this.fgOnDark,
     this.muted,
@@ -84,7 +84,7 @@ class PelePalette {
     this.accent,
     this.code,
     this.critical = '#e45756',
-    this.radius = 6,
+    this.radius = 4,
     this.strokeWidth = 1.25,
     this.thickStrokeWidth = 2.5,
     this.hairlineStrokeWidth = 0.5,
@@ -102,9 +102,22 @@ class PelePalette {
     ],
   });
 
-  /// Default light palette (`#ffffff` background, `#24292e` foreground, and
-  /// upstream Pele's 8-color categorical series).
-  static const PelePalette light = PelePalette();
+  /// Default light palette matching upstream `src/svg/theme.ts` CSS variable
+  /// fallbacks (`#ffffff` background, `#1f1f1f` foreground, `#6e6e6e` muted,
+  /// `#f3f3f3` surface, `#e6e6e6` surfaceAlt, `#8a8a8a` border, `#5b7bd5`
+  /// accent, `4px` radius, and upstream Pele's 8-color categorical series).
+  static const PelePalette light = PelePalette(
+    bg: '#ffffff',
+    fg: '#1f1f1f',
+    muted: '#6e6e6e',
+    line: '#1f1f1f',
+    surface: '#f3f3f3',
+    surfaceAlt: '#e6e6e6',
+    border: '#8a8a8a',
+    accent: '#5b7bd5',
+    critical: '#e45756',
+    radius: 4,
+  );
 
   /// Default dark palette (`#1e1e1e` background, `#e1e4e8` foreground, and
   /// upstream Pele's 8-color categorical series).

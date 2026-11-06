@@ -215,10 +215,15 @@ flowchart LR
       expect(opts.outputMode, SvgOutputMode.flattened);
       expect(opts.palette, PelePalette.light);
       expect(PelePalette.light.bg, '#ffffff');
-      expect(PelePalette.light.fg, '#24292e');
+      expect(PelePalette.light.fg, '#1f1f1f');
+      expect(PelePalette.light.muted, '#6e6e6e');
+      expect(PelePalette.light.line, '#1f1f1f');
+      expect(PelePalette.light.surface, '#f3f3f3');
       expect(PelePalette.light.surfaceAlt, '#e6e6e6');
+      expect(PelePalette.light.border, '#8a8a8a');
+      expect(PelePalette.light.accent, '#5b7bd5');
       expect(PelePalette.light.critical, '#e45756');
-      expect(PelePalette.light.radius, 6);
+      expect(PelePalette.light.radius, 4);
       expect(PelePalette.light.strokeWidth, 1.25);
       expect(PelePalette.light.thickStrokeWidth, 2.5);
       expect(PelePalette.light.hairlineStrokeWidth, 0.5);

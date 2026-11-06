@@ -101,7 +101,7 @@ flowchart LR
       expect(flatResult.type, 'flowchart');
       expect(flatResult.svg, isNot(contains('var(--')));
       expect(flatResult.svg, isNot(contains('color-mix(')));
-      expect(flatResult.svg, contains('fill="#24292e"'));
+      expect(flatResult.svg, contains('fill="#1f1f1f"'));
 
       final darkResult = renderMermaid(
         source,

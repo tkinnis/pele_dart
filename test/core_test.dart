@@ -135,7 +135,7 @@ flowchart TD
       );
       expect(flatRes.svg, isNot(contains('var(--')));
       expect(flatRes.svg, isNot(contains('color-mix(')));
-      expect(flatRes.svg, contains('fill="#24292e"'));
+      expect(flatRes.svg, contains('fill="#1f1f1f"'));
       expect(flatRes.svg, contains('Pele v$peleVersion'));
     });
 
@@ -149,7 +149,7 @@ flowchart TD
       expect(flat, isNot(contains('var(--')));
       expect(flat, isNot(contains('color-mix(')));
       expect(flat, isNot(contains('baseline-shift=')));
-      expect(flat, contains('rx="6"'));
+      expect(flat, contains('rx="4"'));
       expect(flat, contains('font-weight="bold"'));
       expect(flat, contains('dy="3" font-size="10"'));
     });
