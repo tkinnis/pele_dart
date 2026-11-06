@@ -1,3 +1,7 @@
+## 1.13.0+1
+
+* Refine `README.md` typography, visual showcase layout, and Pele brand mark for `pub.dev` and GitHub rendering.
+
 ## 1.13.0
 
 * Initial public release of `pele_dart`, version-locked 1:1 to upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (`v1.13.0`, commit `3a2f075ee0c3d914f0fad3545fc0f193693975ac`) created by Steph Ango (`kepano`) and the Obsidian team.
