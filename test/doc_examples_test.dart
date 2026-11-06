@@ -450,6 +450,7 @@ flowchart LR
         'doc/DIAGRAM_GALLERY.md',
         'doc/STUDIO_GUIDE.md',
         'doc/UPSTREAM_SYNC.md',
+        '.agents/skills/sync-upstream-pele/SKILL.md',
       ];
       final linkRe = RegExp(r'!?\[[^\]]*\]\(([^)]+)\)');
 

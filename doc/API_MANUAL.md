@@ -168,7 +168,7 @@ Clears any cached text width measurements (no-op for the stateless built-in `met
 `pele_dart` is designed so library consumers can either use the clean built-in defaults (`PelePalette.light` / `PelePalette.dark`) or supply their own custom palette, CSS custom properties, or in-diagram Mermaid styles.
 
 > **Want to see all 33 diagram types rendered by `pele_dart`?**
-> Browse the [**Visual Diagram Gallery (`doc/DIAGRAM_GALLERY.md`)**](DIAGRAM_GALLERY.md) for clean, standalone SVG renders of every supported diagram family.
+> Browse the [**Visual Diagram Gallery**](DIAGRAM_GALLERY.md) for clean, standalone SVG renders of every supported diagram family.
 
 ### 5.1 Built-in Default Palettes (`PelePalette.light` & `PelePalette.dark`)
 

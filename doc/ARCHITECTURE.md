@@ -1,10 +1,10 @@
 # `pele_dart` Architecture & Internals
 
-* **Upstream Parity**: Version-locked 1:1 to [`obsidianmd/pele`](https://github.com/obsidianmd/pele) across all **33 diagram families** (`787/787` byte-for-byte SVG parity tests; see [`UPSTREAM.md`](../UPSTREAM.md))
-* **Public API Reference**: [`doc/API_MANUAL.md`](API_MANUAL.md)
-* **Performance & AOT Benchmarks**: [`doc/BENCHMARKS.md`](BENCHMARKS.md)
-* **Pele Studio Workbench Guide**: [`doc/STUDIO_GUIDE.md`](STUDIO_GUIDE.md)
-* **Upstream Sync Runbook**: [`doc/UPSTREAM_SYNC.md`](UPSTREAM_SYNC.md)
+* **Upstream Parity**: Version-locked 1:1 to [`obsidianmd/pele`](https://github.com/obsidianmd/pele) across all **33 diagram families** (`787/787` byte-for-byte SVG parity tests; see [Upstream Tracking](../UPSTREAM.md))
+* **Public API Reference**: [API User Manual](API_MANUAL.md)
+* **Performance & AOT Benchmarks**: [Performance Benchmarks](BENCHMARKS.md)
+* **Pele Studio Workbench Guide**: [Pele Studio User Guide](STUDIO_GUIDE.md)
+* **Upstream Sync Runbook**: [Upstream Sync Guide](UPSTREAM_SYNC.md)
 * **Target SDK**: Pure Dart `^3.13.0` (Zero Flutter, `dart:ui`, Browser, or JavaScript runtime dependencies in the core package)
 
 ---

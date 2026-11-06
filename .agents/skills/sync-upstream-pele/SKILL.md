@@ -26,7 +26,7 @@ dart run tool/sync_upstream.dart --check --json
 ### What `--check` Reports
 1. **New Upstream Pele Releases**: Compares `Target Release` and `Target Commit SHA` in [`UPSTREAM.md`](../../../UPSTREAM.md) against all semantic tags (`v*`) fetched live from `https://github.com/obsidianmd/pele.git`.
 2. **Unreleased `origin/main` Commits**: Reports commits on `origin/main` ahead of the latest tagged release.
-3. **Target Mermaid.js Version Sync**: Compares upstream's target `mermaid` version (in `.upstream/scripts/bench-mermaid.mjs` and `.upstream/website/package.json`) and `@mermaid-js/parser` version against `UPSTREAM.md`, `example/assets/mermaid.min.js`, and the UI label in `example/lib/engine_runner.dart`.
+3. **Target Mermaid.js Version Sync**: Compares upstream's target `mermaid` version (in `.upstream/scripts/bench-mermaid.mjs` and `.upstream/website/package.json`) and `@mermaid-js/parser` version against `UPSTREAM.md`, `studio/assets/mermaid.min.js`, and the UI label in `studio/lib/engine_runner.dart`.
 4. **Categorized Migration Report**: Automatically writes `.upstream/diff_report.md` listing:
    - Upstream commits in the range
    - New diagram families (`src/diagrams/<new_type>/`)
@@ -54,8 +54,8 @@ Note: When `mermaid.min.js` needs to be downloaded from `https://unpkg.com/merma
 ### What `--update-to-latest` Does Automatically
 1. Generates `.upstream/diff_report.md` (including unified TypeScript patches for `src/`) from the previously pinned SHA to the new target SHA.
 2. Checks out the target release SHA in `.upstream/`.
-3. Rebuilds `example/assets/pele.bundle.js` via `bun build` and appends `globalThis.Pele = exports_src; globalThis.PeleMetricsMeasurer = metricsMeasurer;`.
-4. Downloads the exact upstream-matched `mermaid@<version>` bundle into `example/assets/mermaid.min.js` and updates the `ComparisonEngine.mermaidJs` label in `example/lib/engine_runner.dart`.
+3. Rebuilds `studio/assets/pele.bundle.js` via `bun build` and appends `globalThis.Pele = exports_src; globalThis.PeleMetricsMeasurer = metricsMeasurer;`.
+4. Downloads the exact upstream-matched `mermaid@<version>` bundle into `studio/assets/mermaid.min.js` and updates the `ComparisonEngine.mermaidJs` label in `studio/lib/engine_runner.dart`.
 5. Updates `UPSTREAM.md` (`Target Release`, `Target Commit SHA`, `Target Commit Date`, `Target Mermaid Version`, `Target Mermaid Parser`, and `Synced Commit` column).
 
 ---
@@ -81,7 +81,7 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 * When upstream promotes a diagram from `<name>-beta` to `<name>` (or adds an alias in `src/detect.ts`):
   1. Update the first-character `switch` branch in [`lib/src/detect.dart`](../../../lib/src/detect.dart) to match `src/detect.ts` 1:1.
   2. Update the diagram's `parser.dart` header matcher if it strips the first-line keyword.
-  3. Update `"beta": false` in `example/diagrams/02_extended/<type>/family.json` and any updated `.mmd` sample headers in `example/diagrams/02_extended/<type>/*.mmd`.
+  3. Update `"beta": false` in `studio/diagrams/02_extended/<type>/family.json` and any updated `.mmd` sample headers in `studio/diagrams/02_extended/<type>/*.mmd`.
 
 ### C. New Diagram Families (`A src/diagrams/<new_type>/...`)
 1. Create `lib/src/diagrams/<new_type>/` with 1:1 Dart counterparts for each `.ts` file (`model.dart`, `parser.dart`, `layout.dart`, `render.dart`, `index.dart`), each starting with `// Upstream: src/diagrams/<new_type>/<file>.ts`.
