@@ -32,6 +32,7 @@
 | **Inspect categorized upstream->Dart diffs for any git range** | `dart run tool/sync_upstream.dart --diff <from_tag>..<to_tag>` |
 | **Re-bundle `pele.bundle.js`, sync `mermaid.min.js`, and regenerate `docs/images/` & `docs/DIAGRAM_GALLERY.md`** | `dart run tool/sync_upstream.dart --refresh-assets` |
 | **Run the 787-diagram 100% differential parity & Mermaid version check** | `dart run tool/verify_against_upstream.dart` |
+| **Run the native AOT benchmark suite, update [`docs/BENCHMARKS.md`](BENCHMARKS.md) & verify zero regressions** | `dart run tool/benchmark_suite.dart --update-docs --check-regressions` |
 | **Finalize `UPSTREAM.md` pin after porting and verifying** | `dart run tool/sync_upstream.dart --pin <tag> <sha>` |
 
 ---
@@ -116,9 +117,10 @@ After running `dart run tool/sync_upstream.dart`, you can simply ask your AI cod
 The agent will:
 1. Run `dart run tool/sync_upstream.dart --check` to inspect new releases, commits, and Mermaid version changes.
 2. Run `dart run tool/sync_upstream.dart --update-to-latest` to stage `.upstream/`, generate `.upstream/diff_report.md`, and refresh the JS/gallery/Mermaid assets.
-3. Port every TypeScript change in `.upstream/diff_report.md` 1:1 into `lib/src/` and `test/`.
+3. Port every TypeScript change in `.upstream/diff_report.md` 1:1 into `lib/src/` and `test/`, preserving the Dart AOT hot-path patterns documented in [`docs/BENCHMARKS.md`](BENCHMARKS.md).
 4. Run `dart run tool/verify_against_upstream.dart` until **100%** of canonical, gallery, and corpus diagrams match byte-for-byte.
-5. Update `UPSTREAM.md` via `dart run tool/sync_upstream.dart --pin <tag> <sha>`, bump `pubspec.yaml` and `CHANGELOG.md`, and prepare the release commit.
+5. Run `dart run tool/benchmark_suite.dart --update-docs --check-regressions` to refresh [`docs/BENCHMARKS.md`](BENCHMARKS.md) and confirm zero performance regressions across all 33 diagram families (optimizing any newly synced regex or string hot path before proceeding).
+6. Update `UPSTREAM.md` via `dart run tool/sync_upstream.dart --pin <tag> <sha>`, bump `pubspec.yaml` and `CHANGELOG.md`, and prepare the release commit.
 
 ---
 
@@ -179,13 +181,16 @@ This tool verifies:
 3. **Full Showcase Gallery Suite (`232/232`)**: Renders all 232 gallery `.mmd` diagrams scanned from `example/diagrams/` by `example/lib/gallery_samples.dart` in both engines and asserts 100% byte-for-byte SVG equality.
 4. **Full Upstream Corpus Suite (`522/522`)**: Renders every diagram across all 30 `.upstream/tests/corpus/*.json` files in both engines and asserts 100% byte-for-byte SVG equality.
 
-Then run the standard Dart quality gates:
+Then run the standard Dart quality gates and the **Native AOT Benchmark Regression Gate**:
 
 ```bash
 dart analyze --fatal-infos lib test tool example
 dart test
 dart format --output=none --set-exit-if-changed lib test tool example/lib
+dart run tool/benchmark_suite.dart --update-docs --check-regressions
 ```
+
+If `tool/benchmark_suite.dart --check-regressions` reports a regression in any diagram family or phase (`PARSE` vs `RENDER`), inspect the newly synced code against the hot-path checklist in [`docs/BENCHMARKS.md`](BENCHMARKS.md#4-upstream-sync-performance-invariants--optimization-checklist) and optimize before finalizing the release.
 
 ---
 

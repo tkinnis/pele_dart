@@ -1,6 +1,7 @@
 // Upstream: src/diagrams/architecture/db.ts
 
 import '../../errors.dart';
+import '../../svg/root.dart';
 import 'parser.dart';
 
 sealed class ArchNode {
@@ -73,10 +74,12 @@ class ArchLayoutHint {
   final List<String> members;
 }
 
-abstract interface class ArchitectureModel {
+abstract interface class ArchitectureModel implements Accessible {
   String get type;
   String? get title;
+  @override
   String? get accTitle;
+  @override
   String? get accDescr;
   Map<String, ArchNode> get nodes;
   Map<String, ArchGroup> get groups;

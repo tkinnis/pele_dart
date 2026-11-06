@@ -220,7 +220,8 @@ Future<void> main(List<String> args) async {
         '   Next steps:\n'
         '     1. Port the modified/added files listed above into lib/src/ and test/\n'
         '     2. Verify 100% parity: dart run tool/verify_against_upstream.dart && dart test\n'
-        '     3. Finalize UPSTREAM.md pin: dart run tool/sync_upstream.dart --pin $targetTagOrRef $targetSha',
+        '     3. Verify AOT benchmarks & update docs/BENCHMARKS.md: dart run tool/benchmark_suite.dart --update-docs --check-regressions\n'
+        '     4. Finalize UPSTREAM.md pin: dart run tool/sync_upstream.dart --pin $targetTagOrRef $targetSha',
       );
     }
     return;

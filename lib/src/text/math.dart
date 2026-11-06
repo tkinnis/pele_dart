@@ -2,14 +2,16 @@
 
 import '../types.dart';
 
+const Map<String, MathMarkup?> _emptyFound = <String, MathMarkup?>{};
 MathResolver? _resolver;
-Map<String, MathMarkup?> _found = <String, MathMarkup?>{};
+Map<String, MathMarkup?> _found = _emptyFound;
 
 T withMath<T>(MathResolver? math, T Function() run) {
+  if (math == null && _resolver == null) return run();
   final outer = _resolver;
   final outerFound = _found;
   _resolver = math;
-  _found = <String, MathMarkup?>{};
+  _found = math != null ? <String, MathMarkup?>{} : _emptyFound;
   try {
     return run();
   } finally {

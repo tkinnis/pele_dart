@@ -259,7 +259,8 @@ Rendered _draw(
   String openPeriod(int i) =>
       '<g class="pele-node pele-period" data-id="${escText(periods[i].text.trim())}">';
 
-  var body = '';
+  final body = StringBuffer();
+  String prefix = '';
   double height;
 
   if (vertical) {
@@ -268,11 +269,11 @@ Rendered _draw(
     final eventsX = spineX + _spine;
     var y = top;
     for (final group in groups) {
-      body += open(group);
+      body.write(open(group));
       if (group.section >= 0) {
         final label = sectionLabel(group, bodyW);
         final h = chipHeight(label);
-        body += header(group, label, left, y, bodyW, h);
+        body.write(header(group, label, left, y, bodyW, h));
         y += h + _sectionGap + 4;
       }
       for (final i in group.periods) {
@@ -283,39 +284,38 @@ Rendered _draw(
             ? eventHeight(eventLabels[i][0])
             : h;
         final cy = y + math.max(h, first) / 2;
-        var d = 'M${num(left + colW)},${num(cy)}H${num(axisX)}';
-        var cards = '';
+        final d = StringBuffer('M${num(left + colW)},${num(cy)}H${num(axisX)}');
+        final cards = StringBuffer();
         var ey = cy - first / 2;
         var last = cy;
         for (final label in eventLabels[i]) {
           final eh = eventHeight(label);
           last = ey + eh / 2;
-          d += 'M${num(spineX)},${num(last)}H${num(eventsX)}';
-          cards += event(label, color, eventsX, ey, eh);
+          d.write('M${num(spineX)},${num(last)}H${num(eventsX)}');
+          cards.write(event(label, color, eventsX, ey, eh));
           ey += eh + _eventGap;
         }
         if (cards.isNotEmpty) {
-          d += 'M${num(axisX)},${num(cy)}H${num(spineX)}V${num(last)}';
+          d.write('M${num(axisX)},${num(cy)}H${num(spineX)}V${num(last)}');
         }
-        body +=
-            openPeriod(i) +
-            period(i, group, color, left, cy - h / 2, h) +
-            '<path class="pele-edge" d="$d"$_line/>' +
-            dot(axisX, cy, color) +
-            cards +
-            '</g>';
+        body
+          ..write(openPeriod(i))
+          ..write(period(i, group, color, left, cy - h / 2, h))
+          ..write('<path class="pele-edge" d="$d"$_line/>')
+          ..write(dot(axisX, cy, color))
+          ..write(cards)
+          ..write('</g>');
         y = math.max(cy + h / 2, ey - _eventGap) + _gap;
       }
       if (group.periods.isEmpty) y += _gap - _sectionGap - 4;
-      if (group.section >= 0) body += '</g>';
+      if (group.section >= 0) body.write('</g>');
     }
     if (groups.isNotEmpty) y -= _gap;
     if (drawn) {
       final tip = y + _tail + ARROW;
-      body =
+      prefix =
           '<path class="pele-axis" d="M${num(axisX)},${num(top)}V${num(tip - ARROW + 1)}" fill="none" stroke="var(--_l)"/>' +
-          marker('arrow_point', axisX, tip, 0, 1, 'var(--_l)') +
-          body;
+          marker('arrow_point', axisX, tip, 0, 1, 'var(--_l)');
       y = tip;
     }
     height = y + pad;
@@ -343,46 +343,46 @@ Rendered _draw(
       final group = groups[g];
       final span = math.max<int>(group.periods.length, 1);
       final gx = left + slot * pitch;
-      body += open(group);
+      body.write(open(group));
       final label = sectionLabels[g];
       if (label != null) {
-        body += header(group, label, gx, top, span * pitch - _gap, headerH);
+        body.write(header(group, label, gx, top, span * pitch - _gap, headerH));
       }
       for (var k = 0; k < group.periods.length; k++) {
         final i = group.periods[k];
         final color = colorOf(group, i);
         final x = gx + k * pitch;
         final cx = x + colW / 2;
-        var d =
-            'M${num(cx)},${num(periodsY + chipH)}V${num(eventLabels[i].isNotEmpty ? eventsY : axisY)}';
-        var cards = '';
+        final d = StringBuffer(
+          'M${num(cx)},${num(periodsY + chipH)}V${num(eventLabels[i].isNotEmpty ? eventsY : axisY)}',
+        );
+        final cards = StringBuffer();
         var ey = eventsY;
         for (final eventLabel in eventLabels[i]) {
           final eh = eventHeight(eventLabel);
           if (ey > eventsY) {
-            d += 'M${num(cx)},${num(ey - _eventGap)}V${num(ey)}';
+            d.write('M${num(cx)},${num(ey - _eventGap)}V${num(ey)}');
           }
-          cards += event(eventLabel, color, x, ey, eh);
+          cards.write(event(eventLabel, color, x, ey, eh));
           ey += eh + _eventGap;
         }
         bottom = math.max(bottom, ey - _eventGap);
-        body +=
-            openPeriod(i) +
-            period(i, group, color, x, periodsY, chipH) +
-            '<path class="pele-edge" d="$d"$_line/>' +
-            dot(cx, axisY, color) +
-            cards +
-            '</g>';
+        body
+          ..write(openPeriod(i))
+          ..write(period(i, group, color, x, periodsY, chipH))
+          ..write('<path class="pele-edge" d="$d"$_line/>')
+          ..write(dot(cx, axisY, color))
+          ..write(cards)
+          ..write('</g>');
       }
-      if (group.section >= 0) body += '</g>';
+      if (group.section >= 0) body.write('</g>');
       slot += span;
     }
     if (drawn) {
       final tip = left + bodyW;
-      body =
+      prefix =
           '<path class="pele-axis" d="M${num(left)},${num(axisY)}H${num(tip - ARROW + 1)}" fill="none" stroke="var(--_l)"/>' +
-          marker('arrow_point', tip, axisY, 1, 0, 'var(--_l)') +
-          body;
+          marker('arrow_point', tip, axisY, 1, 0, 'var(--_l)');
     }
     height = bottom + pad;
   }
@@ -396,7 +396,8 @@ Rendered _draw(
         pad + title.height / 2,
         ' class="pele-title" font-weight="var(--_tw)"',
       ) +
-      body;
+      prefix +
+      body.toString();
   return Rendered(
     svg: svgDocument(
       'timeline',

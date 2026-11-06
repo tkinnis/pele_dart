@@ -43,13 +43,8 @@ bool _flag(Config config, String key) {
 
 // A task label sits on one row, so only its first line is kept.
 Label _oneLine(String raw, TextMeasurer measurer, double size) {
-  final label = layoutLabel(
-    raw.replaceAll(_reBreak, ' '),
-    false,
-    measurer,
-    size,
-    4000,
-  );
+  final cleaned = raw.contains('<') ? raw.replaceAll(_reBreak, ' ') : raw;
+  final label = layoutLabel(cleaned, false, measurer, size, 4000);
   if (label.lines.length <= 1) return label;
   return label.copyWith(
     lines: <List<Span>>[label.lines[0]],
@@ -453,41 +448,55 @@ Rendered renderGantt(GanttDb model, Config config, RenderOptions options) {
   // Excluded days, as Mermaid marks them: a day at a time from the first task's start, and not at all
   // when the chart spans more than five years.
   final excluded = StringBuffer();
-  final startDt = DateTime.fromMillisecondsSinceEpoch(start.round());
-  final sixYearsLater = add(startDt, 6, 'y');
-  if ((model.excludes.isNotEmpty || model.includes.isNotEmpty) &&
-      sixYearsLater != null &&
-      sixYearsLater.millisecondsSinceEpoch > stop) {
-    DateTime? from;
-    DateTime? to;
-    void flush() {
-      if (from == null || to == null) return;
-      final dayStart = DateTime(from!.year, from!.month, from!.day, 0, 0, 0, 0);
-      final dayEnd = DateTime(to!.year, to!.month, to!.day, 23, 59, 59, 999);
-      final ex0 = math.max(left, x(dayStart.millisecondsSinceEpoch.toDouble()));
-      final ex1 = math.min(right, x(dayEnd.millisecondsSinceEpoch.toDouble()));
-      if (ex1 > ex0) {
-        excluded.write(
-          '<rect x="${num(ex0)}" y="${num(plotTop)}" width="${num(ex1 - ex0)}" height="${num(plotHeight)}"/>',
+  if (model.excludes.isNotEmpty || model.includes.isNotEmpty) {
+    final startDt = DateTime.fromMillisecondsSinceEpoch(start.round());
+    final sixYearsLater = add(startDt, 6, 'y');
+    if (sixYearsLater != null && sixYearsLater.millisecondsSinceEpoch > stop) {
+      DateTime? from;
+      DateTime? to;
+      void flush() {
+        if (from == null || to == null) return;
+        final fw = DateTime.fromMillisecondsSinceEpoch(
+          from!.millisecondsSinceEpoch + from!.timeZoneOffset.inMilliseconds,
+          isUtc: true,
         );
+        final tw = DateTime.fromMillisecondsSinceEpoch(
+          to!.millisecondsSinceEpoch + to!.timeZoneOffset.inMilliseconds,
+          isUtc: true,
+        );
+        final dayStart = DateTime(fw.year, fw.month, fw.day, 0, 0, 0, 0);
+        final dayEnd = DateTime(tw.year, tw.month, tw.day, 23, 59, 59, 999);
+        final ex0 = math.max(
+          left,
+          x(dayStart.millisecondsSinceEpoch.toDouble()),
+        );
+        final ex1 = math.min(
+          right,
+          x(dayEnd.millisecondsSinceEpoch.toDouble()),
+        );
+        if (ex1 > ex0) {
+          excluded.write(
+            '<rect x="${num(ex0)}" y="${num(plotTop)}" width="${num(ex1 - ex0)}" height="${num(plotHeight)}"/>',
+          );
+        }
+        from = null;
+        to = null;
       }
-      from = null;
-      to = null;
-    }
 
-    for (
-      var day = startDt;
-      day.millisecondsSinceEpoch <= stop;
-      day = addDays(day, 1)
-    ) {
-      if (model.isInvalidDate(day)) {
-        from ??= day;
-        to = day;
-      } else {
-        flush();
+      for (
+        var day = startDt;
+        day.millisecondsSinceEpoch <= stop;
+        day = addDays(day, 1)
+      ) {
+        if (model.isInvalidDate(day)) {
+          from ??= day;
+          to = day;
+        } else {
+          flush();
+        }
       }
+      flush();
     }
-    flush();
   }
 
   final links = <LinkInfo>[];

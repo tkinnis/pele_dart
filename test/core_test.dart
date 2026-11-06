@@ -153,5 +153,198 @@ flowchart TD
       expect(flat, contains('font-weight="bold"'));
       expect(flat, contains('dy="3" font-size="10"'));
     });
+
+    test('layered layout handles repeated mixed class namespace and ER renders across GC cycles', () {
+      const classSrc = '''classDiagram
+  namespace Earth {
+    class Volcano {
+      +erupt()
+    }
+    class Summit
+  }
+  namespace Reef {
+    class Coral
+    class Trench
+  }
+  Volcano --> Summit
+  Summit ..> Coral : ash
+  Coral --> Trench : sediment''';
+      const erSrc = '''erDiagram
+  direction LR
+  CUSTOMER ||--o{ ORDER : places
+  CUSTOMER {
+    string name
+    string custNumber
+  }
+  ORDER ||--|{ LINE-ITEM : contains
+  ORDER {
+    int orderNumber
+  }''';
+      for (var i = 0; i < 64; i++) {
+        final cRes = render(classSrc);
+        final eRes = render(erSrc);
+        expect(cRes.svg, contains('pele-class'));
+        expect(eRes.svg, contains('pele-er'));
+      }
+    });
+
+    test('flattenPeleSvg propagates group fill-opacity to radar curves and resolves cScale0..2', () {
+      const radarSrc = '''---
+config:
+  radar:
+    axisScaleFactor: 0.25
+    curveTension: 0.1
+  theme: base
+  themeVariables:
+    cScale0: "#FF0000"
+    cScale1: "#00FF00"
+    cScale2: "#0000FF"
+    radar:
+      curveOpacity: 0
+---
+radar-beta
+  axis A, B, C, D, E
+  curve c1{1,2,3,4,5}
+  curve c2{5,4,3,2,1}
+  curve c3{3,3,3,3,3}''';
+      final cssRes = render(
+        radarSrc,
+        const RenderOptions(outputMode: SvgOutputMode.cssVariables),
+      );
+      expect(
+        cssRes.svg,
+        contains(
+          '<g class="pele-curves" fill-opacity="0.2" stroke-width="1.5" stroke-linejoin="round">',
+        ),
+      );
+
+      final flatRes = render(
+        radarSrc,
+        const RenderOptions(outputMode: SvgOutputMode.flattened),
+      );
+      expect(
+        flatRes.svg,
+        contains(
+          '<g class="pele-curves" stroke-width="1.5" stroke-linejoin="round">',
+        ),
+      );
+      expect(
+        flatRes.svg,
+        contains('data-id="c1" fill="#FF0000" stroke="#FF0000"'),
+      );
+      expect(
+        flatRes.svg,
+        contains('data-id="c2" fill="#00FF00" stroke="#00FF00"'),
+      );
+      expect(
+        flatRes.svg,
+        contains('data-id="c3" fill="#0000FF" stroke="#0000FF"'),
+      );
+      expect(
+        RegExp(r'class="pele-curve"[^>]*fill-opacity="0\.2"')
+            .allMatches(flatRes.svg)
+            .length,
+        3,
+      );
+    });
+
+    test('flattenPeleSvg extracts root font-size, resolves concrete font-family, and propagates group font-size to Sankey labels', () {
+      const sankeySrc = '''---
+config:
+  sankey:
+    showValues: false
+    labelStyle: outlined
+---
+sankey
+Agricultural 'waste',Bio-conversion,124.729
+Bio-conversion,Liquid,0.597''';
+      final flatRes = render(
+        sankeySrc,
+        const RenderOptions(
+          outputMode: SvgOutputMode.flattened,
+          idPrefix: 'p1',
+        ),
+      );
+      expect(flatRes.svg, contains('font-family="Helvetica" font-size="16"'));
+      expect(
+        flatRes.svg,
+        contains(
+          'stroke-linejoin="round" font-size="14">Agricultural \'waste\'</text>',
+        ),
+      );
+      expect(
+        flatRes.svg,
+        contains(
+          'text-anchor="start" font-size="14">Agricultural \'waste\'</text>',
+        ),
+      );
+      expect(flatRes.svg, contains('fill="url(#p1-sankey-'));
+      expect(flatRes.svg, isNot(contains(') #')));
+    });
+
+    test(
+      'flattenPeleSvg converts nested pele-icon SVGs into scaled g groups',
+      () {
+        const archSrc = '''architecture-beta
+  group api(cloud)[API]
+  service db(database)[Database] in api''';
+        final flatRes = render(
+          archSrc,
+          const RenderOptions(outputMode: SvgOutputMode.flattened),
+        );
+        expect(flatRes.svg, isNot(contains('<svg class="pele-icon"')));
+        expect(flatRes.svg, contains('<g class="pele-icon"'));
+      },
+    );
+
+    test('flattenPeleSvg promotes first tspan x and y onto parent text for multi-span labels', () {
+      const mindmapSrc = '''mindmap
+  id1["`**Pele** is the
+goddess of volcanoes
+Unicode works too: 🌋`"]
+    id2["`She lives in **the** crater of Kīlauea... a *very old story* that is still told today`"]
+    id3[Lava builds new land]''';
+      final cssRes = render(
+        mindmapSrc,
+        const RenderOptions(outputMode: SvgOutputMode.cssVariables),
+      );
+      expect(
+        cssRes.svg,
+        contains(
+          '<text class="pele-label" text-anchor="middle" xml:space="preserve"><tspan x="0" y="-15.4" font-weight="var(--_w)">Pele</tspan><tspan> is the</tspan>',
+        ),
+      );
+
+      final flatRes = render(
+        mindmapSrc,
+        const RenderOptions(outputMode: SvgOutputMode.flattened),
+      );
+      expect(
+        flatRes.svg,
+        contains(
+          '<text class="pele-label" text-anchor="middle" xml:space="preserve" x="0" y="-15.4"><tspan x="0" y="-15.4" font-weight="bold">Pele</tspan><tspan> is the</tspan>',
+        ),
+      );
+    });
+
+    test('flattenPeleSvg converts positioned subscript and superscript tspan dy into explicit x and y coordinates', () {
+      const rawSvg =
+          '<svg xmlns="http://www.w3.org/2000/svg" class="pele pele-test" style="--_bg:#fff;font:16px sans-serif" fill="var(--_fg)">'
+          '<g transform="translate(8, 8)">'
+          '<text text-anchor="middle" xml:space="preserve">'
+          '<tspan x="100" y="50">H</tspan>'
+          '<tspan baseline-shift="sub" font-size="smaller">2</tspan>'
+          '<tspan>O</tspan>'
+          '</text>'
+          '</g>'
+          '</svg>';
+      final flat = flattenPeleSvg(rawSvg);
+      expect(flat, isNot(contains('dy="3"')));
+      expect(flat, contains('<text x="100" y="50"'));
+      expect(flat, contains('text-anchor="start"'));
+      expect(flat, contains('y="50">H</tspan>'));
+      expect(flat, contains('y="53" font-size="10">2</tspan>'));
+      expect(flat, contains('y="50">O</tspan>'));
+    });
   });
 }

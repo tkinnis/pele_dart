@@ -20,6 +20,8 @@ final RegExp _reDuration = RegExp(r'^(\d+(?:\.\d+)?)([Mdhmswy]|ms)$');
 final RegExp _reTokenSplit = RegExp(r'[\s,]+');
 final RegExp _reDigits = RegExp(r'^\d+$');
 final RegExp _reIsoDateOnly = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+final RegExp _reSlashIso = RegExp(r'^(\d{4})/(\d{1,2})/(\d{1,2})$');
+final RegExp _reSlashUs = RegExp(r'^(\d{1,2})/(\d{1,2})/(\d{4})$');
 final RegExp _leadSpaceRe = RegExp(r'^\s+');
 final RegExp _newlineSpaceRe = RegExp(r'\n\s+');
 final Set<String> _dayNames = WEEKDAYS.map((day) => day.toLowerCase()).toSet();
@@ -74,7 +76,7 @@ DateTime? _parseJsFallbackDate(String str) {
     return isValid(local) ? local : null;
   }
   // Handle slash dates like YYYY/MM/DD or MM/DD/YYYY that JS new Date(str) accepts.
-  final slashIso = RegExp(r'^(\d{4})/(\d{1,2})/(\d{1,2})$').firstMatch(trimmed);
+  final slashIso = _reSlashIso.firstMatch(trimmed);
   if (slashIso != null) {
     return makeLocalDate(
       int.parse(slashIso.group(1)!),
@@ -82,7 +84,7 @@ DateTime? _parseJsFallbackDate(String str) {
       int.parse(slashIso.group(3)!),
     );
   }
-  final slashUs = RegExp(r'^(\d{1,2})/(\d{1,2})/(\d{4})$').firstMatch(trimmed);
+  final slashUs = _reSlashUs.firstMatch(trimmed);
   if (slashUs != null) {
     return makeLocalDate(
       int.parse(slashUs.group(3)!),

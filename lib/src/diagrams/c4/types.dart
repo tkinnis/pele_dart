@@ -1,5 +1,7 @@
 // Upstream: src/diagrams/c4/types.ts
 
+import '../../svg/root.dart';
+
 // A `$key="value"` argument.
 class C4Named {
   const C4Named({required this.key, required this.value});
@@ -153,12 +155,14 @@ class C4Rel {
   Map<String, String>? extra;
 }
 
-abstract interface class C4Model {
+abstract interface class C4Model implements Accessible {
   String get type;
   // The header keyword: C4Context, C4Container, C4Component, C4Dynamic or C4Deployment.
   String? get c4Type;
   String? get title;
+  @override
   String? get accTitle;
+  @override
   String? get accDescr;
   List<C4Shape> get shapes;
   // The first boundary is the unnamed one that holds everything at the top level.

@@ -129,66 +129,88 @@ String _zone(DateTime date) {
   return '${offset >= 0 ? '+' : '-'}${_pad(minutes ~/ 60, 2)}:${_pad(minutes % 60, 2)}';
 }
 
+DateTime _wallUtc(DateTime date) {
+  if (date.isUtc) return date;
+  return DateTime.fromMillisecondsSinceEpoch(
+    date.millisecondsSinceEpoch + date.timeZoneOffset.inMilliseconds,
+    isUtc: true,
+  );
+}
+
 int isoWeekday(DateTime date) {
   return date.weekday;
 }
 
 DateTime addDays(DateTime date, int days) {
+  if (days == 0) return date;
+  final nextMs = date.millisecondsSinceEpoch + days * _day;
+  if (nextMs.abs() <= maxJsDateMs) {
+    final tz = date.timeZoneOffset;
+    final candidate = DateTime.fromMillisecondsSinceEpoch(nextMs);
+    if (candidate.timeZoneOffset == tz) return candidate;
+  }
+  final w = _wallUtc(date);
   return DateTime(
-    date.year,
-    date.month,
-    date.day + days,
-    date.hour,
-    date.minute,
-    date.second,
-    date.millisecond,
+    w.year,
+    w.month,
+    w.day + days,
+    w.hour,
+    w.minute,
+    w.second,
+    w.millisecond,
   );
 }
 
 DateTime? _tryAddDays(DateTime date, int days) {
+  if (days == 0) return isValid(date) ? date : null;
+  final nextMs = date.millisecondsSinceEpoch + days * _day;
+  if (nextMs.abs() <= maxJsDateMs) {
+    final tz = date.timeZoneOffset;
+    final candidate = DateTime.fromMillisecondsSinceEpoch(nextMs);
+    if (candidate.timeZoneOffset == tz) return candidate;
+  }
+  final w = _wallUtc(date);
   return makeLocalDate(
-    date.year,
-    date.month - 1,
-    date.day + days,
-    date.hour,
-    date.minute,
-    date.second,
-    date.millisecond,
+    w.year,
+    w.month - 1,
+    w.day + days,
+    w.hour,
+    w.minute,
+    w.second,
+    w.millisecond,
     false,
   );
-}
-
-int _daysInMonth(DateTime date) {
-  final last = DateTime(date.year, date.month + 1, 0, 23, 59, 59, 999);
-  return last.day;
 }
 
 // Sets the month or the year, keeping the day of the month unless the new month is shorter.
 DateTime? _setCalendar(
   DateTime date,
-  DateTime? Function(DateTime first) apply,
+  DateTime? Function(DateTime firstWall) apply,
 ) {
+  final w = _wallUtc(date);
   final first = makeLocalDate(
-    date.year,
-    date.month - 1,
+    w.year,
+    w.month - 1,
     1,
-    date.hour,
-    date.minute,
-    date.second,
-    date.millisecond,
+    w.hour,
+    w.minute,
+    w.second,
+    w.millisecond,
     false,
   );
   if (first == null) return null;
-  final shifted = apply(first);
+  final shifted = apply(w);
   if (shifted == null) return null;
+  final sw = _wallUtc(shifted);
+  final last = DateTime(sw.year, sw.month + 1, 0, 23, 59, 59, 999);
   return makeLocalDate(
-    shifted.year,
-    shifted.month - 1,
-    math.min(date.day, _daysInMonth(shifted)),
-    shifted.hour,
-    shifted.minute,
-    shifted.second,
-    shifted.millisecond,
+    sw.year,
+    sw.month - 1,
+    math.min(w.day, _wallUtc(last).day),
+    sw.hour,
+    sw.minute,
+    sw.second,
+    sw.millisecond,
     false,
   );
 }
@@ -200,14 +222,14 @@ DateTime? add(DateTime date, double amount, Unit unit) {
       final m = roundJs(amount);
       return _setCalendar(
         date,
-        (d) => makeLocalDate(
-          d.year,
-          (date.month - 1) + m,
+        (w) => makeLocalDate(
+          w.year,
+          (w.month - 1) + m,
           1,
-          d.hour,
-          d.minute,
-          d.second,
-          d.millisecond,
+          w.hour,
+          w.minute,
+          w.second,
+          w.millisecond,
           false,
         ),
       );
@@ -215,14 +237,14 @@ DateTime? add(DateTime date, double amount, Unit unit) {
       final y = roundJs(amount);
       return _setCalendar(
         date,
-        (d) => makeLocalDate(
-          date.year + y,
-          d.month - 1,
+        (w) => makeLocalDate(
+          w.year + y,
+          w.month - 1,
           1,
-          d.hour,
-          d.minute,
-          d.second,
-          d.millisecond,
+          w.hour,
+          w.minute,
+          w.second,
+          w.millisecond,
           false,
         ),
       );
@@ -276,24 +298,28 @@ String? format(DateTime? date, String template) {
   final d = date!;
   final str = template.isNotEmpty ? template : _defaultFormat;
   if (str == 'YYYY-MM-DD') return isoDate(d);
+  if (str == 'X') return '${(d.millisecondsSinceEpoch / 1000).floor()}';
+  if (str == 'x') return '${d.millisecondsSinceEpoch}';
+  final w = _wallUtc(d);
+  if (str == 'YYYY') return _pad(w.year, 4);
   var unsupported = false;
   final advanced = str.replaceAllMapped(_reAdvanced, (m) {
     final match = m.group(0)!;
     switch (match) {
       case 'Q':
-        return '${((d.month) / 3).ceil()}';
+        return '${((w.month) / 3).ceil()}';
       case 'Do':
-        return '[${_ordinal(d.day)}]';
+        return '[${_ordinal(w.day)}]';
       case 'GGGG':
-        return '${_weekThursday(d).year}';
+        return '${_wallUtc(_weekThursday(d)).year}';
       case 'W':
         return '${_isoWeek(d)}';
       case 'WW':
         return _pad(_isoWeek(d), 2);
       case 'k':
-        return '${d.hour == 0 ? 24 : d.hour}';
+        return '${w.hour == 0 ? 24 : w.hour}';
       case 'kk':
-        return _pad(d.hour == 0 ? 24 : d.hour, 2);
+        return _pad(w.hour == 0 ? 24 : w.hour, 2);
       case 'X':
         return '${(d.millisecondsSinceEpoch / 1000).floor()}';
       case 'x':
@@ -311,29 +337,29 @@ String? format(DateTime? date, String template) {
     }
   });
   if (unsupported) return null;
-  final hours = d.hour;
-  final dow = d.weekday % 7;
+  final hours = w.hour;
+  final dow = w.weekday % 7;
   return advanced.replaceAllMapped(_reFormat, (m) {
     final literal = m.group(1);
     if (literal != null && literal.isNotEmpty) return literal;
     final match = m.group(0)!;
     switch (match) {
       case 'YY':
-        return sliceJs('${d.year}', -2);
+        return sliceJs('${w.year}', -2);
       case 'YYYY':
-        return _pad(d.year, 4);
+        return _pad(w.year, 4);
       case 'M':
-        return '${d.month}';
+        return '${w.month}';
       case 'MM':
-        return _pad(d.month, 2);
+        return _pad(w.month, 2);
       case 'MMM':
-        return MONTHS[d.month - 1].substring(0, 3);
+        return MONTHS[w.month - 1].substring(0, 3);
       case 'MMMM':
-        return MONTHS[d.month - 1];
+        return MONTHS[w.month - 1];
       case 'D':
-        return '${d.day}';
+        return '${w.day}';
       case 'DD':
-        return _pad(d.day, 2);
+        return _pad(w.day, 2);
       case 'd':
         return '$dow';
       case 'dd':
@@ -355,15 +381,15 @@ String? format(DateTime? date, String template) {
       case 'A':
         return hours < 12 ? 'AM' : 'PM';
       case 'm':
-        return '${d.minute}';
+        return '${w.minute}';
       case 'mm':
-        return _pad(d.minute, 2);
+        return _pad(w.minute, 2);
       case 's':
-        return '${d.second}';
+        return '${w.second}';
       case 'ss':
-        return _pad(d.second, 2);
+        return _pad(w.second, 2);
       case 'SSS':
-        return _pad(d.millisecond, 3);
+        return _pad(w.millisecond, 3);
       case 'Z':
         return _zone(d);
       default:
@@ -373,9 +399,10 @@ String? format(DateTime? date, String template) {
 }
 
 String isoDate(DateTime date) {
-  final year = date.year;
-  final month = date.month;
-  final day = date.day;
+  final w = _wallUtc(date);
+  final year = w.year;
+  final month = w.month;
+  final day = w.day;
   final yStr = (year >= 1000 && year <= 9999) ? '$year' : _pad(year, 4);
   return '$yStr${month < 10 ? '-0' : '-'}$month${day < 10 ? '-0' : '-'}$day';
 }
@@ -631,22 +658,22 @@ final Map<String, _RegexStep> _readers = <String, _RegexStep>{
   'ZZ': _RegexStep(re: _matchOffset, read: _readOffset),
 };
 
-String? _compiledFormat;
-List<Object>? _compiledSteps;
+final Map<String, List<Object>?> _compiledCache = <String, List<Object>?>{};
 
 List<Object>? _compile(String template) {
-  if (template == _compiledFormat) return _compiledSteps;
-  _compiledFormat = template;
-  _compiledSteps = null;
+  if (_compiledCache.containsKey(template)) return _compiledCache[template];
+  if (_compiledCache.length >= 64) _compiledCache.clear();
   // dayjs expands localized tokens through a locale table the English locale does not have, and fails.
-  if (_reLocalized.hasMatch(template.replaceAll(_reLiteral, ''))) return null;
+  if (_reLocalized.hasMatch(template.replaceAll(_reLiteral, ''))) {
+    return _compiledCache[template] = null;
+  }
   final matches = _reTokens.allMatches(template).toList();
-  if (matches.isEmpty) return null;
-  _compiledSteps = matches.map<Object>((m) {
+  if (matches.isEmpty) return _compiledCache[template] = null;
+  final steps = matches.map<Object>((m) {
     final token = m.group(0)!;
     return _readers[token] ?? token.replaceAll(_reStripBrackets, '');
   }).toList();
-  return _compiledSteps;
+  return _compiledCache[template] = steps;
 }
 
 double _jsNumber(String s) {
@@ -711,8 +738,54 @@ DateTime? _loose(String input, String template, DateTime now) {
   return makeLocalDate(year, month0, day, hours, minutes, seconds, ms);
 }
 
+int _parse2Digits(String s, int offset) {
+  final d0 = s.codeUnitAt(offset) - 0x30;
+  final d1 = s.codeUnitAt(offset + 1) - 0x30;
+  if (d0 < 0 || d0 > 9 || d1 < 0 || d1 > 9) return -1;
+  return d0 * 10 + d1;
+}
+
+int _parse4Digits(String s, int offset) {
+  final hi = _parse2Digits(s, offset);
+  final lo = _parse2Digits(s, offset + 2);
+  if (hi < 0 || lo < 0) return -1;
+  return hi * 100 + lo;
+}
+
+int _maxDaysInMonth(int y, int m) {
+  if (m == 2) {
+    return (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 29 : 28;
+  }
+  return (m == 4 || m == 6 || m == 9 || m == 11) ? 30 : 31;
+}
+
 // Parses the way `dayjs(input, format, true)` does. `now` supplies the fields the format leaves out.
 DateTime? parseStrict(String input, String template, DateTime now) {
+  if (template == 'YYYY-MM-DD') {
+    if (input.length != 10 ||
+        input.codeUnitAt(4) != 0x2d ||
+        input.codeUnitAt(7) != 0x2d) {
+      return null;
+    }
+    final y = _parse4Digits(input, 0);
+    final m = _parse2Digits(input, 5);
+    final d = _parse2Digits(input, 8);
+    if (y >= 100 && m >= 1 && m <= 12 && d >= 1 && d <= _maxDaysInMonth(y, m)) {
+      return DateTime(y, m, d);
+    }
+    if (y > 0 && m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+      final dt = makeLocalDate(y, m - 1, d);
+      return (dt != null && dt.year == y && dt.month == m && dt.day == d)
+          ? dt
+          : null;
+    }
+  } else if (template == 'YYYY') {
+    if (input.length != 4) return null;
+    final y = _parse4Digits(input, 0);
+    if (y >= 100) return DateTime(y, 1, 1);
+    if (y > 0) return makeLocalDate(y, 0, 1);
+    return null;
+  }
   final date = _loose(input, template, now);
   return date != null && isValid(date) && format(date, template) == input
       ? date

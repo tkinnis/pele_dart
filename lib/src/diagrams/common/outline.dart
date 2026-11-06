@@ -118,14 +118,89 @@ class _S {
   static const int dataStr = 7;
 }
 
-final RegExp _reSpace = RegExp(r'\s+');
-final RegExp _reLine = RegExp(r'[^\n\r]+');
-final RegExp _reId = RegExp(r'[^([\n){}]+');
-final RegExp _reIdKanban = RegExp(r'[^([\n){}@]+');
-final RegExp _reDescr = RegExp(r'[^)\](}]+');
-final RegExp _reMd = RegExp(r'[^`"]+');
-final RegExp _reData = RegExp(r'[^}^"]+');
 final RegExp _reBr = RegExp(r'\n\s*');
+
+bool _isOutlineSpace(int c) {
+  if (c <= 0x20) {
+    return c == 0x20 || (c >= 0x09 && c <= 0x0D);
+  }
+  return c == 0x85 ||
+      c == 0xA0 ||
+      c == 0x1680 ||
+      (c >= 0x2000 && c <= 0x200A) ||
+      c == 0x2028 ||
+      c == 0x2029 ||
+      c == 0x202F ||
+      c == 0x205F ||
+      c == 0x3000 ||
+      c == 0xFEFF;
+}
+
+int _atSpace(String src, int from, int n) {
+  var q = from;
+  while (q < n && _isOutlineSpace(src.codeUnitAt(q))) {
+    q++;
+  }
+  return q > from ? q : -1;
+}
+
+int _atLine(String src, int from, int n) {
+  var q = from;
+  while (q < n) {
+    final c = src.codeUnitAt(q);
+    if (c == 10 || c == 13) break;
+    q++;
+  }
+  return q > from ? q : -1;
+}
+
+int _atId(String src, int from, int n, bool kanban) {
+  var q = from;
+  while (q < n) {
+    final c = src.codeUnitAt(q);
+    if (c == 40 ||
+        c == 91 ||
+        c == 10 ||
+        c == 41 ||
+        c == 123 ||
+        c == 125 ||
+        (kanban && c == 64)) {
+      break;
+    }
+    q++;
+  }
+  return q > from ? q : -1;
+}
+
+int _atDescr(String src, int from, int n) {
+  var q = from;
+  while (q < n) {
+    final c = src.codeUnitAt(q);
+    if (c == 41 || c == 93 || c == 40 || c == 125) break;
+    q++;
+  }
+  return q > from ? q : -1;
+}
+
+int _atMd(String src, int from, int n) {
+  var q = from;
+  while (q < n) {
+    final c = src.codeUnitAt(q);
+    if (c == 96 || c == 34) break;
+    q++;
+  }
+  return q > from ? q : -1;
+}
+
+int _atData(String src, int from, int n) {
+  var q = from;
+  while (q < n) {
+    final c = src.codeUnitAt(q);
+    if (c == 125 || c == 94 || c == 34) break;
+    q++;
+  }
+  return q > from ? q : -1;
+}
 
 bool _letters(String src, int p, String word) {
   for (var k = 0; k < word.length; k++) {
@@ -140,7 +215,6 @@ Tokens tokenize(String src, bool kanban) {
   final texts = <String>[];
   final starts = <int>[];
   final keyword = kanban ? 'kanban' : 'mindmap';
-  final reId = kanban ? _reIdKanban : _reId;
   var state = _S.initial;
   var p = 0;
   var nextBreak = -1;
@@ -157,10 +231,6 @@ Tokens tokenize(String src, bool kanban) {
     state = next;
   }
 
-  int at(RegExp re, int from) {
-    return re.matchAsPrefix(src, from)?.end ?? -1;
-  }
-
   int upTo(String ch) {
     final e = src.indexOf(ch, p);
     return e == -1 ? n : e;
@@ -171,12 +241,12 @@ Tokens tokenize(String src, bool kanban) {
     final d = charCodeAt(src, p + 1);
     int e;
     if (state == _S.initial) {
-      final w = c <= 32 || c >= 160 ? math.max(at(_reSpace, p), p) : p;
+      final w = c <= 32 || c >= 160 ? math.max(_atSpace(src, p, n), p) : p;
       if (kanban && c == 64 && d == 123) {
         put(T.SHAPE_DATA, '', p + 2);
         state = _S.data;
       } else if (charCodeAt(src, w) == 37 && charCodeAt(src, w + 1) == 37) {
-        emit(T.SPACELINE, at(_reLine, w), _S.initial);
+        emit(T.SPACELINE, _atLine(src, w, n), _S.initial);
       } else if (w > p) {
         if (nextBreak < p) nextBreak = upTo('\n');
         if (nextBreak >= w) {
@@ -204,7 +274,7 @@ Tokens tokenize(String src, bool kanban) {
         emit(T.NODE_DSTART, p + 2, _S.node);
       } else if (c == 41 || c == 40 || c == 91) {
         emit(T.NODE_DSTART, p + 1, _S.node);
-      } else if ((e = at(reId, p)) != -1) {
+      } else if ((e = _atId(src, p, n, kanban)) != -1) {
         emit(T.NODE_ID, e, _S.initial);
       } else {
         break;
@@ -224,7 +294,11 @@ Tokens tokenize(String src, bool kanban) {
       } else if ((c == 125 && d == 125) || (c == 45 && d == 41)) {
         emit(T.NODE_DEND, p + 2, _S.initial);
       } else {
-        emit(T.NODE_DESCR, at(c == 125 ? _reLine : _reDescr, p), _S.node);
+        emit(
+          T.NODE_DESCR,
+          c == 125 ? _atLine(src, p, n) : _atDescr(src, p, n),
+          _S.node,
+        );
       }
     } else if (state == _S.nstr) {
       if (c == 34) {
@@ -237,13 +311,13 @@ Tokens tokenize(String src, bool kanban) {
       if (c == 96 && d == 34) {
         p += 2;
         state = _S.node;
-      } else if ((e = at(_reMd, p)) != -1) {
+      } else if ((e = _atMd(src, p, n)) != -1) {
         emit(T.NODE_DESCR, e, _S.nstr2);
       } else {
         break;
       }
     } else if (state == _S.classState) {
-      if ((e = at(_reLine, p)) != -1) {
+      if ((e = _atLine(src, p, n)) != -1) {
         emit(T.CLASS, e, _S.initial);
       } else if (c == 10) {
         p++;
@@ -264,7 +338,7 @@ Tokens tokenize(String src, bool kanban) {
       } else if (c == 125) {
         p++;
         state = _S.initial;
-      } else if ((e = at(_reData, p)) != -1) {
+      } else if ((e = _atData(src, p, n)) != -1) {
         emit(T.SHAPE_DATA, e, _S.data);
       } else {
         break;

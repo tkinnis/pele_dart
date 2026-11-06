@@ -1,5 +1,6 @@
 // Upstream: src/diagrams/agentflow/types.ts
 
+import '../../svg/root.dart';
 import '../../util/yaml.dart';
 
 typedef LabelType = String;
@@ -329,7 +330,7 @@ class SemanticModel {
   final List<Diagnostic> diagnostics;
 }
 
-abstract interface class AgentflowModel {
+abstract interface class AgentflowModel implements Accessible {
   String get type;
   String? get direction;
   Map<String, AgentNode> get nodes;
@@ -344,7 +345,9 @@ abstract interface class AgentflowModel {
   List<ElementMapping> get mappings;
   List<Diagnostic> get diagnostics;
   String? get title;
+  @override
   String? get accTitle;
+  @override
   String? get accDescr;
   SemanticModel semanticModel();
 }

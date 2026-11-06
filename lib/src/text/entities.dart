@@ -80,8 +80,22 @@ String writtenCodes(String text) {
 }
 
 String decodeEntities(String text) {
-  if (text.contains(_close)) text = _restorePlaceholders(text);
-  if (text.contains('&')) {
+  var hasAmp = false;
+  var hasClose = false;
+  for (var i = 0, n = text.length; i < n; i++) {
+    final c = text.codeUnitAt(i);
+    if (c == 0x26) {
+      hasAmp = true;
+    } else if (c == 0xb6 && i + 1 < n && text.codeUnitAt(i + 1) == 0xdf) {
+      hasClose = true;
+    }
+  }
+  if (!hasAmp && !hasClose) return text;
+  if (hasClose) {
+    text = _restorePlaceholders(text);
+    hasAmp = true;
+  }
+  if (hasAmp) {
     text = text.replaceAllMapped(_reEntity, (m) {
       final raw = m.group(0)!;
       final dec = m.group(1);

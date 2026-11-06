@@ -1,21 +1,30 @@
 // Upstream: src/diagrams/sankey/parser.ts
 
 import '../../errors.dart';
+import '../../svg/builder.dart';
 import '../../text/entities.dart';
 import '../../util/math_js.dart';
 import 'db.dart';
 import 'lexer.dart';
 
 final RegExp _reLineBreaks = RegExp(r'[\n\r]+');
+final RegExp _reLeadingFloat = RegExp(
+  r'^\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?',
+);
 final RegExp _reInvalidXml = RegExp(
   r'[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff\ufffe\uffff]',
   unicode: true,
 );
-final RegExp _reLeadingFloat = RegExp(
-  r'^\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?',
-);
+bool _hasInvalidSankeyXml(String s) => _reInvalidXml.hasMatch(s);
 
 double _parseFloat(String raw) {
+  final trimmed = raw.trim();
+  final direct = double.tryParse(trimmed);
+  if (direct != null &&
+      !trimmed.startsWith('0x') &&
+      !trimmed.startsWith('0X')) {
+    return direct;
+  }
   final m = _reLeadingFloat.firstMatch(raw);
   if (m == null) return double.nan;
   return double.tryParse(m.group(0)!.trim()) ?? double.nan;
@@ -139,9 +148,15 @@ void parseSankey(String src, SankeyDb db, [String? source]) {
 
   String name() {
     final start = starts[i];
-    final text = field().trim().replaceAll('""', '"');
-    // Entity codes can encode characters excluded by the lexer.
-    if (_reInvalidXml.hasMatch(decodeEntities(text))) {
+    final trimmed = field().trim();
+    final text = trimmed.contains('"')
+        ? trimmed.replaceAll('""', '"')
+        : trimmed;
+    // Entity codes can encode characters excluded by the lexer (`hasInvalidXml`
+    // also flags 0x7f, which `_isTextData` in the lexer only allows when decoded
+    // via entity, so check `c != 0x7f` if `hasInvalidXml` returns true).
+    final decoded = decodeEntities(text);
+    if (hasInvalidXml(decoded) && _hasInvalidSankeyXml(decoded)) {
       throw error(start, 'Invalid XML character in node name');
     }
     return text;

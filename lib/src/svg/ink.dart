@@ -45,6 +45,8 @@ final RegExp _reLeadingFloat = RegExp(
   r'^[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?',
   caseSensitive: false,
 );
+final RegExp _reCommaSep = RegExp(r'\s*,\s*');
+final RegExp _reSpaces = RegExp(r'\s+');
 
 double _parseFloat(String raw) {
   final m = _reLeadingFloat.firstMatch(raw.trim());
@@ -78,7 +80,7 @@ List<String>? _args(String body, bool hsl) {
   final alpha = parts.length == 2 ? parts[1] : null;
   final list = main
       .trim()
-      .split(legacy ? RegExp(r'\s*,\s*') : RegExp(r'\s+'))
+      .split(legacy ? _reCommaSep : _reSpaces)
       .where((s) => s.isNotEmpty)
       .toList();
   if (legacy ? (list.length < 3 || list.length > 4) : list.length != 3) {
@@ -152,6 +154,7 @@ double _opacity(String shape) {
 final Map<String, String?> _known = <String, String?>{};
 
 String? ink(String shape, [String text = '']) {
+  if (shape.isEmpty) return null;
   final key = '$shape\u0000$text';
   if (_known.containsKey(key)) return _known[key];
   if (_known.length > 1000) _known.clear();
@@ -171,6 +174,7 @@ String? _pick(String shape, String text) {
 }
 
 bool paints(String shape) {
+  if (shape.isEmpty) return false;
   final fill = _reFill.firstMatch(shape)?.group(1)?.trim().toLowerCase();
   if (fill == null || fill.isEmpty || fill == 'none' || fill == 'transparent') {
     return false;

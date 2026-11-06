@@ -50,7 +50,13 @@ When translating upstream TypeScript to Dart 3, respect these critical rules:
 1. **32-Bit Bitwise Operations**: In JS, `x | 0`, `x >> n`, `x << n`, and `Math.imul` operate on signed 32-bit integers (`Int32`), whereas Dart `int` is 64-bit. Always wrap translated bitwise hash/PRNG math in `.toSigned(32)` / `.toUnsigned(32)` helpers in `lib/src/util/math_js.dart`.
 2. **Array/String Slicing**: JS `Array.prototype.slice(start, end)` and `String.prototype.slice(start, end)` clamp out-of-bounds indices and support negative indices without throwing. Use `jsSlice()` / `jsSubstr()` helpers rather than raw `List.sublist()` / `String.substring()` when translating index math that may exceed bounds.
 3. **Number Formatting**: SVG coordinate formatting must strip trailing zeros and never emit scientific notation (`1e-7`), matching upstream number formatting (`fmtNum()`).
-4. **RegExp Semantics**: Translate JS `/y` (sticky) or `/g` `lastIndex` loops using `RegExp.matchAsPrefix(input, pos)` or `allMatches(input, pos)`.
+4. **RegExp Semantics & Dart AOT Hot Paths**:
+   * Translate JS `/y` (sticky) or `/g` `lastIndex` loops using `RegExp.matchAsPrefix(input, pos)` or `allMatches(input, pos)`.
+   * **Preserve Dart AOT Hot-Path Optimizations**:
+     * In `lib/src/detect.dart`, maintain the leading-whitespace skip + first-character `switch` dispatch returning `const Detected` instances (never replace with a sequential `RegExp` list scan).
+     * In `lib/src/diagrams/common/tokens.dart`, keep `re: RegExp(...)` on each `TokenType` for 1:1 upstream diffing alongside fast `match` closures and `_compileFastMatcher` / `_inferFirstChars` in `_prepare()`. When an upstream sync changes a token regex that also has an explicit `match` closure, update both in lockstep.
+     * In `lib/src/diagrams/common/outline.dart`, `lib/src/text/label.dart`, `lib/src/preprocess.dart`, and `lib/src/util/yaml.dart`, preserve `codeUnitAt` scanning and slice-based `StringBuffer.write(source.substring(start, end))` instead of per-character `String` indexing (`s[i]`) or backtracking regexes in inner loops.
+     * In `lib/src/diagrams/gantt/dates.dart`, keep `_MDate._w` lazy so `DateTime.timeZoneOffset` (`localtime_r` OS syscall) is only queried when local wall-clock fields are read.
 
 ---
 
@@ -81,11 +87,17 @@ Before completing any task or committing changes, all quality gates must pass:
    ```
    Verifies Mermaid version consistency across `UPSTREAM.md`, `.upstream/`, and `example/assets/mermaid.min.js`, and asserts 100% byte-for-byte SVG equality between `pele_dart` and `obsidianmd/pele (JS)` across all 33 canonical diagram families, 232 gallery diagrams, and 522 upstream corpus diagrams (`787/787`).
 
-5. **Upstream Sync & Release Workflow**:
-   * Check for new `obsidianmd/pele` releases, commits, or target `mermaid.js` updates with `dart run tool/sync_upstream.dart` (`--check`).
-   * Follow [`docs/UPSTREAM_SYNC.md`](docs/UPSTREAM_SYNC.md) and the workspace skill [`.agents/skills/sync-upstream-pele/SKILL.md`](.agents/skills/sync-upstream-pele/SKILL.md) to stage updates (`--update-to-latest`), port changes 1:1, refresh assets (`--refresh-assets`), verify parity, and update `UPSTREAM.md` (`--pin`).
-   * Keep [`docs/API_MANUAL.md`](docs/API_MANUAL.md) updated whenever public options, APIs, or supported diagram families change.
+5. **Native AOT Benchmark Report & Regression Gate**:
+   ```bash
+   dart run tool/benchmark_suite.dart --update-docs --check-regressions
+   ```
+   Compiles `pele_dart` to native AOT (`dart compile exe`), benchmarks all 33 diagram families (232 gallery diagrams) against `obsidianmd/pele (JS)`, updates [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md), and enforces non-regression against [`tool/benchmark_baseline.json`](tool/benchmark_baseline.json).
 
-6. **Commit Policy**:
+6. **Upstream Sync & Release Workflow**:
+   * Check for new `obsidianmd/pele` releases, commits, or target `mermaid.js` updates with `dart run tool/sync_upstream.dart` (`--check`).
+   * Follow [`docs/UPSTREAM_SYNC.md`](docs/UPSTREAM_SYNC.md) and the workspace skill [`.agents/skills/sync-upstream-pele/SKILL.md`](.agents/skills/sync-upstream-pele/SKILL.md) to stage updates (`--update-to-latest`), port changes 1:1, refresh assets (`--refresh-assets`), verify parity (`tool/verify_against_upstream.dart`), verify benchmarks (`tool/benchmark_suite.dart --update-docs --check-regressions`), and update `UPSTREAM.md` (`--pin`).
+   * Keep [`docs/API_MANUAL.md`](docs/API_MANUAL.md) and [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) updated whenever public options, APIs, supported diagram families, or upstream releases change.
+
+7. **Commit Policy**:
    * Follow **Conventional Commits** (`feat(flowchart): ...`, `fix(layout): ...`, `test(sequence): ...`, `docs(design): ...`).
    * **Strict NO AI References Policy**: Never include `Co-Authored-By`, AI tool names, or agent attributions in commit messages, PR descriptions, or comments.

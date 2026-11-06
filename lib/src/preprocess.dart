@@ -33,6 +33,7 @@ final RegExp _reDirective = RegExp(
 );
 final RegExp _reHtmlTag = RegExp(r'<(\w+)([^>]*)>');
 final RegExp _reAttr = RegExp(r'="([^"]*)"');
+final RegExp _reCrLf = RegExp(r'\r\n?');
 const Set<String> _unsafeKeys = {'__proto__', 'constructor', 'prototype'};
 
 String _removeAll(String text, RegExp re, List<List<Edit>>? steps) {
@@ -40,8 +41,45 @@ String _removeAll(String text, RegExp re, List<List<Edit>>? steps) {
   return text.replaceAll(re, '');
 }
 
+String _stripCommentLines(String text) {
+  final n = text.length;
+  StringBuffer? out;
+  var kept = 0;
+  var wsLineStart = 0;
+  while (wsLineStart < n) {
+    var p = wsLineStart;
+    while (p < n && chars.isSpace(text.codeUnitAt(p))) {
+      p++;
+    }
+    if (p >= n) break;
+    final nl = text.indexOf('\n', p);
+    final lineEnd = nl == -1 ? n : nl;
+    if (p + 2 < lineEnd &&
+        text.codeUnitAt(p) == 0x25 &&
+        text.codeUnitAt(p + 1) == 0x25 &&
+        text.codeUnitAt(p + 2) != 0x7b) {
+      out ??= StringBuffer();
+      if (wsLineStart > kept) {
+        out.write(text.substring(kept, wsLineStart));
+      }
+      final cutEnd = nl == -1 ? n : nl + 1;
+      kept = cutEnd;
+      wsLineStart = cutEnd;
+    } else {
+      if (nl == -1) break;
+      wsLineStart = nl + 1;
+    }
+  }
+  if (out == null) return text;
+  if (kept < n) out.write(text.substring(kept, n));
+  return out.toString();
+}
+
 String cleanupComments(String text, [List<List<Edit>>? steps]) {
   if (text.contains('%%')) {
+    if (steps == null && !text.contains('\r')) {
+      return _stripCommentLines(text).trimLeft();
+    }
     text = _removeAll(text, _reComment, steps);
   }
   final trimmed = text.trimLeft();
@@ -50,15 +88,11 @@ String cleanupComments(String text, [List<List<Edit>>? steps]) {
 }
 
 String normalizeLineBreaks(String text) {
-  return text.contains('\r') ? text.replaceAll(RegExp(r'\r\n?'), '\n') : text;
+  return text.contains('\r') ? text.replaceAll(_reCrLf, '\n') : text;
 }
 
-bool _isLineBreak(String? ch) {
-  return ch == '\n' || ch == '\r';
-}
-
-bool _isSpace(String? ch) {
-  return ch != null && RegExp(r'\s').hasMatch(ch);
+bool _isLineBreakCode(int c) {
+  return c == 0x0a || c == 0x0d;
 }
 
 class _FrontMatter {
@@ -76,29 +110,36 @@ class _FrontMatter {
 _FrontMatter? _matchFrontMatter(String text) {
   var cursor = 0;
   while (cursor < text.length &&
-      _isSpace(text[cursor]) &&
-      !_isLineBreak(text[cursor])) {
+      chars.isSpace(text.codeUnitAt(cursor)) &&
+      !_isLineBreakCode(text.codeUnitAt(cursor))) {
     cursor++;
   }
   final indent = text.substring(0, cursor);
   if (!text.startsWith('---', cursor)) return null;
 
   final openingEnds = <int>[];
-  for (var i = cursor + 3; i < text.length && _isSpace(text[i]); i++) {
-    if (_isLineBreak(text[i])) openingEnds.add(i);
+  for (
+    var i = cursor + 3;
+    i < text.length && chars.isSpace(text.codeUnitAt(i));
+    i++
+  ) {
+    if (_isLineBreakCode(text.codeUnitAt(i))) openingEnds.add(i);
   }
   if (openingEnds.isEmpty) return null;
 
   final fence = '$indent---';
   int closingEnd(int i) {
-    if (!_isLineBreak(text[i]) || !text.startsWith(fence, i + 1)) return -1;
+    if (!_isLineBreakCode(text.codeUnitAt(i)) ||
+        !text.startsWith(fence, i + 1)) {
+      return -1;
+    }
     var last = -1;
     for (
       var j = i + 1 + fence.length;
-      j < text.length && _isSpace(text[j]);
+      j < text.length && chars.isSpace(text.codeUnitAt(j));
       j++
     ) {
-      if (_isLineBreak(text[j])) last = j;
+      if (_isLineBreakCode(text.codeUnitAt(j))) last = j;
     }
     return last;
   }
@@ -196,8 +237,28 @@ String _directives(String text, Config config, List<List<Edit>>? steps) {
 }
 
 Preprocessed preprocess(String source, [List<List<Edit>>? steps]) {
-  var text = normalizeLineBreaks(source);
-  final lastClose = text.contains('<') ? text.lastIndexOf('>') : -1;
+  var hasCr = false;
+  var hasLt = false;
+  var hasEqQuote = false;
+  var hasComment = false;
+  var hasDirective = false;
+  for (var i = 0, n = source.length; i < n; i++) {
+    final c = source.codeUnitAt(i);
+    if (c == 0x0d) {
+      hasCr = true;
+    } else if (c == 0x3c) {
+      hasLt = true;
+    } else if (c == 0x3d && i + 1 < n && source.codeUnitAt(i + 1) == 0x22) {
+      hasEqQuote = true;
+    } else if (c == 0x25 && i + 1 < n && source.codeUnitAt(i + 1) == 0x25) {
+      hasComment = true;
+      if (i + 2 < n && source.codeUnitAt(i + 2) == 0x7b) {
+        hasDirective = true;
+      }
+    }
+  }
+  var text = hasCr ? source.replaceAll(_reCrLf, '\n') : source;
+  final lastClose = hasLt && hasEqQuote ? text.lastIndexOf('>') : -1;
   if (lastClose > 0) {
     text =
         text
@@ -215,7 +276,7 @@ Preprocessed preprocess(String source, [List<List<Edit>>? steps]) {
   String? title;
   var lineOffset = 0;
 
-  final front = text.contains('---') ? _matchFrontMatter(text) : null;
+  final front = _matchFrontMatter(text);
   if (front != null) {
     final body = front.indent.isNotEmpty
         ? front.body
@@ -262,9 +323,12 @@ Preprocessed preprocess(String source, [List<List<Edit>>? steps]) {
     steps?.add([(0, front.length, 0)]);
   }
 
-  text = _directives(text, config, steps);
+  if (hasDirective) {
+    text = _directives(text, config, steps);
+  }
+  final cleaned = hasComment ? _stripCommentLines(text) : text;
   return Preprocessed(
-    text: cleanupComments(text),
+    text: cleaned.trimLeft(),
     title: title,
     config: config,
     withComments: text,
@@ -274,7 +338,6 @@ Preprocessed preprocess(String source, [List<List<Edit>>? steps]) {
 
 final RegExp _reEntity = RegExp(r'#\w+;');
 final RegExp _reInt = RegExp(r'^\+?\d+$');
-final RegExp _reLineBreak = RegExp('[\n\r\u2028\u2029]');
 
 List<Edit>? _recording(List<List<Edit>>? steps) {
   if (steps == null) return null;
@@ -294,8 +357,11 @@ String _dropColorSemicolons(
   final out = StringBuffer();
   var last = 0;
   while (from != -1) {
-    final lbMatch = _reLineBreak.firstMatch(text.substring(from));
-    final lineEnd = lbMatch != null ? from + lbMatch.start : text.length;
+    var lineEnd = from + keyword.length;
+    while (lineEnd < text.length &&
+        !chars.isLineEnd(text.codeUnitAt(lineEnd))) {
+      lineEnd++;
+    }
     var afterColon = false;
     var hash = -1;
     for (var j = from + keyword.length; j < lineEnd; j++) {
@@ -334,10 +400,10 @@ String encodeEntities(String text, [List<List<Edit>>? steps]) {
     steps,
   );
   final edits = _recording(steps);
-  final out = StringBuffer();
+  StringBuffer? out;
   var last = 0;
   for (final m in _reEntity.allMatches(text)) {
-    out.write(text.substring(last, m.start));
+    (out ??= StringBuffer()).write(text.substring(last, m.start));
     final s = m.group(0)!;
     final inner = s.substring(1, s.length - 1);
     final code = '${_reInt.hasMatch(inner) ? 'ﬂ°°' : 'ﬂ°'}$inner¶ß';
@@ -345,6 +411,7 @@ String encodeEntities(String text, [List<List<Edit>>? steps]) {
     out.write(code);
     last = m.end;
   }
+  if (out == null) return text;
   out.write(text.substring(last));
   return out.toString();
 }

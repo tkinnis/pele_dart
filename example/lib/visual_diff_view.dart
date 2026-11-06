@@ -59,6 +59,7 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
   int? _diffPixelCount;
   int? _totalPixelCount;
   bool _computingHeatmap = false;
+  String? _heatmapError;
 
   @override
   void initState() {
@@ -125,9 +126,12 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
 
     setState(() {
       _computingHeatmap = true;
+      _heatmapError = null;
     });
 
     try {
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
       final imgA = await boundaryA.toImage(pixelRatio: 1.5);
       final imgB = await boundaryB.toImage(pixelRatio: 1.5);
       final w = math.min<int>(imgA.width, imgB.width);
@@ -138,7 +142,12 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
       imgB.dispose();
 
       if (bytesA == null || bytesB == null || w == 0 || h == 0) {
-        if (mounted) setState(() => _computingHeatmap = false);
+        if (mounted) {
+          setState(() {
+            _computingHeatmap = false;
+            _heatmapError = 'Could not read RGBA pixel buffers from surfaces.';
+          });
+        }
         return;
       }
 
@@ -207,14 +216,16 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
           _totalPixelCount = totalPixels;
           _matchPercentage = ((totalPixels - diffPixels) / totalPixels) * 100.0;
           _computingHeatmap = false;
+          _heatmapError = null;
         });
       } else {
         decoded.dispose();
       }
-    } catch (_) {
+    } catch (err) {
       if (mounted) {
         setState(() {
           _computingHeatmap = false;
+          _heatmapError = 'Heatmap capture failed: $err';
         });
       }
     }
@@ -239,6 +250,37 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
       );
     }
 
+    final bgColor =
+        widget.isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFFFF);
+    final w = out.width > 0 ? out.width : 600.0;
+    final h = out.height > 0 ? out.height : 400.0;
+
+    // For WebView-backed JS engines (obsidianmd/pele and mermaid.js), render the actual
+    // WebKit-rasterized PNG snapshot so Visual Diff compares Flutter's vector_graphics
+    // rendering against WebKit's native SVG/CSS rendering.
+    if (engine != ComparisonEngine.peleDart && out.webViewPngBytes != null) {
+      return Container(
+        color: bgColor,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(20),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: SizedBox(
+            width: w,
+            height: h,
+            child: Image.memory(
+              out.webViewPngBytes!,
+              width: w,
+              height: h,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+              gaplessPlayback: true,
+            ),
+          ),
+        ),
+      );
+    }
+
     Uint8List? bytes = out.compiledVectorBytes;
     if (bytes == null && out.flattenedSvg.isNotEmpty) {
       try {
@@ -254,11 +296,7 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
       }
     }
 
-    final bgColor =
-        widget.isDark ? const Color(0xFF14171F) : const Color(0xFFFFFFFF);
     if (bytes != null) {
-      final w = out.width > 0 ? out.width : 600.0;
-      final h = out.height > 0 ? out.height : 400.0;
       return Container(
         color: bgColor,
         alignment: Alignment.center,
@@ -301,11 +339,12 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
         Expanded(
           child: Stack(
             children: <Widget>[
-              // Offstage RepaintBoundaries keep identical-size surfaces ready for Pixel-Diff Heatmap capture
+              // Offstage RepaintBoundaries keep identical-size surfaces ready for Pixel-Diff Heatmap capture.
+              // Opacity must be >= 0.01 (alpha >= 3/255) so RenderOpacity does not skip painting children.
               Positioned.fill(
                 child: IgnorePointer(
                   child: Opacity(
-                    opacity: 0.001,
+                    opacity: 0.01,
                     child: Stack(
                       children: <Widget>[
                         Positioned.fill(
@@ -649,13 +688,34 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
         final img = _heatmapImage;
         if (img == null) {
           return Center(
-            child: FilledButton.icon(
-              onPressed: _computeHeatmap,
-              icon: const Icon(Icons.grid_on),
-              label: const Text('Compute Pixel-Diff Heatmap'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                FilledButton.icon(
+                  onPressed: _computeHeatmap,
+                  icon: const Icon(Icons.grid_on),
+                  label: const Text('Compute Pixel-Diff Heatmap'),
+                ),
+                if (_heatmapError != null) ...<Widget>[
+                  const SizedBox(height: 10),
+                  Text(
+                    _heatmapError!,
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
             ),
           );
         }
+        final diffStats =
+            (_diffPixelCount != null &&
+                    _totalPixelCount != null &&
+                    _matchPercentage != null)
+                ? '  •  $_diffPixelCount / $_totalPixelCount px differ (${_matchPercentage!.toStringAsFixed(2)}% match)'
+                : '';
         return Stack(
           children: <Widget>[
             Positioned.fill(
@@ -669,7 +729,7 @@ class _VisualGraphicDiffViewState extends State<VisualGraphicDiffView> {
               left: 16,
               top: 12,
               child: _buildCornerBadge(
-                'Hot Pink = Differing Pixels (±$_pixelTolerance/255)  |  Gray = Matching Pixels',
+                'Hot Pink = Differing Pixels (±$_pixelTolerance/255)  |  Gray = Matching Pixels$diffStats',
                 Colors.pinkAccent,
               ),
             ),

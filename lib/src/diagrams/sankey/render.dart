@@ -185,10 +185,14 @@ Rendered _draw(
       if (style.isNotEmpty) custom[entry.key] = style;
     }
   }
-  String nodeStyle(int i) => custom[model.nodes[i].id] ?? '';
+  String nodeStyle(int i) =>
+      custom.isEmpty ? '' : (custom[model.nodes[i].id] ?? '');
   // Match the whole fill to preserve semicolons in escaped entities.
-  String nodeColor(int i) =>
-      _reFillStyle.firstMatch(nodeStyle(i))?.group(1) ?? seriesColor(i);
+  String nodeColor(int i) {
+    final st = nodeStyle(i);
+    return (st.isNotEmpty ? _reFillStyle.firstMatch(st)?.group(1) : null) ??
+        seriesColor(i);
+  }
 
   // Labels sit beside the bars, on the side that faces the middle of the chart unless that
   // side is crowded.

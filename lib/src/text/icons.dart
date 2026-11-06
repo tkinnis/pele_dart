@@ -2,14 +2,16 @@
 
 import '../types.dart';
 
+const Map<String, String> _emptyFound = <String, String>{};
 IconResolver? _resolver;
-Map<String, String> _found = <String, String>{};
+Map<String, String> _found = _emptyFound;
 
 T withIcons<T>(IconResolver? icons, T Function() run) {
+  if (icons == null && _resolver == null) return run();
   final outer = _resolver;
   final outerFound = _found;
   _resolver = icons;
-  _found = <String, String>{};
+  _found = icons != null ? <String, String>{} : _emptyFound;
   try {
     return run();
   } finally {

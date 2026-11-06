@@ -687,11 +687,10 @@ LayeredResult layered(
   }
 
   final pieceStart = Int32List(m + 1);
-  final pieces = (opt.tracks == true || (EFK != null && opt.straight != true))
-      ? _Pieces()
-      : null;
+  final hasPieces = opt.tracks == true || (EFK != null && opt.straight != true);
+  final pieces = hasPieces ? _Pieces() : _emptyPieces;
   final trackCount = Int32List(maxRank + 1);
-  if (pieces != null) {
+  if (hasPieces) {
     for (var ei = 0; ei < m; ei++) {
       pieceStart[ei] = pieces.from.length;
       if (direct[ei] != 0) continue;
@@ -748,7 +747,7 @@ LayeredResult layered(
       step;
   final gapUnder = Float64List(maxRank + 1);
   for (var r = 0; r < maxRank; r++) {
-    gapUnder[r] = pieces != null
+    gapUnder[r] = hasPieces
         ? usual(r)
         : math.max(
             usual(r),
@@ -782,7 +781,7 @@ LayeredResult layered(
   final leastPitch = opt.tracks == true ? _trackPitch : _levelPitch;
   final mostPitch = opt.tracks == true ? _trackSpread : _levelPitch;
   final below = Int32List(maxRank + 1);
-  if (pieces != null) {
+  if (hasPieces) {
     final room = Float64List(maxRank + 1);
     for (var r = 0; r < maxRank; r++) {
       if (empty != null && empty[r] != 0) continue;
@@ -830,8 +829,8 @@ LayeredResult layered(
   final height = y;
 
   double trackY(int piece, [int? onTrackArg]) {
-    final onTrack = onTrackArg ?? pieces!.track[piece];
-    final r = pieces!.rank[piece];
+    final onTrack = onTrackArg ?? pieces.track[piece];
+    final r = pieces.rank[piece];
     final top = bandBottom[r];
     final bottom = bandTop[below[r]];
     final count = opt.tracks == true ? trackCount[r] : pieces.levels[piece];
@@ -878,7 +877,7 @@ LayeredResult layered(
       first.y + first.h / 2,
     ];
     final d0 = firstDummy[ei];
-    if (pieces != null && pieceStart[ei + 1] > pieceStart[ei]) {
+    if (hasPieces && pieceStart[ei + 1] > pieceStart[ei]) {
       for (var k = pieceStart[ei]; k < pieceStart[ei + 1]; k++) {
         if (pieces.track[k] >= 0 &&
             (opt.tracks == true || pieces.wide[k] == 1)) {
@@ -946,6 +945,8 @@ LayeredResult layered(
 
   return LayeredResult(width: maxX - minX, height: height);
 }
+
+final _Pieces _emptyPieces = _Pieces();
 
 class _Pieces {
   final List<double> from = <double>[];

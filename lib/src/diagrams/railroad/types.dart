@@ -1,5 +1,7 @@
 // Upstream: src/diagrams/railroad/types.ts
 
+import '../../svg/root.dart';
+
 abstract interface class HasParts<T> {
   List<T> get nodeParts;
 }
@@ -125,11 +127,13 @@ class RailroadRule {
 // Which of Mermaid's four grammars the text was written in.
 typedef Notation = String; // 'railroad' | 'ebnf' | 'abnf' | 'peg'
 
-abstract interface class RailroadModel {
+abstract interface class RailroadModel implements Accessible {
   String get type;
   Notation get notation;
   String? get title;
+  @override
   String? get accTitle;
+  @override
   String? get accDescr;
   // Every rule in source order. A name defined twice appears twice.
   List<RailroadRule> get rules;

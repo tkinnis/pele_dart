@@ -248,7 +248,9 @@ String formatPaletteToCss(PelePalette p, {String selector = '.pele'}) {
     ..writeln('  --pele-border: $resolvedBorder;')
     ..writeln('  --pele-accent: $resolvedAccent;')
     ..writeln('  --pele-critical: ${p.critical};')
-    ..writeln('  --pele-radius: $rad;');
+    ..writeln('  --pele-radius: $rad;')
+    ..writeln('  --pele-font: ${p.fontFamily};')
+    ..writeln('  --pele-font-mono: ${p.monoFontFamily};');
   for (var i = 0; i < p.colors.length; i++) {
     sb.writeln('  --pele-series-${i + 1}: ${p.colors[i]};');
   }
@@ -294,32 +296,50 @@ class TimedSample<T> {
   });
 }
 
-/// Synchronous port of `timed()` from `obsidianmd/pele/website/src/lib/timing.ts`.
+({T result, double ms}) _measureSyncBatch<T>(T Function() run) {
+  var batch = 1;
+  final sw = Stopwatch();
+  while (true) {
+    sw
+      ..reset()
+      ..start();
+    late T res;
+    for (var i = 0; i < batch; i++) {
+      res = run();
+    }
+    sw.stop();
+    final elapsedMs = sw.elapsedMicroseconds / 1000.0;
+    if (elapsedMs >= 12.0 || batch >= 512) {
+      return (result: res, ms: elapsedMs / batch);
+    }
+    batch *= 2;
+  }
+}
+
+/// Synchronous port of `timed()` from `obsidianmd/pele/website/src/lib/timing.ts`,
+/// using the same adaptive batching (`_measureSyncBatch`) as `timedSync` in the
+/// WebView JS harness for a true apples-to-apples comparison.
 ///
-/// Runs [run] up to [maxRuns] times (default `7`) within [budgetMs] (default `60.0` ms)
-/// and returns the median (`p50`) duration so JIT warmup and single-run jitter do not
-/// skew engine comparisons.
+/// Runs [run] in adaptive batches (`1, 2, 4, ..., 512` until a batch spans `>= 12.0 ms`)
+/// up to [maxRuns] times (default `7`) within [budgetMs] (default `80.0` ms)
+/// and returns the median (`p50`) per-render duration.
 TimedSample<T> timedRender<T>(
   T Function() run, {
   int maxRuns = 7,
-  double budgetMs = 60.0,
+  double budgetMs = 80.0,
 }) {
   final times = <double>[];
   final totalSw = Stopwatch()..start();
 
-  final iterSw = Stopwatch()..start();
-  var result = run();
-  iterSw.stop();
-  times.add(iterSw.elapsedMicroseconds / 1000.0);
+  final s0 = _measureSyncBatch(run);
+  var result = s0.result;
+  times.add(s0.ms);
 
   while (times.length < maxRuns &&
       (totalSw.elapsedMicroseconds / 1000.0) < budgetMs) {
-    iterSw
-      ..reset()
-      ..start();
-    result = run();
-    iterSw.stop();
-    times.add(iterSw.elapsedMicroseconds / 1000.0);
+    final sIter = _measureSyncBatch(run);
+    result = sIter.result;
+    times.add(sIter.ms);
   }
   totalSw.stop();
 
@@ -355,6 +375,11 @@ class EngineRenderOutput {
   /// Pre-compiled binary vector graphics bytes for native Flutter canvas rendering.
   final Uint8List? compiledVectorBytes;
 
+  /// Native WebKit (`WKWebView`) rasterized PNG snapshot of the rendered SVG,
+  /// used in Visual Diff so `obsidianmd/pele (JS)` and `mermaid.js` reflect
+  /// WebKit's actual SVG/CSS rendering rather than `pele_dart`'s vector compiler.
+  final Uint8List? webViewPngBytes;
+
   /// Fair apples-to-apples **Pure SVG Generation** median (`p50`) time in milliseconds:
   /// `Mermaid text -> SVG string` across all 3 engines (using `timedRender`).
   final double svgGenMs;
@@ -383,6 +408,7 @@ class EngineRenderOutput {
     required this.flattenedSvg,
     required this.cssVarsSvg,
     this.compiledVectorBytes,
+    this.webViewPngBytes,
     required this.svgGenMs,
     this.minSvgGenMs = 0.0,
     this.sampleRuns = 1,
@@ -481,7 +507,8 @@ EngineRenderOutput renderWithPeleDart(
       outputMode: SvgOutputMode.cssVariables,
     );
 
-    // 1. Fair apples-to-apples timing: pure Mermaid -> CSS-Variables SVG (matching Pele.render(source)).
+    // 1. Warm up outside the timer, then measure pure Mermaid -> CSS-Variables SVG.
+    render(source, options);
     final timed = timedRender<RenderResult>(
       () => render(source, options),
       maxRuns: maxRuns,
@@ -662,6 +689,7 @@ class _WebViewEngineCanvasState extends State<WebViewEngineCanvas> {
   }
 
   Future<void> _initWebView() async {
+    if (WebViewPlatform.instance == null) return;
     try {
       final chunks = await _loadEngineChunks(widget.engine);
       if (!mounted) return;
@@ -741,14 +769,13 @@ class _WebViewEngineCanvasState extends State<WebViewEngineCanvas> {
     height: 100%;
     background: #ffffff;
     color: #1f1f1f;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: auto;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: block;
+    position: relative;
+    overflow: hidden;
+    font-family: Helvetica, Arial, sans-serif;
   }
   body.dark-mode {
-    background: #14171f;
+    background: #1e1e1e;
     color: #e1e4e8;
     color-scheme: dark;
     --pele-bg: #1e1e1e;
@@ -769,12 +796,28 @@ class _WebViewEngineCanvasState extends State<WebViewEngineCanvas> {
     height: 100%;
     padding: 16px;
     box-sizing: border-box;
+    overflow: hidden;
   }
   #stage svg {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto !important;
-    height: auto !important;
+    display: block;
+    flex-shrink: 0;
+  }
+  #scratch {
+    position: fixed !important;
+    left: -10000px !important;
+    top: 0 !important;
+    width: 784px !important;
+    height: 600px !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+  }
+  body > :not(#stage) {
+    position: fixed !important;
+    left: -10000px !important;
+    top: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 </style>
 <style id="custom-pele-style"></style>
@@ -797,9 +840,65 @@ class _WebViewEngineCanvasState extends State<WebViewEngineCanvas> {
 </head>
 <body>
 <div id="stage"></div>
+<div id="scratch" aria-hidden="true"></div>
 <script>
 let mermaidSeq = 0;
+let activeRunId = 0;
 const warmedTypes = new Set();
+
+function parseSvgIntrinsicSize(svgEl) {
+  let w = 0;
+  let h = 0;
+  const vbAttr = svgEl.getAttribute('viewBox');
+  if (vbAttr) {
+    const parts = vbAttr.trim().split(/[\\s,]+/);
+    if (parts.length === 4) {
+      w = parseFloat(parts[2]) || 0;
+      h = parseFloat(parts[3]) || 0;
+    }
+  }
+  if (w <= 0) {
+    const rawW = svgEl.getAttribute('width') || '';
+    if (!rawW.includes('%')) w = parseFloat(rawW) || 0;
+  }
+  if (h <= 0) {
+    const rawH = svgEl.getAttribute('height') || '';
+    if (!rawH.includes('%')) h = parseFloat(rawH) || 0;
+  }
+  if (w <= 0) w = 600;
+  if (h <= 0) h = 400;
+  return { w, h };
+}
+
+function fitStageSvg() {
+  const stage = document.getElementById('stage');
+  const svgEl = stage ? stage.querySelector('svg') : null;
+  if (!stage || !svgEl) return;
+  let w = parseFloat(svgEl.dataset.intrinsicWidth) || 0;
+  let h = parseFloat(svgEl.dataset.intrinsicHeight) || 0;
+  if (w <= 0 || h <= 0) {
+    const parsed = parseSvgIntrinsicSize(svgEl);
+    w = parsed.w;
+    h = parsed.h;
+    svgEl.dataset.intrinsicWidth = String(w);
+    svgEl.dataset.intrinsicHeight = String(h);
+    svgEl.setAttribute('width', String(w));
+    svgEl.setAttribute('height', String(h));
+  }
+  const availW = Math.max(1, stage.clientWidth - 32);
+  const availH = Math.max(1, stage.clientHeight - 32);
+  const scale = Math.min(1.0, availW / w, availH / h);
+  svgEl.style.maxWidth = 'none';
+  svgEl.style.maxHeight = 'none';
+  svgEl.style.width = (w * scale) + 'px';
+  svgEl.style.height = (h * scale) + 'px';
+}
+
+if (typeof ResizeObserver !== 'undefined') {
+  new ResizeObserver(() => fitStageSvg()).observe(document.getElementById('stage'));
+} else {
+  window.addEventListener('resize', fitStageSvg);
+}
 
 // Port of website/src/lib/timing.ts from https://pele.run/playground,
 // with adaptive batching to overcome WKWebView's 1.0 ms performance.now() quantization.
@@ -812,7 +911,7 @@ function measureSyncBatch(run) {
       res = run();
     }
     const elapsed = performance.now() - t0;
-    if (elapsed >= 6.0 || batch >= 64) {
+    if (elapsed >= 12.0 || batch >= 512) {
       return { result: res, ms: elapsed / batch };
     }
     batch *= 2;
@@ -839,13 +938,17 @@ function timedSync(run, maxRuns, budgetMs) {
   };
 }
 
-async function timedAsync(run, maxRuns, budgetMs) {
+async function timedAsync(run, maxRuns, budgetMs, runId) {
   const times = [];
   const started = performance.now();
   const r0 = performance.now();
   let result = await run();
   times.push(performance.now() - r0);
-  while (times.length < maxRuns && (performance.now() - started) < budgetMs) {
+  while (
+    times.length < maxRuns &&
+    (performance.now() - started) < budgetMs &&
+    runId === activeRunId
+  ) {
     const tIter = performance.now();
     result = await run();
     times.push(performance.now() - tIter);
@@ -860,6 +963,7 @@ async function timedAsync(run, maxRuns, budgetMs) {
 }
 
 async function runEngine(source, isDark, maxRuns, budgetMs, customCss, bgHex) {
+  const runId = ++activeRunId;
   document.body.className = isDark ? 'dark-mode' : '';
   if (bgHex) {
     document.body.style.background = bgHex;
@@ -893,19 +997,24 @@ async function runEngine(source, isDark, maxRuns, budgetMs, customCss, bgHex) {
         suppressErrorRendering: true
       });
       // 2. Warm up diagram type loader on first use outside the timer.
+      const scratch = document.getElementById('scratch');
       const headerKey = (source.trim().split(/\\s+/)[0] || 'default') + ':' + (isDark ? 'dark' : 'light');
       if (!warmedTypes.has(headerKey)) {
         warmedTypes.add(headerKey);
         try {
-          await mermaid.render('m_warmup_' + (++mermaidSeq), source);
+          await mermaid.render('m_warmup_' + (++mermaidSeq), source, scratch || undefined);
         } catch (_) {}
       }
+      if (runId !== activeRunId) return;
       // 3. Timed render(s) within budget.
       const timed = await timedAsync(
-        () => mermaid.render('m_run_' + (++mermaidSeq), source),
+        () => mermaid.render('m_run_' + (++mermaidSeq), source, scratch || undefined),
         Math.min(maxRuns, 5),
-        budgetMs
+        budgetMs,
+        runId
       );
+      if (scratch) scratch.innerHTML = '';
+      if (runId !== activeRunId) return;
       svg = timed.result.svg;
       medianMs = timed.medianMs;
       minMs = timed.minMs;
@@ -915,18 +1024,26 @@ async function runEngine(source, isDark, maxRuns, budgetMs, customCss, bgHex) {
     // 4. Measure DOM insertion + synchronous layout flush separately.
     const tDom = performance.now();
     stage.innerHTML = svg;
+    fitStageSvg();
     stage.getBoundingClientRect();
     const displayPrepMs = performance.now() - tDom;
+
+    // 5. Capture WebKit's native SVG/CSS rendering to a 2x PNG outside the benchmark timer
+    // so Visual Diff compares pele_dart's Flutter vector canvas against WKWebView's real output.
+    const pngBase64 = await rasterizeSvgToPng(stage.querySelector('svg'), customCss);
+    if (runId !== activeRunId) return;
 
     EngineChannel.postMessage(JSON.stringify({
       ok: true,
       svg: svg,
+      pngBase64: pngBase64,
       svgGenMs: medianMs,
       minSvgGenMs: minMs,
       sampleRuns: runs,
       displayPrepMs: displayPrepMs
     }));
   } catch (err) {
+    if (runId !== activeRunId) return;
     stage.innerHTML = '<pre style="color:#ef4444;font-size:12px;white-space:pre-wrap;padding:12px;">' +
       String(err && err.message ? err.message : err) + '</pre>';
     EngineChannel.postMessage(JSON.stringify({
@@ -937,6 +1054,55 @@ async function runEngine(source, isDark, maxRuns, budgetMs, customCss, bgHex) {
       sampleRuns: 1,
       displayPrepMs: 0
     }));
+  }
+}
+
+async function rasterizeSvgToPng(svgEl, customCss) {
+  if (!svgEl) return null;
+  try {
+    const clone = svgEl.cloneNode(true);
+    if (!clone.getAttribute('xmlns')) {
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    }
+    const parsed = parseSvgIntrinsicSize(clone);
+    const w = parsed.w;
+    const h = parsed.h;
+    clone.setAttribute('width', String(w));
+    clone.setAttribute('height', String(h));
+    if (clone.style) {
+      clone.style.width = '';
+      clone.style.height = '';
+      clone.style.maxWidth = '';
+      clone.style.maxHeight = '';
+    }
+
+    if (customCss) {
+      const styleNode = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+      styleNode.textContent = customCss.replace(/body\\s*,/g, ':root, svg,');
+      clone.insertBefore(styleNode, clone.firstChild);
+    }
+
+    const xml = new XMLSerializer().serializeToString(clone);
+    const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+    const img = new Image();
+    const loaded = await new Promise((resolve) => {
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = dataUrl;
+    });
+    if (!loaded) return null;
+
+    const scale = Math.min(2.0, Math.max(1.0, 2400 / Math.max(w, h, 1)));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(w * scale));
+    canvas.height = Math.max(1, Math.round(h * scale));
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const pngUrl = canvas.toDataURL('image/png');
+    const commaIdx = pngUrl.indexOf(',');
+    return commaIdx >= 0 ? pngUrl.substring(commaIdx + 1) : null;
+  } catch (_) {
+    return null;
   }
 }
 </script>
@@ -980,6 +1146,15 @@ async function runEngine(source, isDark, maxRuns, budgetMs, customCss, bgHex) {
 
       if (ok) {
         final svg = (map['svg'] as String?) ?? '';
+        final pngBase64 = map['pngBase64'] as String?;
+        Uint8List? webViewPngBytes;
+        if (pngBase64 != null && pngBase64.isNotEmpty) {
+          try {
+            webViewPngBytes = base64Decode(pngBase64);
+          } catch (_) {
+            webViewPngBytes = null;
+          }
+        }
         final (w, h) = parseSvgDimensions(svg);
         final palette =
             widget.customPalette ??
@@ -998,6 +1173,7 @@ async function runEngine(source, isDark, maxRuns, budgetMs, customCss, bgHex) {
             flattenedSvg: flattened,
             cssVarsSvg: svg,
             compiledVectorBytes: compiledBytes,
+            webViewPngBytes: webViewPngBytes,
             svgGenMs: svgGenMs,
             minSvgGenMs: minSvgGenMs,
             sampleRuns: sampleRuns,

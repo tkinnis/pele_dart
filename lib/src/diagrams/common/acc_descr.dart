@@ -9,7 +9,15 @@ final RegExp _reHead = RegExp(
 Scanner _scanner() {
   var unclosed = false;
   return (src, at, _) {
-    final m = _reHead.matchAsPrefix(src, at);
+    final n = src.length;
+    var q = at;
+    while (q < n) {
+      final c = src.codeUnitAt(q);
+      if (c != 32 && c != 9) break;
+      q++;
+    }
+    if (!src.startsWith('accDescr', q)) return -1;
+    final m = _reHead.matchAsPrefix(src, q);
     if (m == null) return -1;
     final end = m.end;
     if (m.group(1) == null) return end;

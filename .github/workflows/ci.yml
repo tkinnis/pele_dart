@@ -29,7 +29,7 @@ jobs:
           sdk: ${{ matrix.sdk }}
 
       - name: Install dependencies
-        run: dart pub get
+        run: dart pub get --no-example
 
       - name: Verify code formatting
         run: dart format --output=none --set-exit-if-changed lib test tool example/lib example/main.dart

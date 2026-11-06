@@ -19,9 +19,9 @@ void _assign(Map<String, YamlValue> target, String key, YamlValue value) {
 
 class _Reader {
   _Reader(String src)
-    : lines =
-          (src.contains('\r') ? src.replaceAll(RegExp(r'\r\n?'), '\n') : src)
-              .split('\n');
+    : lines = (src.contains('\r') ? src.replaceAll(_reCrLf, '\n') : src).split(
+        '\n',
+      );
 
   final List<String> lines;
   int i = 0;
@@ -29,7 +29,7 @@ class _Reader {
   void skipBlank() {
     while (i < lines.length) {
       final t = lines[i].trim();
-      if (t.isNotEmpty && t[0] != '#' && t != '---') break;
+      if (t.isNotEmpty && t.codeUnitAt(0) != 0x23 && t != '---') break;
       i++;
     }
   }
@@ -37,16 +37,17 @@ class _Reader {
   int indent() {
     final line = lines[i];
     var k = 0;
-    while (k < line.length && line[k] == ' ') {
+    while (k < line.length && line.codeUnitAt(k) == 0x20) {
       k++;
     }
-    if (k < line.length && line[k] == '\t') {
+    if (k < line.length && line.codeUnitAt(k) == 0x09) {
       throw StateError('YAML: tabs are not allowed for indentation');
     }
     return k;
   }
 }
 
+final RegExp _reCrLf = RegExp(r'\r\n?');
 final RegExp _reInt = RegExp(r'^[-+]?(?:0|[1-9][0-9]*)$');
 final RegExp _reHex = RegExp(r'^[-+]?0x[0-9a-fA-F]+$');
 final RegExp _reOct = RegExp(r'^[-+]?0o[0-7]+$');
@@ -54,25 +55,57 @@ final RegExp _reBin = RegExp(r'^[-+]?0b[01]+$');
 final RegExp _reFloat = RegExp(
   r'^[-+]?(?:[0-9][0-9]*(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?$',
 );
-final RegExp _reKeyStart = RegExp(r'''[\s#:,[\]{}&*!|>'"%@`]''');
+final RegExp _reInf = RegExp(r'^[-+]?\.(?:inf|Inf|INF)$');
+final RegExp _reNan = RegExp(r'^\.(?:nan|NaN|NAN)$');
+final RegExp _reNewlines = RegExp(r'\n+');
+final RegExp _reEscapedNewline = RegExp(r'\\\n[ \t]*');
+final RegExp _reFlowStopAfterColon = RegExp(r'[\s,[\]{}]');
+final RegExp _reDigit1To9 = RegExp(r'[1-9]');
+final RegExp _reLeadingSpaceOrTab = RegExp(r'^[ \t]');
+final RegExp _reBlockScalarHeader = RegExp(r'^[|>][-+0-9]*\s*(?:#.*)?$');
 
-bool _isBlank(String? ch) {
-  return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
+bool _isBlankCode(int c) {
+  return c == 0x20 || c == 0x09 || c == 0x0a || c == 0x0d;
+}
+
+bool _isKeyStartBlocked(int c) {
+  return _isBlankCode(c) ||
+      c == 0x23 ||
+      c == 0x3a ||
+      c == 0x2c ||
+      c == 0x5b ||
+      c == 0x5d ||
+      c == 0x7b ||
+      c == 0x7d ||
+      c == 0x26 ||
+      c == 0x2a ||
+      c == 0x21 ||
+      c == 0x7c ||
+      c == 0x3e ||
+      c == 0x27 ||
+      c == 0x22 ||
+      c == 0x25 ||
+      c == 0x40 ||
+      c == 0x60;
 }
 
 ({String key, int length})? _splitKey(String line) {
-  final first = charAtOrNull(line, 0);
+  final n = line.length;
+  if (n == 0) return null;
+  final first = line.codeUnitAt(0);
   int end;
   int colon;
-  if (first == '"' || first == "'") {
+  if (first == 0x22 || first == 0x27) {
     var i = 1;
     while (true) {
-      if (i >= line.length) return null;
-      final c = line[i];
-      if (first == '"' && c == r'\') {
+      if (i >= n) return null;
+      final c = line.codeUnitAt(i);
+      if (first == 0x22 && c == 0x5c) {
         i += 2;
       } else if (c == first) {
-        if (first == '"' || charAtOrNull(line, i + 1) != "'") break;
+        if (first == 0x22 || i + 1 >= n || line.codeUnitAt(i + 1) != 0x27) {
+          break;
+        }
         i += 2;
       } else {
         i++;
@@ -80,34 +113,36 @@ bool _isBlank(String? ch) {
     }
     end = i + 1;
     colon = end;
-    while (_isBlank(charAtOrNull(line, colon))) {
+    while (colon < n && _isBlankCode(line.codeUnitAt(colon))) {
       colon++;
     }
-    if (charAtOrNull(line, colon) != ':') return null;
+    if (colon >= n || line.codeUnitAt(colon) != 0x3a) return null;
   } else {
-    if (first == null || _reKeyStart.hasMatch(first)) return null;
-    if (first == '-' &&
-        (line.length < 2 ||
-            _isBlank(line[1]) ||
-            line[1] == ':' ||
-            line[1] == '#')) {
-      return null;
+    if (_isKeyStartBlocked(first)) return null;
+    if (first == 0x2d) {
+      if (n < 2) return null;
+      final second = line.codeUnitAt(1);
+      if (_isBlankCode(second) || second == 0x3a || second == 0x23) {
+        return null;
+      }
     }
     colon = 1;
-    while (colon < line.length && line[colon] != ':' && line[colon] != '#') {
+    while (colon < n) {
+      final c = line.codeUnitAt(colon);
+      if (c == 0x3a || c == 0x23) break;
       colon++;
     }
-    if (charAtOrNull(line, colon) != ':') return null;
+    if (colon >= n || line.codeUnitAt(colon) != 0x3a) return null;
     end = colon;
-    while (end > 0 && _isBlank(charAtOrNull(line, end - 1))) {
+    while (end > 0 && _isBlankCode(line.codeUnitAt(end - 1))) {
       end--;
     }
   }
   var length = colon + 1;
-  if (length < line.length && !_isBlank(charAtOrNull(line, length))) {
+  if (length < n && !_isBlankCode(line.codeUnitAt(length))) {
     return null;
   }
-  while (_isBlank(charAtOrNull(line, length))) {
+  while (length < n && _isBlankCode(line.codeUnitAt(length))) {
     length++;
   }
   return (key: line.substring(0, end), length: length);
@@ -142,10 +177,10 @@ YamlValue _scalar(String raw) {
     final v = int.parse(body.substring(2), radix: radix);
     return neg ? -v : v;
   }
-  if (RegExp(r'^[-+]?\.(?:inf|Inf|INF)$').hasMatch(s)) {
+  if (_reInf.hasMatch(s)) {
     return s[0] == '-' ? double.negativeInfinity : double.infinity;
   }
-  if (RegExp(r'^\.(?:nan|NaN|NAN)$').hasMatch(s)) return double.nan;
+  if (_reNan.hasMatch(s)) return double.nan;
   return s;
 }
 
@@ -194,7 +229,7 @@ String _fold(String text) {
   return lines
       .join('\n')
       .replaceAllMapped(
-        RegExp(r'\n+'),
+        _reNewlines,
         (m) => m[0]!.length == 1 ? ' ' : '\n' * (m[0]!.length - 1),
       );
 }
@@ -202,18 +237,19 @@ String _fold(String text) {
 String _unquoteDouble(String body) {
   if (!body.contains(r'\')) return _fold(body);
   final out = StringBuffer();
-  final s = _fold(body.replaceAll(RegExp(r'\\\n[ \t]*'), ''));
-  for (var i = 0; i < s.length; i++) {
-    final ch = s[i];
-    if (ch != r'\') {
-      out.write(ch);
-      continue;
+  final s = _fold(body.replaceAll(_reEscapedNewline, ''));
+  final n = s.length;
+  var chunkStart = 0;
+  for (var i = 0; i < n; i++) {
+    if (s.codeUnitAt(i) != 0x5c) continue;
+    if (i > chunkStart) {
+      out.write(s.substring(chunkStart, i));
     }
     i++;
     final e = charAtOrNull(s, i);
     if (e == 'x' || e == 'u' || e == 'U') {
       final len = e == 'x' ? 2 : (e == 'u' ? 4 : 8);
-      if (i + 1 + len > s.length) {
+      if (i + 1 + len > n) {
         throw StateError('YAML: unknown escape sequence');
       }
       final code = int.tryParse(s.substring(i + 1, i + 1 + len), radix: 16);
@@ -225,22 +261,27 @@ String _unquoteDouble(String body) {
     } else {
       throw StateError('YAML: unknown escape sequence');
     }
+    chunkStart = i + 1;
+  }
+  if (n > chunkStart) {
+    out.write(s.substring(chunkStart, n));
   }
   return out.toString();
 }
 
 int _skip(String s, int pos, bool commas) {
-  while (pos < s.length) {
-    final c = s[pos];
-    if (c == ' ' ||
-        c == '\n' ||
-        c == '\t' ||
-        c == '\r' ||
-        (commas && c == ',')) {
+  final n = s.length;
+  while (pos < n) {
+    final c = s.codeUnitAt(pos);
+    if (c == 0x20 ||
+        c == 0x0a ||
+        c == 0x09 ||
+        c == 0x0d ||
+        (commas && c == 0x2c)) {
       pos++;
-    } else if (c == '#' && (pos == 0 || RegExp(r'\s').hasMatch(s[pos - 1]))) {
+    } else if (c == 0x23 && (pos == 0 || _isBlankCode(s.codeUnitAt(pos - 1)))) {
       final nl = s.indexOf('\n', pos);
-      pos = nl == -1 ? s.length : nl;
+      pos = nl == -1 ? n : nl;
     } else {
       break;
     }
@@ -310,8 +351,8 @@ void _entryStart(String ch, bool separated) {
   }
   if (ch == '"') {
     var end = pos + 1;
-    while (end < s.length && s[end] != '"') {
-      end += s[end] == r'\' ? 2 : 1;
+    while (end < s.length && s.codeUnitAt(end) != 0x22) {
+      end += s.codeUnitAt(end) == 0x5c ? 2 : 1;
     }
     if (end >= s.length) {
       throw const _Incomplete(
@@ -323,8 +364,8 @@ void _entryStart(String ch, bool separated) {
   if (ch == "'") {
     var end = pos + 1;
     while (end < s.length) {
-      if (s[end] == "'") {
-        if (charAtOrNull(s, end + 1) != "'") break;
+      if (s.codeUnitAt(end) == 0x27) {
+        if (end + 1 >= s.length || s.codeUnitAt(end + 1) != 0x27) break;
         end++;
       }
       end++;
@@ -342,10 +383,10 @@ void _entryStart(String ch, bool separated) {
     if (stops.contains(c) &&
         (c != ':' ||
             end + 1 >= s.length ||
-            RegExp(r'[\s,[\]{}]').hasMatch(s[end + 1]))) {
+            _reFlowStopAfterColon.hasMatch(s[end + 1]))) {
       break;
     }
-    if (c == '#' && end > pos && RegExp(r'\s').hasMatch(s[end - 1])) {
+    if (c == '#' && end > pos && _isBlankCode(s.codeUnitAt(end - 1))) {
       final nl = s.indexOf('\n', end);
       return (
         _scalar(_fold(s.substring(pos, end).trim())),
@@ -358,18 +399,23 @@ void _entryStart(String ch, bool separated) {
 }
 
 String _stripComment(String s) {
-  var quote = '';
-  for (var i = 0; i < s.length; i++) {
-    final c = s[i];
-    if (quote.isNotEmpty) {
-      if (c == r'\' && quote == '"') {
+  if (!s.contains('#')) return s;
+  var quote = 0;
+  final n = s.length;
+  for (var i = 0; i < n; i++) {
+    final c = s.codeUnitAt(i);
+    if (quote != 0) {
+      if (c == 0x5c && quote == 0x22) {
         i++;
       } else if (c == quote) {
-        quote = '';
+        quote = 0;
       }
-    } else if (c == '"' || c == "'") {
+    } else if (c == 0x22 || c == 0x27) {
       quote = c;
-    } else if (c == '#' && (i == 0 || s[i - 1] == ' ' || s[i - 1] == '\t')) {
+    } else if (c == 0x23 &&
+        (i == 0 ||
+            s.codeUnitAt(i - 1) == 0x20 ||
+            s.codeUnitAt(i - 1) == 0x09)) {
       return s.substring(0, i);
     }
   }
@@ -379,7 +425,7 @@ String _stripComment(String s) {
 String _blockScalar(_Reader r, String header, int parentIndent) {
   final folded = header.startsWith('>');
   final chomp = header.contains('-') ? '-' : (header.contains('+') ? '+' : '');
-  final explicit = RegExp(r'[1-9]').firstMatch(header);
+  final explicit = _reDigit1To9.firstMatch(header);
   var indent = explicit != null ? parentIndent + int.parse(explicit[0]!) : -1;
   final out = <String>[];
   while (r.i < r.lines.length) {
@@ -414,7 +460,8 @@ String _blockScalar(_Reader r, String header, int parentIndent) {
           buf.write('\n');
         } else if (prev.isNotEmpty) {
           buf.write(
-            RegExp(r'^[ \t]').hasMatch(prev) || RegExp(r'^[ \t]').hasMatch(cur)
+            _reLeadingSpaceOrTab.hasMatch(prev) ||
+                    _reLeadingSpaceOrTab.hasMatch(cur)
                 ? '\n'
                 : ' ',
           );
@@ -432,10 +479,25 @@ String _blockScalar(_Reader r, String header, int parentIndent) {
   return '$text\n';
 }
 
+String _parseKey(String rawKey) {
+  if (rawKey.isNotEmpty) {
+    final c = rawKey.codeUnitAt(0);
+    if (c != 0x7b &&
+        c != 0x5b &&
+        c != 0x22 &&
+        c != 0x27 &&
+        !rawKey.contains('#') &&
+        !rawKey.contains('\n')) {
+      return '${_scalar(rawKey) ?? 'null'}';
+    }
+  }
+  return '${_flow(rawKey, 0, '').$1 ?? 'null'}';
+}
+
 YamlValue _inlineValue(_Reader r, String rest, int indent) {
   final first = charAtOrNull(rest, 0);
   if (first == '|' || first == '>') {
-    if (RegExp(r'^[|>][-+0-9]*\s*(?:#.*)?$').hasMatch(rest)) {
+    if (_reBlockScalarHeader.hasMatch(rest)) {
       return _blockScalar(r, rest, indent);
     }
   }
@@ -443,6 +505,34 @@ YamlValue _inlineValue(_Reader r, String rest, int indent) {
     final start = r.i;
     var text = rest;
     var taken = 0;
+    if (first == '"') {
+      var scan = 1;
+      while (true) {
+        while (scan < text.length && text.codeUnitAt(scan) != 0x22) {
+          scan += text.codeUnitAt(scan) == 0x5c ? 2 : 1;
+        }
+        if (scan < text.length || start + taken >= r.lines.length) break;
+        text += '\n${r.lines[start + taken]}';
+        taken++;
+      }
+    } else if (first == "'") {
+      var scan = 1;
+      while (true) {
+        while (scan < text.length) {
+          if (text.codeUnitAt(scan) == 0x27) {
+            if (scan + 1 < text.length && text.codeUnitAt(scan + 1) == 0x27) {
+              scan += 2;
+              continue;
+            }
+            break;
+          }
+          scan++;
+        }
+        if (scan < text.length || start + taken >= r.lines.length) break;
+        text += '\n${r.lines[start + taken]}';
+        taken++;
+      }
+    }
     var batch = 1;
     while (true) {
       try {
@@ -550,7 +640,7 @@ YamlValue _block(_Reader r, int minIndent, [int depth = 0]) {
     if (km == null) {
       throw StateError('YAML: can not read a block mapping entry');
     }
-    final key = '${_flow(km.key, 0, '').$1 ?? 'null'}';
+    final key = _parseKey(km.key);
     final rest = cur.substring(km.length);
     r.i++;
     if (_stripComment(rest).trim().isEmpty) {

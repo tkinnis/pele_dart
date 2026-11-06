@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pele_dart/pele_dart.dart';
@@ -63,7 +64,7 @@ class _PeleDartComparisonAppState extends State<PeleDartComparisonApp> {
       brightness: _isDark ? Brightness.dark : Brightness.light,
     );
     return MaterialApp(
-      title: 'pele_dart — 3-Way Comparison, Diff Studio & Playground',
+      title: 'Pele Studio — 3-Way Comparison, Diff Studio & Playground',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorScheme: scheme, useMaterial3: true),
       home: ComparisonStudioScreen(
@@ -170,6 +171,15 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
 
   late final TextEditingController _editorController;
   late final TextEditingController _styleCssController;
+  late final TextEditingController _searchController;
+  final FocusNode _browserFocusNode = FocusNode(debugLabel: 'DiagramBrowser');
+  final FocusNode _searchFocusNode = FocusNode(debugLabel: 'DiagramSearch');
+  final FocusNode _editorFocusNode = FocusNode(debugLabel: 'MermaidEditor');
+  final FocusNode _styleCssFocusNode = FocusNode(debugLabel: 'StyleCssEditor');
+  final ScrollController _sidebarScrollController = ScrollController();
+  final ScrollController _subSampleScrollController = ScrollController();
+  final Map<String, GlobalKey> _sidebarRowKeys = <String, GlobalKey>{};
+  final Map<String, GlobalKey> _subSamplePillKeys = <String, GlobalKey>{};
   String _activeSource =
       gallerySamples.first.playgroundSamples.isNotEmpty
           ? gallerySamples.first.playgroundSamples.first.source
@@ -226,6 +236,8 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
     _styleCssController = TextEditingController(
       text: formatPaletteToCss(_activePalette),
     );
+    _searchController = TextEditingController();
+    HardwareKeyboard.instance.addHandler(_handleHardwareKeyEvent);
     _runPeleDartEngine();
   }
 
@@ -246,12 +258,291 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
     _debounceTimer?.cancel();
     _cssDebounceTimer?.cancel();
     _editorController.dispose();
     _styleCssController.dispose();
+    _searchController.dispose();
+    _browserFocusNode.dispose();
+    _searchFocusNode.dispose();
+    _editorFocusNode.dispose();
+    _styleCssFocusNode.dispose();
+    _sidebarScrollController.dispose();
+    _subSampleScrollController.dispose();
     _zoomController.dispose();
     super.dispose();
+  }
+
+  GlobalKey _sidebarRowKey(String key) =>
+      _sidebarRowKeys.putIfAbsent(key, () => GlobalKey());
+
+  GlobalKey _subSamplePillKey(String key) =>
+      _subSamplePillKeys.putIfAbsent(key, () => GlobalKey());
+
+  List<DiagramSample> get _filteredFamilies {
+    return gallerySamples.where((s) {
+      if (_tierFilter != null && s.tier != _tierFilter) return false;
+      if (_searchQuery.isEmpty) return true;
+      final q = _searchQuery.toLowerCase();
+      final matchesFile = s.playgroundSamples.any(
+        (item) =>
+            item.fileName.toLowerCase().contains(q) ||
+            item.label.toLowerCase().contains(q),
+      );
+      return s.title.toLowerCase().contains(q) ||
+          s.diagramType.toLowerCase().contains(q) ||
+          s.description.toLowerCase().contains(q) ||
+          matchesFile;
+    }).toList();
+  }
+
+  List<(DiagramSample, int)> get _filteredDiagramEntries {
+    final entries = <(DiagramSample, int)>[];
+    final q = _searchQuery.toLowerCase();
+    for (final sample in _filteredFamilies) {
+      if (sample.playgroundSamples.isEmpty) {
+        entries.add((sample, 0));
+        continue;
+      }
+      final familyTextMatches =
+          q.isEmpty ||
+          sample.title.toLowerCase().contains(q) ||
+          sample.diagramType.toLowerCase().contains(q) ||
+          sample.description.toLowerCase().contains(q);
+      for (var i = 0; i < sample.playgroundSamples.length; i++) {
+        final item = sample.playgroundSamples[i];
+        if (familyTextMatches ||
+            item.fileName.toLowerCase().contains(q) ||
+            item.label.toLowerCase().contains(q)) {
+          entries.add((sample, i));
+        }
+      }
+    }
+    return entries;
+  }
+
+  void _focusBrowserIfNeeded() {
+    if (!_searchFocusNode.hasFocus) {
+      _browserFocusNode.requestFocus();
+    }
+  }
+
+  void _scheduleScrollActiveDiagramIntoView() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _isAdHocCustom) return;
+      final fileKey =
+          _sidebarRowKeys['file:${_selectedSample.id}:$_selectedPlaygroundSampleIndex'];
+      final familyKey = _sidebarRowKeys['family:${_selectedSample.id}'];
+      final targetSidebarCtx =
+          fileKey?.currentContext ?? familyKey?.currentContext;
+      if (targetSidebarCtx != null) {
+        Scrollable.ensureVisible(
+          targetSidebarCtx,
+          duration: const Duration(milliseconds: 110),
+          curve: Curves.easeOut,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        );
+        Scrollable.ensureVisible(
+          targetSidebarCtx,
+          duration: const Duration(milliseconds: 110),
+          curve: Curves.easeOut,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+        );
+      }
+      final pillKey =
+          _subSamplePillKeys['pill:${_selectedSample.id}:$_selectedPlaygroundSampleIndex'];
+      final targetPillCtx = pillKey?.currentContext;
+      if (targetPillCtx != null) {
+        Scrollable.ensureVisible(
+          targetPillCtx,
+          duration: const Duration(milliseconds: 110),
+          curve: Curves.easeOut,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        );
+        Scrollable.ensureVisible(
+          targetPillCtx,
+          duration: const Duration(milliseconds: 110),
+          curve: Curves.easeOut,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+        );
+      }
+    });
+  }
+
+  void _navigateDiagramBy(int delta) {
+    final entries = _filteredDiagramEntries;
+    if (entries.isEmpty) return;
+    final currentIndex =
+        _isAdHocCustom
+            ? -1
+            : entries.indexWhere(
+              (e) =>
+                  e.$1.id == _selectedSample.id &&
+                  e.$2 == _selectedPlaygroundSampleIndex,
+            );
+    final int nextIndex;
+    if (currentIndex < 0) {
+      nextIndex = delta >= 0 ? 0 : entries.length - 1;
+    } else {
+      nextIndex =
+          ((currentIndex + delta) % entries.length + entries.length) %
+          entries.length;
+    }
+    final (nextSample, nextFileIdx) = entries[nextIndex];
+    if (nextSample.playgroundSamples.isEmpty) {
+      _selectFamily(nextSample);
+    } else {
+      _selectFamilyAndFile(nextSample, nextFileIdx);
+    }
+  }
+
+  void _navigateFamilyBy(int delta) {
+    final families = _filteredFamilies;
+    if (families.isEmpty) return;
+    final currentIndex =
+        _isAdHocCustom
+            ? -1
+            : families.indexWhere((s) => s.id == _selectedSample.id);
+    final int nextIndex;
+    if (currentIndex < 0) {
+      nextIndex = delta >= 0 ? 0 : families.length - 1;
+    } else {
+      nextIndex =
+          ((currentIndex + delta) % families.length + families.length) %
+          families.length;
+    }
+    _selectFamily(families[nextIndex]);
+  }
+
+  void _jumpToDiagramBoundary({required bool first}) {
+    final entries = _filteredDiagramEntries;
+    if (entries.isEmpty) return;
+    final (sample, fileIdx) = first ? entries.first : entries.last;
+    if (sample.playgroundSamples.isEmpty) {
+      _selectFamily(sample);
+    } else {
+      _selectFamilyAndFile(sample, fileIdx);
+    }
+  }
+
+  bool _handleHardwareKeyEvent(KeyEvent event) {
+    if (!mounted) return false;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return false;
+    if (ModalRoute.of(context)?.isCurrent == false) return false;
+
+    final key = event.logicalKey;
+
+    // If the Mermaid or CSS code editor is focused, only intercept Escape to
+    // return focus to the diagram browser.
+    if (_editorFocusNode.hasFocus || _styleCssFocusNode.hasFocus) {
+      if (key == LogicalKeyboardKey.escape) {
+        _browserFocusNode.requestFocus();
+        return true;
+      }
+      return false;
+    }
+
+    // If the sidebar search box is focused, allow Up/Down arrow keys to step
+    // through filtered diagrams immediately, and Escape to clear/unfocus.
+    if (_searchFocusNode.hasFocus) {
+      if (key == LogicalKeyboardKey.escape) {
+        if (_searchQuery.isNotEmpty) {
+          setState(() {
+            _searchController.clear();
+            _searchQuery = '';
+          });
+        }
+        _browserFocusNode.requestFocus();
+        return true;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        _navigateDiagramBy(1);
+        return true;
+      }
+      if (key == LogicalKeyboardKey.arrowUp) {
+        _navigateDiagramBy(-1);
+        return true;
+      }
+      return false;
+    }
+
+    // Ignore if any other EditableText (e.g., dialog field) has primary focus.
+    final primaryCtx = FocusManager.instance.primaryFocus?.context;
+    if (primaryCtx != null &&
+        (primaryCtx.widget is EditableText ||
+            primaryCtx.findAncestorWidgetOfExactType<EditableText>() != null)) {
+      return false;
+    }
+
+    final isAlt = HardwareKeyboard.instance.isAltPressed;
+    final isMeta = HardwareKeyboard.instance.isMetaPressed;
+    final isControl = HardwareKeyboard.instance.isControlPressed;
+    if (isMeta || isControl) return false;
+
+    if (key == LogicalKeyboardKey.arrowDown) {
+      if (isAlt) {
+        _navigateFamilyBy(1);
+      } else {
+        _navigateDiagramBy(1);
+      }
+      return true;
+    }
+    if (key == LogicalKeyboardKey.arrowUp) {
+      if (isAlt) {
+        _navigateFamilyBy(-1);
+      } else {
+        _navigateDiagramBy(-1);
+      }
+      return true;
+    }
+    if (key == LogicalKeyboardKey.arrowRight ||
+        key == LogicalKeyboardKey.keyJ) {
+      _navigateDiagramBy(1);
+      return true;
+    }
+    if (key == LogicalKeyboardKey.arrowLeft || key == LogicalKeyboardKey.keyK) {
+      _navigateDiagramBy(-1);
+      return true;
+    }
+    if (key == LogicalKeyboardKey.bracketRight ||
+        key == LogicalKeyboardKey.pageDown) {
+      _navigateFamilyBy(1);
+      return true;
+    }
+    if (key == LogicalKeyboardKey.bracketLeft ||
+        key == LogicalKeyboardKey.pageUp) {
+      _navigateFamilyBy(-1);
+      return true;
+    }
+    if (key == LogicalKeyboardKey.home) {
+      _jumpToDiagramBoundary(first: true);
+      return true;
+    }
+    if (key == LogicalKeyboardKey.end) {
+      _jumpToDiagramBoundary(first: false);
+      return true;
+    }
+
+    final digitIndex = switch (key) {
+      LogicalKeyboardKey.digit1 => 0,
+      LogicalKeyboardKey.digit2 => 1,
+      LogicalKeyboardKey.digit3 => 2,
+      LogicalKeyboardKey.digit4 => 3,
+      LogicalKeyboardKey.digit5 => 4,
+      LogicalKeyboardKey.digit6 => 5,
+      LogicalKeyboardKey.digit7 => 6,
+      LogicalKeyboardKey.digit8 => 7,
+      LogicalKeyboardKey.digit9 => 8,
+      _ => -1,
+    };
+    if (digitIndex >= 0 &&
+        digitIndex < _selectedSample.playgroundSamples.length) {
+      _selectFamilyAndFile(_selectedSample, digitIndex);
+      return true;
+    }
+
+    return false;
   }
 
   void _applyStylePreset(PeleStylePreset preset) {
@@ -306,6 +597,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
 
   void _selectFamily(DiagramSample sample, {bool toggleExpand = false}) {
     _debounceTimer?.cancel();
+    _focusBrowserIfNeeded();
     final initialSource =
         sample.playgroundSamples.isNotEmpty
             ? sample.playgroundSamples.first.source
@@ -329,10 +621,12 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       _editorController.text = initialSource;
     });
     _runPeleDartEngine();
+    _scheduleScrollActiveDiagramIntoView();
   }
 
   void _selectFamilyAndFile(DiagramSample sample, int fileIndex) {
     _debounceTimer?.cancel();
+    _focusBrowserIfNeeded();
     final item = sample.playgroundSamples[fileIndex];
     setState(() {
       _expandedFamilyIds.add(sample.id);
@@ -343,6 +637,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       _editorController.text = item.source;
     });
     _runPeleDartEngine();
+    _scheduleScrollActiveDiagramIntoView();
   }
 
   void _rescanDiagramsFolder() {
@@ -453,6 +748,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
 
   void _selectSubSampleSource(String source, int index) {
     _debounceTimer?.cancel();
+    _focusBrowserIfNeeded();
     setState(() {
       _selectedPlaygroundSampleIndex = index;
       _isAdHocCustom = false;
@@ -460,6 +756,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       _editorController.text = source;
     });
     _runPeleDartEngine();
+    _scheduleScrollActiveDiagramIntoView();
   }
 
   void _startAdHocPlayground({String? initialText}) {
@@ -509,132 +806,138 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: <Widget>[
-          _buildTopToolbar(context),
-          Expanded(
-            child: Row(
-              children: <Widget>[
-                if (_showGallerySidebar) ...<Widget>[
-                  SizedBox(
-                    width: _sidebarWidth,
-                    child: _buildGallerySidebar(context),
-                  ),
-                  ResizableSplitter(
-                    axis: Axis.horizontal,
-                    tooltip:
-                        'Drag to resize diagram sidebar (double-click to reset)',
-                    onDoubleTap: () => setState(() => _sidebarWidth = 232.0),
-                    onDragDelta: (dx) {
-                      setState(() {
-                        _sidebarWidth = (_sidebarWidth + dx).clamp(
-                          180.0,
-                          460.0,
-                        );
-                      });
-                    },
-                  ),
-                ],
-                if (_editorDockMode == EditorDockMode.leftSplit) ...<Widget>[
-                  SizedBox(
-                    width: _editorLeftWidth,
-                    child: _buildLiveSourceEditor(context, isLeftSplit: true),
-                  ),
-                  ResizableSplitter(
-                    axis: Axis.horizontal,
-                    tooltip:
-                        'Drag to resize playground editor (double-click to reset)',
-                    onDoubleTap: () => setState(() => _editorLeftWidth = 340.0),
-                    onDragDelta: (dx) {
-                      setState(() {
-                        _editorLeftWidth = (_editorLeftWidth + dx).clamp(
-                          220.0,
-                          680.0,
-                        );
-                      });
-                    },
-                  ),
-                ],
-                Expanded(
-                  child: Column(
-                    children: <Widget>[
-                      _buildSubSampleSelectorBar(context),
-                      Expanded(
-                        child: Stack(
-                          children: <Widget>[
-                            Positioned.fill(
-                              child: IgnorePointer(
-                                ignoring:
-                                    _activeTab != InspectionTab.visualRender,
-                                child: Opacity(
-                                  opacity:
-                                      _activeTab == InspectionTab.visualRender
-                                          ? 1.0
-                                          : 0.0,
-                                  child: _buildVisualRenderPanels(context),
-                                ),
-                              ),
-                            ),
-                            if (_activeTab == InspectionTab.visualDiff)
+    return Focus(
+      focusNode: _browserFocusNode,
+      autofocus: true,
+      child: Scaffold(
+        body: Column(
+          children: <Widget>[
+            _buildTopToolbar(context),
+            Expanded(
+              child: Row(
+                children: <Widget>[
+                  if (_showGallerySidebar) ...<Widget>[
+                    SizedBox(
+                      width: _sidebarWidth,
+                      child: _buildGallerySidebar(context),
+                    ),
+                    ResizableSplitter(
+                      axis: Axis.horizontal,
+                      tooltip:
+                          'Drag to resize diagram sidebar (double-click to reset)',
+                      onDoubleTap: () => setState(() => _sidebarWidth = 232.0),
+                      onDragDelta: (dx) {
+                        setState(() {
+                          _sidebarWidth = (_sidebarWidth + dx).clamp(
+                            180.0,
+                            460.0,
+                          );
+                        });
+                      },
+                    ),
+                  ],
+                  if (_editorDockMode == EditorDockMode.leftSplit) ...<Widget>[
+                    SizedBox(
+                      width: _editorLeftWidth,
+                      child: _buildLiveSourceEditor(context, isLeftSplit: true),
+                    ),
+                    ResizableSplitter(
+                      axis: Axis.horizontal,
+                      tooltip:
+                          'Drag to resize playground editor (double-click to reset)',
+                      onDoubleTap:
+                          () => setState(() => _editorLeftWidth = 340.0),
+                      onDragDelta: (dx) {
+                        setState(() {
+                          _editorLeftWidth = (_editorLeftWidth + dx).clamp(
+                            220.0,
+                            680.0,
+                          );
+                        });
+                      },
+                    ),
+                  ],
+                  Expanded(
+                    child: Column(
+                      children: <Widget>[
+                        _buildSubSampleSelectorBar(context),
+                        Expanded(
+                          child: Stack(
+                            children: <Widget>[
                               Positioned.fill(
-                                child: VisualGraphicDiffView(
-                                  outputs: _outputs,
-                                  activeEngines: _orderedSelectedEngines,
-                                  source: _activeSource,
-                                  isDark: _stylePreset.isDarkCanvas,
+                                child: IgnorePointer(
+                                  ignoring:
+                                      _activeTab != InspectionTab.visualRender,
+                                  child: Opacity(
+                                    opacity:
+                                        _activeTab == InspectionTab.visualRender
+                                            ? 1.0
+                                            : 0.0,
+                                    child: _buildVisualRenderPanels(context),
+                                  ),
                                 ),
                               ),
-                            if (_activeTab == InspectionTab.rawSvg)
-                              Positioned.fill(
-                                child: RawSvgOutputView(
-                                  activeEngines: _orderedSelectedEngines,
-                                  outputs: _outputs,
-                                  peleDartMode: _peleDartOutputMode,
+                              if (_activeTab == InspectionTab.visualDiff)
+                                Positioned.fill(
+                                  child: VisualGraphicDiffView(
+                                    outputs: _outputs,
+                                    activeEngines: _orderedSelectedEngines,
+                                    source: _activeSource,
+                                    isDark: _stylePreset.isDarkCanvas,
+                                  ),
                                 ),
-                              ),
-                            if (_activeTab == InspectionTab.svgTextDiff)
-                              Positioned.fill(
-                                child: SvgTextDiffView(
-                                  diagramId: _selectedSample.id,
-                                  activeEngines: _orderedSelectedEngines,
-                                  outputs: _outputs,
-                                  peleDartMode: _peleDartOutputMode,
+                              if (_activeTab == InspectionTab.rawSvg)
+                                Positioned.fill(
+                                  child: RawSvgOutputView(
+                                    activeEngines: _orderedSelectedEngines,
+                                    outputs: _outputs,
+                                    peleDartMode: _peleDartOutputMode,
+                                  ),
                                 ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      if (_editorDockMode ==
-                          EditorDockMode.bottomDock) ...<Widget>[
-                        ResizableSplitter(
-                          axis: Axis.vertical,
-                          tooltip:
-                              'Drag to resize bottom playground editor (double-click to reset)',
-                          onDoubleTap:
-                              () => setState(() => _editorBottomHeight = 195.0),
-                          onDragDelta: (dy) {
-                            setState(() {
-                              _editorBottomHeight = (_editorBottomHeight - dy)
-                                  .clamp(110.0, 540.0);
-                            });
-                          },
-                        ),
-                        SizedBox(
-                          height: _editorBottomHeight,
-                          child: _buildLiveSourceEditor(
-                            context,
-                            isLeftSplit: false,
+                              if (_activeTab == InspectionTab.svgTextDiff)
+                                Positioned.fill(
+                                  child: SvgTextDiffView(
+                                    diagramId: _selectedSample.id,
+                                    activeEngines: _orderedSelectedEngines,
+                                    outputs: _outputs,
+                                    peleDartMode: _peleDartOutputMode,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
+                        if (_editorDockMode ==
+                            EditorDockMode.bottomDock) ...<Widget>[
+                          ResizableSplitter(
+                            axis: Axis.vertical,
+                            tooltip:
+                                'Drag to resize bottom playground editor (double-click to reset)',
+                            onDoubleTap:
+                                () =>
+                                    setState(() => _editorBottomHeight = 195.0),
+                            onDragDelta: (dy) {
+                              setState(() {
+                                _editorBottomHeight = (_editorBottomHeight - dy)
+                                    .clamp(110.0, 540.0);
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            height: _editorBottomHeight,
+                            child: _buildLiveSourceEditor(
+                              context,
+                              isLeftSplit: false,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -669,37 +972,57 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                     setState(() => _showGallerySidebar = !_showGallerySidebar),
           ),
           const SizedBox(width: 4),
-          const Icon(Icons.auto_graph, color: Color(0xFF00B4D8), size: 17),
+          Image.asset(
+            'assets/app_icon.png',
+            width: 20,
+            height: 20,
+            filterQuality: FilterQuality.medium,
+            errorBuilder:
+                (_, __, ___) => const Icon(
+                  Icons.auto_graph,
+                  color: Color(0xFF00B4D8),
+                  size: 17,
+                ),
+          ),
           const SizedBox(width: 6),
           const Text(
-            'pele_dart Studio',
+            'Pele Studio',
             style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
           ),
-          const Spacer(),
+          const SizedBox(width: 8),
           // Primary 4-Mode Switcher centered
-          SegmentedButton<InspectionTab>(
-            style: const ButtonStyle(visualDensity: VisualDensity.compact),
-            segments:
-                InspectionTab.values
-                    .map(
-                      (t) => ButtonSegment<InspectionTab>(
-                        value: t,
-                        icon: Icon(t.icon, size: 14),
-                        label: Text(
-                          t.label,
-                          style: const TextStyle(fontSize: 11.5),
-                        ),
-                      ),
-                    )
-                    .toList(),
-            selected: <InspectionTab>{_activeTab},
-            onSelectionChanged: (sel) {
-              setState(() {
-                _activeTab = sel.first;
-              });
-            },
+          Expanded(
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: SegmentedButton<InspectionTab>(
+                  style: const ButtonStyle(
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  segments:
+                      InspectionTab.values
+                          .map(
+                            (t) => ButtonSegment<InspectionTab>(
+                              value: t,
+                              icon: Icon(t.icon, size: 14),
+                              label: Text(
+                                t.label,
+                                style: const TextStyle(fontSize: 11.5),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                  selected: <InspectionTab>{_activeTab},
+                  onSelectionChanged: (sel) {
+                    setState(() {
+                      _activeTab = sel.first;
+                    });
+                  },
+                ),
+              ),
+            ),
           ),
-          const Spacer(),
+          const SizedBox(width: 8),
           // Style / Theme Preset Selector
           PopupMenuButton<PeleStylePreset>(
             tooltip: 'Diagram Theme & Style Preset',
@@ -922,9 +1245,18 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
   Widget _buildSubSampleSelectorBar(BuildContext context) {
     final samples = _selectedSample.playgroundSamples;
     final cs = Theme.of(context).colorScheme;
+    final entries = _filteredDiagramEntries;
+    final activeEntryIdx =
+        _isAdHocCustom
+            ? -1
+            : entries.indexWhere(
+              (e) =>
+                  e.$1.id == _selectedSample.id &&
+                  e.$2 == _selectedPlaygroundSampleIndex,
+            );
     return Container(
       height: 36,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: cs.surface,
         border: Border(
@@ -933,19 +1265,67 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
       ),
       child: Row(
         children: <Widget>[
+          IconButton(
+            tooltip:
+                'Previous Diagram (↑ / ← / k)\nPrevious Folder: Alt+↑ or [',
+            icon: const Icon(Icons.chevron_left, size: 17),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            onPressed: () => _navigateDiagramBy(-1),
+          ),
+          IconButton(
+            tooltip: 'Next Diagram (↓ / → / j)\nNext Folder: Alt+↓ or ]',
+            icon: const Icon(Icons.chevron_right, size: 17),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            onPressed: () => _navigateDiagramBy(1),
+          ),
+          const SizedBox(width: 4),
           Text(
             _isAdHocCustom ? 'Custom Diagram' : _selectedSample.title,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
           ),
+          if (activeEntryIdx >= 0 && entries.isNotEmpty) ...<Widget>[
+            const SizedBox(width: 6),
+            Tooltip(
+              message:
+                  'Keyboard Navigation:\n'
+                  '• ↑ / ↓ or ← / → (or j / k): Previous / Next diagram\n'
+                  '• Alt+↑ / Alt+↓ or [ / ]: Previous / Next folder\n'
+                  '• 1–9: Select sub-sample in current folder\n'
+                  '• Home / End: First / Last diagram\n'
+                  '• Esc: Return focus from code editor to browser',
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '${activeEntryIdx + 1}/${entries.length} ↑↓',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontFamily: 'Menlo',
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(width: 10),
           Expanded(
             child: SingleChildScrollView(
+              controller: _subSampleScrollController,
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: <Widget>[
                   for (var i = 0; i < samples.length; i++) ...<Widget>[
                     if (i > 0) const SizedBox(width: 4),
                     InkWell(
+                      key: _subSamplePillKey('pill:${_selectedSample.id}:$i'),
                       borderRadius: BorderRadius.circular(6),
                       onTap: () => _selectSubSampleSource(samples[i].source, i),
                       child: Container(
@@ -1015,21 +1395,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
     final extCount = allSamples.where((s) => s.tier == 2).length;
     final customCount = allSamples.where((s) => s.tier == 3).length;
 
-    final filtered =
-        allSamples.where((s) {
-          if (_tierFilter != null && s.tier != _tierFilter) return false;
-          if (_searchQuery.isEmpty) return true;
-          final q = _searchQuery.toLowerCase();
-          final matchesFile = s.playgroundSamples.any(
-            (item) =>
-                item.fileName.toLowerCase().contains(q) ||
-                item.label.toLowerCase().contains(q),
-          );
-          return s.title.toLowerCase().contains(q) ||
-              s.diagramType.toLowerCase().contains(q) ||
-              s.description.toLowerCase().contains(q) ||
-              matchesFile;
-        }).toList();
+    final filtered = _filteredFamilies;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1101,6 +1467,8 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
               SizedBox(
                 height: 29,
                 child: TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
                   decoration: InputDecoration(
                     hintText: 'Filter folders or .mmd files...',
                     prefixIcon: const Icon(Icons.search, size: 14),
@@ -1136,7 +1504,10 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                     Expanded(
                       child: InkWell(
                         borderRadius: BorderRadius.circular(6),
-                        onTap: () => setState(() => _tierFilter = entry.$1),
+                        onTap: () {
+                          _focusBrowserIfNeeded();
+                          setState(() => _tierFilter = entry.$1);
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           alignment: Alignment.center,
@@ -1174,141 +1545,156 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
         ),
         const Divider(height: 1),
         Expanded(
-          child: ListView.builder(
+          child: SingleChildScrollView(
+            controller: _sidebarScrollController,
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-            itemCount: filtered.length,
-            itemBuilder: (context, index) {
-              final sample = filtered[index];
-              final isSelectedFamily =
-                  !_isAdHocCustom && sample.id == _selectedSample.id;
-              final isExpanded =
-                  _expandedFamilyIds.contains(sample.id) ||
-                  _searchQuery.isNotEmpty;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 1),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    InkWell(
-                      borderRadius: BorderRadius.circular(6),
-                      onTap: () => _selectFamily(sample, toggleExpand: true),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              isSelectedFamily
-                                  ? cs.primaryContainer.withValues(alpha: 0.55)
-                                  : Colors.transparent,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(
-                              isExpanded
-                                  ? Icons.keyboard_arrow_down
-                                  : Icons.keyboard_arrow_right,
-                              size: 14,
-                              color: cs.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 3),
-                            Icon(
-                              isExpanded
-                                  ? Icons.folder_open
-                                  : Icons.folder_outlined,
-                              size: 14,
-                              color:
-                                  isSelectedFamily
-                                      ? cs.primary
-                                      : cs.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                sample.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight:
-                                      isSelectedFamily
-                                          ? FontWeight.w700
-                                          : FontWeight.w500,
-                                  color:
-                                      isSelectedFamily
-                                          ? cs.onPrimaryContainer
-                                          : cs.onSurface,
-                                ),
-                              ),
-                            ),
-                            if (sample.beta) ...<Widget>[
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: cs.secondaryContainer.withValues(
-                                    alpha: 0.7,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  'beta',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    color: cs.onSecondaryContainer,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                            ],
-                            Text(
-                              '${sample.playgroundSamples.length}',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontFamily: 'Menlo',
-                                color: cs.onSurfaceVariant.withValues(
-                                  alpha: 0.7,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (isExpanded)
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 20,
-                          top: 1,
-                          bottom: 3,
-                        ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                for (final sample in filtered)
+                  Builder(
+                    builder: (context) {
+                      final isSelectedFamily =
+                          !_isAdHocCustom && sample.id == _selectedSample.id;
+                      final isExpanded =
+                          _expandedFamilyIds.contains(sample.id) ||
+                          _searchQuery.isNotEmpty;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 1),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
-                            for (
-                              var fIdx = 0;
-                              fIdx < sample.playgroundSamples.length;
-                              fIdx++
-                            )
-                              _buildMmdFileTreeRow(
-                                context,
-                                sample: sample,
-                                fileIndex: fIdx,
-                                isSelectedFile:
-                                    isSelectedFamily &&
-                                    _selectedPlaygroundSampleIndex == fIdx,
+                            InkWell(
+                              key: _sidebarRowKey('family:${sample.id}'),
+                              borderRadius: BorderRadius.circular(6),
+                              onTap:
+                                  () =>
+                                      _selectFamily(sample, toggleExpand: true),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      isSelectedFamily
+                                          ? cs.primaryContainer.withValues(
+                                            alpha: 0.55,
+                                          )
+                                          : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Row(
+                                  children: <Widget>[
+                                    Icon(
+                                      isExpanded
+                                          ? Icons.keyboard_arrow_down
+                                          : Icons.keyboard_arrow_right,
+                                      size: 14,
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Icon(
+                                      isExpanded
+                                          ? Icons.folder_open
+                                          : Icons.folder_outlined,
+                                      size: 14,
+                                      color:
+                                          isSelectedFamily
+                                              ? cs.primary
+                                              : cs.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        sample.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight:
+                                              isSelectedFamily
+                                                  ? FontWeight.w700
+                                                  : FontWeight.w500,
+                                          color:
+                                              isSelectedFamily
+                                                  ? cs.onPrimaryContainer
+                                                  : cs.onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                    if (sample.beta) ...<Widget>[
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                          vertical: 1,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: cs.secondaryContainer
+                                              .withValues(alpha: 0.7),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'beta',
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            color: cs.onSecondaryContainer,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                    ],
+                                    Text(
+                                      '${sample.playgroundSamples.length}',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontFamily: 'Menlo',
+                                        color: cs.onSurfaceVariant.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (isExpanded)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 20,
+                                  top: 1,
+                                  bottom: 3,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: <Widget>[
+                                    for (
+                                      var fIdx = 0;
+                                      fIdx < sample.playgroundSamples.length;
+                                      fIdx++
+                                    )
+                                      _buildMmdFileTreeRow(
+                                        context,
+                                        sample: sample,
+                                        fileIndex: fIdx,
+                                        isSelectedFile:
+                                            isSelectedFamily &&
+                                            _selectedPlaygroundSampleIndex ==
+                                                fIdx,
+                                      ),
+                                  ],
+                                ),
                               ),
                           ],
                         ),
-                      ),
-                  ],
-                ),
-              );
-            },
+                      );
+                    },
+                  ),
+              ],
+            ),
           ),
         ),
       ],
@@ -1326,6 +1712,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
     final displayFile =
         item.fileName.isNotEmpty ? item.fileName : '${item.label}.mmd';
     return Padding(
+      key: _sidebarRowKey('file:${sample.id}:$fileIndex'),
       padding: const EdgeInsets.symmetric(vertical: 0.5),
       child: InkWell(
         borderRadius: BorderRadius.circular(5),
@@ -1500,14 +1887,52 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
               ),
               const SizedBox(width: 7),
               Expanded(
-                child: Text(
-                  engine.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(
+                        engine.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    if (kDebugMode &&
+                        engine == ComparisonEngine.peleDart) ...<Widget>[
+                      const SizedBox(width: 6),
+                      Tooltip(
+                        message:
+                            'Running in Flutter Debug JIT mode (assertions + unoptimized VM).\n'
+                            'Run with `flutter run --release` or `--profile` for native AOT benchmark speeds.',
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 1.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: Colors.amber.withValues(alpha: 0.45),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: const Text(
+                            'DEBUG JIT',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Menlo',
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               if (out != null && out.error == null) ...<Widget>[
@@ -1862,6 +2287,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                 isStyleTab
                     ? TextField(
                       controller: _styleCssController,
+                      focusNode: _styleCssFocusNode,
                       maxLines: null,
                       expands: true,
                       style: const TextStyle(
@@ -1879,6 +2305,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
                     )
                     : TextField(
                       controller: _editorController,
+                      focusNode: _editorFocusNode,
                       maxLines: null,
                       expands: true,
                       style: const TextStyle(

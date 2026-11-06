@@ -1,5 +1,6 @@
 // Upstream: src/diagrams/flowchart/types.ts
 
+import '../../svg/root.dart';
 import '../../util/yaml.dart';
 
 typedef LabelType = String;
@@ -145,7 +146,7 @@ class DirStmt {
 /// Union type: `String | List<String> | DirStmt`.
 typedef DocItem = Object;
 
-abstract interface class FlowchartModel {
+abstract interface class FlowchartModel implements Accessible {
   String get type;
   String? get direction;
   Map<String, FlowNode> get nodes;
@@ -156,6 +157,8 @@ abstract interface class FlowchartModel {
   List<String>? get defaultEdgeStyle;
   String? get defaultInterpolate;
   String? get title;
+  @override
   String? get accTitle;
+  @override
   String? get accDescr;
 }

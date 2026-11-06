@@ -2,6 +2,7 @@
 
 [![pub package](https://img.shields.io/pub/v/pele_dart.svg)](https://pub.dev/packages/pele_dart)
 [![CI](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml/badge.svg)](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml)
+[![Benchmarks](https://img.shields.io/badge/benchmarks-2.2x%20faster%20(AOT)-00b4d8)](docs/BENCHMARKS.md)
 [![Upstream obsidianmd/pele](https://img.shields.io/badge/upstream-obsidianmd%2Fpele-7c3aed)](UPSTREAM.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -187,6 +188,32 @@ See [**Section 11 of the API User Manual**](docs/API_MANUAL.md#11-integration-gu
 
 ---
 
+## Performance & Benchmarks
+
+Compiled to native **Dart AOT**, `pele_dart` renders the entire **232-diagram** showcase corpus across all **33 diagram families** in **`~10.2 ms`** (`43.8 µs` mean per diagram)—over **2x faster** overall (and up to **4.5x faster** on complex diagrams like Class, Sequence, and Flowchart) than upstream `obsidianmd/pele` in JavaScriptCore (`21.9 ms`).
+
+> **[View the Complete 33-Family Benchmark Report & Regression Gate (`docs/BENCHMARKS.md`) →](docs/BENCHMARKS.md)**
+
+| Metric | `pele_dart` (Native Dart AOT) | `obsidianmd/pele` (JS) | Comparison |
+| :--- | ---: | ---: | :--- |
+| **Full 232-Diagram Corpus (`SvgOutputMode.cssVariables`)** | **10.16 ms** | 21.94 ms | **2.16x faster overall** |
+| **Mean Time per Diagram (`SvgOutputMode.cssVariables`)** | **43.8 µs** | 94.6 µs | **2.16x faster per diagram** |
+| **Mean Diagram Header Detection (`detectDiagram()`)** | **0.010 µs** | — | `O(1)` first-character switch dispatch |
+| **Full Corpus (`SvgOutputMode.flattened`)** | **120.13 ms** | n/a *(CSS vars only)* | Includes static SVG 1.1 CSS-variable & `color-mix()` flattening |
+
+> **Bar Series 1 (Left):** `pele_dart` Native AOT (µs) &nbsp;|&nbsp; **Bar Series 2 (Right):** `obsidianmd/pele` JS (µs) — *Lower is faster*
+
+```mermaid
+xychart-beta
+  title "Core Mermaid Families — Mean Render Time in µs (Lower is Faster)"
+  x-axis ["Class", "ER", "Flowchart", "Gantt", "Git", "Info", "Mindmap", "Pie", "Sequence", "State"]
+  y-axis "Mean Render Time (µs)" 0 --> 300
+  bar [43.9, 40.2, 79.8, 65.9, 41.4, 1.3, 21.4, 13.3, 24.5, 62.0]
+  bar [200.4, 102.3, 237.3, 88.3, 87.2, 4.8, 44.4, 31.5, 84.5, 142.9]
+```
+
+---
+
 ## macOS 3-Way Comparison Studio (`example/`)
 
 The repository includes a macOS desktop showcase and comparison workbench in [`example/`](example/README.md) that renders every diagram side-by-side across **`pele_dart` (Pure Dart)**, **`obsidianmd/pele` (JS)**, and **`mermaid.js`**:
@@ -205,6 +232,7 @@ flutter run -d macos
 ## Documentation
 
 * **[Visual Diagram Gallery (`docs/DIAGRAM_GALLERY.md`)](docs/DIAGRAM_GALLERY.md)**: Clean standalone SVG renders and Mermaid source code for all 33 supported diagram families.
+* **[Performance Benchmarks (`docs/BENCHMARKS.md`)](docs/BENCHMARKS.md)**: Native Dart AOT vs `obsidianmd/pele` (JS) benchmarks across all 33 diagram families (232 diagrams), phase breakdowns (`parse` vs `render`), and upstream sync regression gate rules.
 * **[API User Manual (`docs/API_MANUAL.md`)](docs/API_MANUAL.md)**: Complete reference covering `render`, `renderMermaid`, `parse`, `detectType`, `supports`, `SvgOutputMode`, `PelePalette` theming & custom palettes, `RenderOptions`, `ParseOptions`, `PeleError`, custom `TextMeasurer` / `IconResolver` / `MathResolver`, and Flutter integration.
 * **[Example & Comparison Studio Guide (`example/README.md`)](example/README.md)**: Guide to pure-Dart CLI usage and the macOS 3-Way Comparison Studio.
 * **[Upstream Sync & Release Guide (`docs/UPSTREAM_SYNC.md`)](docs/UPSTREAM_SYNC.md)**: Workflow for detecting upstream `obsidianmd/pele` releases (`dart run tool/sync_upstream.dart`), staging diffs, and running the 787-diagram differential verification suite (`dart run tool/verify_against_upstream.dart`).

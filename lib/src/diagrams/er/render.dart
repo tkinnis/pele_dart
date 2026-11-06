@@ -171,6 +171,14 @@ String _textLeft(
 /// Mermaid reads `~` pairs as angle brackets. They are written as entities so the label parser
 /// does not take `<int>` for a tag.
 String _cellText(String raw) {
+  var hasTilde = false;
+  for (var i = 0, n = raw.length; i < n; i++) {
+    if (raw.codeUnitAt(i) == 0x7e) {
+      hasTilde = true;
+      break;
+    }
+  }
+  if (!hasTilde) return raw;
   final converted = parseGenericTypes(raw);
   return converted == raw
       ? raw
@@ -263,7 +271,9 @@ Rendered _draw(ErDb db, Config config, RenderOptions options, bool turned) {
     );
     final base =
         (style.bold ? Style.Bold : 0) | (style.italic ? Style.Italic : 0);
-    final mono = monospaced && !_reFontFamily.hasMatch(style.text)
+    final mono =
+        monospaced &&
+            (style.text.isEmpty || !_reFontFamily.hasMatch(style.text))
         ? Style.Mono
         : 0;
     final nameSize = style.fontSize ?? size;
@@ -341,7 +351,11 @@ Rendered _draw(ErDb db, Config config, RenderOptions options, bool turned) {
               base | mono,
             ),
             layoutLabel(
-              attribute.keys.join(', '),
+              attribute.keys.isEmpty
+                  ? ''
+                  : (attribute.keys.length == 1
+                        ? attribute.keys[0]
+                        : attribute.keys.join(', ')),
               false,
               measurer,
               keySize,
@@ -460,9 +474,9 @@ Rendered _draw(ErDb db, Config config, RenderOptions options, bool turned) {
     final view = views[i];
     final c = cnodes[i];
     final node = view.node;
-    final classes = classNames(
-      node.cssClasses.replaceFirst(_reDefaultPrefix, ''),
-    );
+    final classes = node.cssClasses.isEmpty
+        ? ''
+        : classNames(node.cssClasses.replaceFirst(_reDefaultPrefix, ''));
     final styleRecord = (shape: view.style.shape, text: view.style.text);
     if (c.isGroup) {
       view.w = c.w;
@@ -500,12 +514,13 @@ Rendered _draw(ErDb db, Config config, RenderOptions options, bool turned) {
       ' class="pele-label"$color$text',
       icons,
     );
-    final display = decodeEntities(
-      node.alias.isNotEmpty ? node.alias : node.label,
-    );
-    if (_reInternalLink.hasMatch('$classes ') &&
+    if (classes.isNotEmpty &&
+        _reInternalLink.hasMatch('$classes ') &&
         name.isNotEmpty &&
         options.links != false) {
+      final display = decodeEntities(
+        node.alias.isNotEmpty ? node.alias : node.label,
+      );
       // The name ends up in an href, so it gets the same check as a URL.
       final safe = internalLink(display, options);
       final target = esc(display);
@@ -516,7 +531,7 @@ Rendered _draw(ErDb db, Config config, RenderOptions options, bool turned) {
 
     String body;
     if (view.rows.isEmpty) {
-      body = '<rect $shape${rounded(_boxAttrs + view.style.shape)}/>$name';
+      body = '<rect $shape$_boxAttrs${rounded(view.style.shape)}/>$name';
     } else {
       final rowLine = roundJs(view.rowSize * 1.5).toDouble();
       final lineColor = view.style.stroke != null
@@ -596,10 +611,10 @@ Rendered _draw(ErDb db, Config config, RenderOptions options, bool turned) {
           ? onLight
           : 'var(--_bg)';
       body =
-          '<rect $shape${rounded(_boxAttrs + view.style.shape)}/>'
+          '<rect $shape$_boxAttrs${rounded(view.style.shape)}/>'
           // Over a fill the diagram chose, the shading is a tint of that fill. The opacity is on the
           // group because the two parts of the last row overlap.
-          '<g class="pele-er-stripes" fill="$shade"${view.style.shape.contains('fill:') ? ' opacity="0.6"' : ''}>$stripes</g>'
+          '<g class="pele-er-stripes" fill="$shade"${setsFill(view.style.shape) ? ' opacity="0.6"' : ''}>$stripes</g>'
           '<path class="pele-er-divider" d="M${num(x0)},$dividerY'
           'H${num(x0 + w)}" stroke="$lineColor"/>'
           '<rect $shape fill="none" stroke="var(--_b)"${rounded(view.style.line)}/>'

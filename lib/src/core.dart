@@ -123,7 +123,7 @@ class _Parsed {
   });
 }
 
-final Map<Object, _Parsed> _parsedModels = Map<Object, _Parsed>.identity();
+final Expando<_Parsed> _parsedModels = Expando<_Parsed>();
 
 _Parsed _parseSource(String text, int limit, int maxEdges, Config? extra) {
   _ensureDefaults();
@@ -225,7 +225,9 @@ _Parsed _parsedFrom(
       config,
     );
   }
-  final parsed = _parsedModels[source];
+  final parsed = (source is num || source is bool || source is Record)
+      ? null
+      : _parsedModels[source];
   if (parsed == null) {
     throw ArgumentError(
       'render() takes diagram text or a model that parse() returned.',

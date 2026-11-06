@@ -1,5 +1,7 @@
 // Upstream: src/diagrams/sankey/db.ts
 
+import '../../svg/root.dart';
+
 class SankeyNode {
   const SankeyNode({required this.id, required this.index});
 
@@ -36,12 +38,14 @@ class SankeyLink {
   int get hashCode => Object.hash(source, target, value);
 }
 
-abstract interface class SankeyModel {
+abstract interface class SankeyModel implements Accessible {
   String get type;
   List<SankeyNode> get nodes;
   List<SankeyLink> get links;
   String? get title;
+  @override
   String? get accTitle;
+  @override
   String? get accDescr;
 }
 

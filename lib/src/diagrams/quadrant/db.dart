@@ -1,6 +1,7 @@
 // Upstream: src/diagrams/quadrant/db.ts
 
 import '../../errors.dart';
+import '../../svg/root.dart';
 
 class QuadrantText {
   QuadrantText({required this.text, required this.type});
@@ -78,10 +79,12 @@ class QuadrantPoint extends PointStyle {
   );
 }
 
-abstract interface class QuadrantModel {
+abstract interface class QuadrantModel implements Accessible {
   String get type;
   String? get title;
+  @override
   String? get accTitle;
+  @override
   String? get accDescr;
   // Quadrants 1 to 4: top right, top left, bottom left, bottom right.
   List<QuadrantText?> get quadrants;

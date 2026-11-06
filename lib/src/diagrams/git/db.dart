@@ -2,6 +2,7 @@
 
 import '../../errors.dart';
 import '../../preprocess.dart';
+import '../../svg/root.dart';
 import 'parser.dart';
 
 abstract final class CommitType {
@@ -44,7 +45,7 @@ class GitCommit {
   final bool? customId;
 }
 
-class GitModel {
+class GitModel implements Accessible {
   const GitModel({
     this.type = 'gitGraph',
     this.title,
@@ -61,7 +62,9 @@ class GitModel {
 
   final String type;
   final String? title;
+  @override
   final String? accTitle;
+  @override
   final String? accDescr;
   final GitDirection direction;
   // Keyed by commit id, in the order the ids first appeared.

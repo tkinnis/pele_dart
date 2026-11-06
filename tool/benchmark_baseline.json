@@ -1,0 +1,240 @@
+{
+  "totalSamples": 232,
+  "totalAotCssMs": 22.671,
+  "totalAotParseMs": 5.495,
+  "totalAotRenderMs": 17.295,
+  "meanPureDetectUs": 0.0235,
+  "families": {
+    "class": {
+      "sampleCount": 8,
+      "meanCssUs": 115.13,
+      "meanParseUs": 19.06,
+      "meanRenderUs": 87.54,
+      "meanFlatUs": 757.3
+    },
+    "er": {
+      "sampleCount": 8,
+      "meanCssUs": 87.33,
+      "meanParseUs": 20.71,
+      "meanRenderUs": 69.31,
+      "meanFlatUs": 687.36
+    },
+    "flowchart": {
+      "sampleCount": 8,
+      "meanCssUs": 203.42,
+      "meanParseUs": 35.13,
+      "meanRenderUs": 160.52,
+      "meanFlatUs": 827.05
+    },
+    "gantt": {
+      "sampleCount": 8,
+      "meanCssUs": 131.08,
+      "meanParseUs": 22.65,
+      "meanRenderUs": 119.15,
+      "meanFlatUs": 533.31
+    },
+    "git": {
+      "sampleCount": 8,
+      "meanCssUs": 115.26,
+      "meanParseUs": 35.32,
+      "meanRenderUs": 80.16,
+      "meanFlatUs": 802.36
+    },
+    "info": {
+      "sampleCount": 5,
+      "meanCssUs": 3.33,
+      "meanParseUs": 1.35,
+      "meanRenderUs": 1.97,
+      "meanFlatUs": 85.83
+    },
+    "mindmap": {
+      "sampleCount": 8,
+      "meanCssUs": 49.41,
+      "meanParseUs": 7.31,
+      "meanRenderUs": 50.72,
+      "meanFlatUs": 819.42
+    },
+    "pie": {
+      "sampleCount": 4,
+      "meanCssUs": 36.19,
+      "meanParseUs": 10.28,
+      "meanRenderUs": 21.0,
+      "meanFlatUs": 274.5
+    },
+    "sequence": {
+      "sampleCount": 8,
+      "meanCssUs": 61.48,
+      "meanParseUs": 17.2,
+      "meanRenderUs": 41.06,
+      "meanFlatUs": 470.78
+    },
+    "state": {
+      "sampleCount": 8,
+      "meanCssUs": 159.54,
+      "meanParseUs": 29.4,
+      "meanRenderUs": 110.88,
+      "meanFlatUs": 889.52
+    },
+    "block": {
+      "sampleCount": 8,
+      "meanCssUs": 55.63,
+      "meanParseUs": 14.1,
+      "meanRenderUs": 38.55,
+      "meanFlatUs": 459.92
+    },
+    "c4": {
+      "sampleCount": 7,
+      "meanCssUs": 216.46,
+      "meanParseUs": 49.21,
+      "meanRenderUs": 171.26,
+      "meanFlatUs": 1153.54
+    },
+    "eventmodeling": {
+      "sampleCount": 8,
+      "meanCssUs": 62.24,
+      "meanParseUs": 19.4,
+      "meanRenderUs": 43.34,
+      "meanFlatUs": 898.25
+    },
+    "kanban": {
+      "sampleCount": 5,
+      "meanCssUs": 61.34,
+      "meanParseUs": 10.47,
+      "meanRenderUs": 48.48,
+      "meanFlatUs": 330.46
+    },
+    "packet": {
+      "sampleCount": 6,
+      "meanCssUs": 26.99,
+      "meanParseUs": 10.06,
+      "meanRenderUs": 16.74,
+      "meanFlatUs": 274.26
+    },
+    "quadrant": {
+      "sampleCount": 4,
+      "meanCssUs": 56.4,
+      "meanParseUs": 31.88,
+      "meanRenderUs": 29.91,
+      "meanFlatUs": 371.19
+    },
+    "requirement": {
+      "sampleCount": 8,
+      "meanCssUs": 106.86,
+      "meanParseUs": 23.74,
+      "meanRenderUs": 86.88,
+      "meanFlatUs": 751.61
+    },
+    "sankey": {
+      "sampleCount": 8,
+      "meanCssUs": 184.45,
+      "meanParseUs": 46.5,
+      "meanRenderUs": 139.57,
+      "meanFlatUs": 1696.47
+    },
+    "timeline": {
+      "sampleCount": 8,
+      "meanCssUs": 75.62,
+      "meanParseUs": 7.69,
+      "meanRenderUs": 67.55,
+      "meanFlatUs": 982.44
+    },
+    "journey": {
+      "sampleCount": 4,
+      "meanCssUs": 38.11,
+      "meanParseUs": 3.83,
+      "meanRenderUs": 32.98,
+      "meanFlatUs": 505.22
+    },
+    "xychart": {
+      "sampleCount": 8,
+      "meanCssUs": 56.36,
+      "meanParseUs": 12.84,
+      "meanRenderUs": 44.82,
+      "meanFlatUs": 381.16
+    },
+    "agentflow": {
+      "sampleCount": 8,
+      "meanCssUs": 153.96,
+      "meanParseUs": 79.28,
+      "meanRenderUs": 71.7,
+      "meanFlatUs": 757.7
+    },
+    "architecture": {
+      "sampleCount": 8,
+      "meanCssUs": 63.4,
+      "meanParseUs": 23.15,
+      "meanRenderUs": 39.29,
+      "meanFlatUs": 818.44
+    },
+    "cynefin": {
+      "sampleCount": 4,
+      "meanCssUs": 109.17,
+      "meanParseUs": 15.89,
+      "meanRenderUs": 91.44,
+      "meanFlatUs": 1579.38
+    },
+    "ishikawa": {
+      "sampleCount": 4,
+      "meanCssUs": 38.08,
+      "meanParseUs": 4.87,
+      "meanRenderUs": 31.65,
+      "meanFlatUs": 364.75
+    },
+    "radar": {
+      "sampleCount": 5,
+      "meanCssUs": 49.68,
+      "meanParseUs": 19.91,
+      "meanRenderUs": 30.75,
+      "meanFlatUs": 578.85
+    },
+    "railroad": {
+      "sampleCount": 8,
+      "meanCssUs": 103.36,
+      "meanParseUs": 28.95,
+      "meanRenderUs": 78.98,
+      "meanFlatUs": 820.13
+    },
+    "swimlane": {
+      "sampleCount": 8,
+      "meanCssUs": 153.15,
+      "meanParseUs": 28.91,
+      "meanRenderUs": 110.0,
+      "meanFlatUs": 526.0
+    },
+    "treeview": {
+      "sampleCount": 8,
+      "meanCssUs": 37.34,
+      "meanParseUs": 20.09,
+      "meanRenderUs": 17.7,
+      "meanFlatUs": 381.77
+    },
+    "treemap": {
+      "sampleCount": 8,
+      "meanCssUs": 54.03,
+      "meanParseUs": 14.71,
+      "meanRenderUs": 34.0,
+      "meanFlatUs": 585.97
+    },
+    "usecase": {
+      "sampleCount": 8,
+      "meanCssUs": 126.82,
+      "meanParseUs": 45.72,
+      "meanRenderUs": 101.05,
+      "meanFlatUs": 671.82
+    },
+    "venn": {
+      "sampleCount": 8,
+      "meanCssUs": 192.16,
+      "meanParseUs": 7.42,
+      "meanRenderUs": 214.53,
+      "meanFlatUs": 472.52
+    },
+    "wardley": {
+      "sampleCount": 8,
+      "meanCssUs": 65.73,
+      "meanParseUs": 23.79,
+      "meanRenderUs": 37.97,
+      "meanFlatUs": 430.49
+    }
+  }
+}

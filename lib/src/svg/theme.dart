@@ -12,10 +12,13 @@ const String radius = 'var(--pele-radius,4px)';
 const String roundedAttr = ' style="rx:var(--_r)"';
 
 final RegExp _reFill = RegExp(r'[";]fill:');
+final RegExp _reImportant = RegExp(r'!important', caseSensitive: false);
+final RegExp _rePxSize = RegExp(r'^[\d.]+(px)?$');
 
-bool setsFill(String shape) => _reFill.hasMatch(shape);
+bool setsFill(String shape) => shape.isNotEmpty && _reFill.hasMatch(shape);
 
 String rounded(String attrs) {
+  if (attrs.isEmpty) return roundedAttr;
   final at = attrs.indexOf(' style="');
   return at < 0
       ? '$attrs$roundedAttr'
@@ -112,13 +115,8 @@ ResolvedStyle resolveStyle(List<String> declarations) {
     final at = decl.indexOf(':');
     if (at <= 0) continue;
     final prop = decl.substring(0, at).trim().toLowerCase();
-    final value = decl
-        .substring(at + 1)
-        .replaceAll(RegExp(r'!important', caseSensitive: false), '')
-        .trim();
-    if (value.isEmpty ||
-        _reUnsafe.hasMatch(value) ||
-        reInvalidXml.hasMatch(value)) {
+    final value = decl.substring(at + 1).replaceAll(_reImportant, '').trim();
+    if (value.isEmpty || _reUnsafe.hasMatch(value) || hasInvalidXml(value)) {
       continue;
     }
     if (_shapeProps.contains(prop)) shape[prop] = value;
@@ -142,7 +140,7 @@ ResolvedStyle resolveStyle(List<String> declarations) {
   final weight = text['font-weight'];
   final size = text['font-size'];
   double? px;
-  if (size != null && RegExp(r'^[\d.]+(px)?$').hasMatch(size)) {
+  if (size != null && _rePxSize.hasMatch(size)) {
     final numPart = size.endsWith('px')
         ? size.substring(0, size.length - 2)
         : size;
@@ -166,22 +164,20 @@ ResolvedStyle resolveStyle(List<String> declarations) {
 final RegExp _reClass = RegExp(r'[^\w-]+');
 
 String classNames(String raw) {
+  if (raw.isEmpty) return '';
   final cleaned = raw.replaceAll(_reClass, ' ').trim();
   return cleaned.isEmpty ? '' : ' $cleaned';
 }
 
-const List<String> _series = [
-  '#4c78a8',
-  '#f58518',
-  '#54a24b',
-  '#e45756',
-  '#72b7b2',
-  '#eeca3b',
-  '#b279a2',
-  '#9d755d',
+const List<String> _seriesVars = [
+  'var(--pele-series-1,#4c78a8)',
+  'var(--pele-series-2,#f58518)',
+  'var(--pele-series-3,#54a24b)',
+  'var(--pele-series-4,#e45756)',
+  'var(--pele-series-5,#72b7b2)',
+  'var(--pele-series-6,#eeca3b)',
+  'var(--pele-series-7,#b279a2)',
+  'var(--pele-series-8,#9d755d)',
 ];
 
-String seriesColor(int index) {
-  final k = ((index % 8) + 8) % 8;
-  return 'var(--pele-series-${k + 1},${_series[k]})';
-}
+String seriesColor(int index) => _seriesVars[index & 7];

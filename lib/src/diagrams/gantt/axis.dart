@@ -19,79 +19,119 @@ typedef TickUnit = String; // 'millisecond' | 'second' | 'minute' | 'hour' | 'da
 
 class _MDate {
   DateTime? _dt;
+  DateTime? _wall;
+  int _tzMin = 0;
 
   _MDate(num ms) {
     setTime(ms);
   }
 
-  _MDate.fromDateTime(DateTime dt) : _dt = isValid(dt) ? dt : null;
+  _MDate.fromDateTime(DateTime dt) {
+    _assign(isValid(dt) ? dt : null);
+  }
+
+  void _assign(DateTime? dt) {
+    _dt = dt;
+    _wall = null;
+  }
+
+  DateTime get _w {
+    var w = _wall;
+    if (w == null) {
+      final dt = _dt!;
+      if (dt.isUtc) {
+        w = dt;
+        _tzMin = 0;
+      } else {
+        final offset = dt.timeZoneOffset;
+        _tzMin = -offset.inMinutes;
+        w = DateTime.fromMillisecondsSinceEpoch(
+          dt.millisecondsSinceEpoch + offset.inMilliseconds,
+          isUtc: true,
+        );
+      }
+      _wall = w;
+    }
+    return w;
+  }
 
   bool get isFinite => _dt != null;
   double get ms => _dt?.millisecondsSinceEpoch.toDouble() ?? double.nan;
 
   void setTime(num ms) {
-    _dt = dateFromMs(ms);
+    _assign(dateFromMs(ms));
   }
 
-  int getMilliseconds() => _dt!.millisecond;
-  int getSeconds() => _dt!.second;
-  int getUTCSeconds() => _dt!.toUtc().second;
-  int getMinutes() => _dt!.minute;
-  int getHours() => _dt!.hour;
-  int getDate() => _dt!.day;
-  int getDay() => _dt!.weekday % 7;
-  int getMonth() => _dt!.month - 1;
-  int getFullYear() => _dt!.year;
-  int getTimezoneOffset() => -_dt!.timeZoneOffset.inMinutes;
+  int getMilliseconds() {
+    final rem = _dt!.millisecondsSinceEpoch % 1000;
+    return rem < 0 ? rem + 1000 : rem;
+  }
+
+  int getSeconds() => _w.second;
+  int getUTCSeconds() {
+    final sec = (_dt!.millisecondsSinceEpoch / 1000).floor() % 60;
+    return sec < 0 ? sec + 60 : sec;
+  }
+
+  int getMinutes() => _w.minute;
+  int getHours() => _w.hour;
+  int getDate() => _w.day;
+  int getDay() => _w.weekday % 7;
+  int getMonth() => _w.month - 1;
+  int getFullYear() => _w.year;
+  int getTimezoneOffset() {
+    _w;
+    return _tzMin;
+  }
 
   void setHours(int h, [int m = 0, int s = 0, int ms = 0]) {
-    final d = _dt;
-    if (d == null) return;
-    _dt = makeLocalDate(d.year, d.month - 1, d.day, h, m, s, ms, false);
+    if (_dt == null) return;
+    final w = _w;
+    if (w.hour == h && w.minute == m && w.second == s && w.millisecond == ms) {
+      return;
+    }
+    _assign(makeLocalDate(w.year, w.month - 1, w.day, h, m, s, ms, false));
   }
 
   void setDate(int day) {
-    final d = _dt;
-    if (d == null) return;
-    _dt = makeLocalDate(
-      d.year,
-      d.month - 1,
-      day,
-      d.hour,
-      d.minute,
-      d.second,
-      d.millisecond,
-      false,
-    );
+    if (_dt == null) return;
+    final w = _w;
+    final curDay = w.day;
+    if (day == curDay) return;
+    _assign(addDays(_dt!, day - curDay));
   }
 
   void setMonth(int month0, [int? day]) {
-    final d = _dt;
-    if (d == null) return;
-    _dt = makeLocalDate(
-      d.year,
-      month0,
-      day ?? d.day,
-      d.hour,
-      d.minute,
-      d.second,
-      d.millisecond,
-      false,
+    if (_dt == null) return;
+    final w = _w;
+    _assign(
+      makeLocalDate(
+        w.year,
+        month0,
+        day ?? w.day,
+        w.hour,
+        w.minute,
+        w.second,
+        w.millisecond,
+        false,
+      ),
     );
   }
 
   void setFullYear(int year) {
-    final d = _dt;
-    if (d == null) return;
-    _dt = makeLocalDate(
-      year,
-      d.month - 1,
-      d.day,
-      d.hour,
-      d.minute,
-      d.second,
-      d.millisecond,
-      false,
+    if (_dt == null) return;
+    final w = _w;
+    _assign(
+      makeLocalDate(
+        year,
+        w.month - 1,
+        w.day,
+        w.hour,
+        w.minute,
+        w.second,
+        w.millisecond,
+        false,
+      ),
     );
   }
 }
@@ -455,6 +495,10 @@ const Map<String, String> _pads = <String, String>{'-': '', '_': ' ', '0': '0'};
 
 // Formats a date with a d3 time format specifier such as `%Y-%m-%d`.
 String timeFormat(String specifier, DateTime date) {
+  if (specifier == '%Y-%m-%d') return isoDate(date);
+  if (specifier == '%s') {
+    return '${(date.millisecondsSinceEpoch / 1000).floor()}';
+  }
   final md = _MDate.fromDateTime(date);
   final out = StringBuffer();
   var from = 0;

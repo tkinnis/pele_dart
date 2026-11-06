@@ -73,12 +73,20 @@ int _lastBrace = -2;
 // In the other grammars an `accDescr {` that never closes ends the lexing. Here `accDescr` is
 // also a name and `{` a token, so each unclosed one would read to the end of the text again.
 int _matchAccDescr(String src, int at, [int _ = -1]) {
-  final blockEnd = matchSticky(_reBlock, src, at);
+  final n = src.length;
+  var q = at;
+  while (q < n) {
+    final c = src.codeUnitAt(q);
+    if (c != 32 && c != 9) break;
+    q++;
+  }
+  if (!src.startsWith('accDescr', q)) return -1;
+  final blockEnd = matchSticky(_reBlock, src, q);
   if (blockEnd != -1) {
     if (_lastBrace == -2) _lastBrace = src.lastIndexOf('}');
     if (blockEnd > _lastBrace) return -1;
   }
-  return matchSticky(_reAccDescr, src, at);
+  return matchSticky(_reAccDescr, src, q);
 }
 
 final TokenType _id = TokenType(
@@ -111,6 +119,7 @@ final List<TokenType> RADAR_TOKENS = <TokenType>[
     name: _kwRadar.name,
     pattern: _kwRadar.pattern,
     first: _kwRadar.first,
+    match: _kwRadar.match,
     longer: <TokenType>[_id],
   ),
   _word('showLegend'),
@@ -129,11 +138,13 @@ final List<TokenType> RADAR_TOKENS = <TokenType>[
   TokenType(
     name: 'GRATICULE',
     pattern: _reGraticule,
+    first: 'cp',
     match: _optionValue(_reGraticule, _T.graticule),
   ),
   TokenType(
     name: 'BOOLEAN',
     pattern: _reBoolean,
+    first: 'tf',
     match: _optionValue(_reBoolean, _T.showLegend),
   ),
   TokenType(
@@ -147,6 +158,7 @@ final List<TokenType> RADAR_TOKENS = <TokenType>[
   TokenType(
     name: 'NUMBER',
     pattern: RegExp(r'(?:[0-9]+\.[0-9]+(?!\.))|(?:0|[1-9][0-9]*(?!\.))'),
+    first: '0123456789',
     match: _matchNumber,
   ),
   STRING,

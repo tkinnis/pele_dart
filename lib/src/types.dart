@@ -88,10 +88,8 @@ class PelePalette {
     this.strokeWidth = 1.25,
     this.thickStrokeWidth = 2.5,
     this.hairlineStrokeWidth = 0.5,
-    this.fontFamily =
-        '-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif',
-    this.monoFontFamily =
-        'ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace',
+    this.fontFamily = 'Helvetica,Arial,sans-serif',
+    this.monoFontFamily = 'Menlo,Monaco,Consolas,monospace',
     this.colors = const <String>[
       '#4c78a8',
       '#f58518',

@@ -1,6 +1,6 @@
 ---
 name: sync-upstream-pele
-description: Detects new upstream obsidianmd/pele releases, commits, and target Mermaid.js version changes, ports TypeScript changes 1:1 into pele_dart (bug fixes, new diagram families, beta-to-stable promotions), refreshes showcase app bundles and galleries, runs the 787-diagram differential verification suite, and cuts an updated release.
+description: Detects new upstream obsidianmd/pele releases, commits, and target Mermaid.js version changes, ports TypeScript changes 1:1 into pele_dart (bug fixes, new diagram families, beta-to-stable promotions) while preserving Dart AOT hot-path optimizations, refreshes showcase app bundles and galleries, runs the 787-diagram differential verification suite and native AOT benchmark regression gate, and cuts an updated release.
 ---
 
 # Sync Upstream `obsidianmd/pele` Skill (`sync-upstream-pele`)
@@ -66,21 +66,26 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 
 ### A. Bug Fixes & Modified Files (`M src/<path>.ts`)
 * Locate the mapped Dart file listed in `.upstream/diff_report.md` (every Dart file under `lib/src/` begins with `// Upstream: src/<path>.ts`).
-* Apply the exact algorithmic and structural change in Dart 3 while respecting the TypeScript-to-Dart semantic rules in [`AGENTS.md`](../../../AGENTS.md):
+* Apply the exact algorithmic and structural change in Dart 3 while respecting the TypeScript-to-Dart semantic and **Dart AOT Hot-Path** rules in [`AGENTS.md`](../../../AGENTS.md):
   - 32-bit signed/unsigned bitwise math (`.toSigned(32)` / `.toUnsigned(32)`).
   - Out-of-bounds-safe slicing (`jsSlice` / `jsSubstr`).
   - Trailing-zero-stripped number formatting (`num()`).
+  - **Preserve Dart AOT Hot-Path Optimizations**:
+    - In [`lib/src/detect.dart`](../../../lib/src/detect.dart), maintain the leading-whitespace skip + first-character `switch` dispatch returning `const Detected` instances (never replace with a sequential `RegExp` array scan).
+    - In [`lib/src/diagrams/common/tokens.dart`](../../../lib/src/diagrams/common/tokens.dart), keep the `re: RegExp(...)` definition on each `TokenType` for 1:1 diffing alongside fast `match` closures and `_compileFastMatcher` / `_inferFirstChars` in `_prepare()`. If an upstream diff modifies a token rule that has a manual `match` closure, update both `re:` and `match:` in lockstep.
+    - In [`lib/src/diagrams/common/outline.dart`](../../../lib/src/diagrams/common/outline.dart), [`lib/src/text/label.dart`](../../../lib/src/text/label.dart), [`lib/src/preprocess.dart`](../../../lib/src/preprocess.dart), and [`lib/src/util/yaml.dart`](../../../lib/src/util/yaml.dart), preserve `codeUnitAt` scanning and slice-based `StringBuffer.write(source.substring(start, end))` instead of per-character `String` indexing (`s[i]`) or backtracking regexes in inner loops.
+    - In [`lib/src/diagrams/gantt/dates.dart`](../../../lib/src/diagrams/gantt/dates.dart), keep `_MDate._w` lazy so `DateTime.timeZoneOffset` (`localtime_r` OS syscall) is only queried when local wall-clock fields are read.
   - If `src/svg/theme.ts` or `src/svg/root.ts` changes CSS variables or `SERIES` colors, update both `lib/src/svg/theme.dart` / `lib/src/svg/root.dart` **and** `lib/src/svg/flattener.dart` + `lib/src/types.dart` (`PelePalette`) so `SvgOutputMode.flattened` stays 100% aligned with `SvgOutputMode.cssVariables`.
 
 ### B. Beta-to-Stable Diagram Promotions or Detector Changes (`M src/detect.ts`)
 * When upstream promotes a diagram from `<name>-beta` to `<name>` (or adds an alias in `src/detect.ts`):
-  1. Update `_detectors` in [`lib/src/detect.dart`](../../../lib/src/detect.dart) to match `src/detect.ts` 1:1.
-  2. Update the diagram's `parser.dart` header regex if it strips the first-line keyword.
+  1. Update the first-character `switch` branch in [`lib/src/detect.dart`](../../../lib/src/detect.dart) to match `src/detect.ts` 1:1.
+  2. Update the diagram's `parser.dart` header matcher if it strips the first-line keyword.
   3. Update `"beta": false` in `example/diagrams/02_extended/<type>/family.json` and any updated `.mmd` sample headers in `example/diagrams/02_extended/<type>/*.mmd`.
 
 ### C. New Diagram Families (`A src/diagrams/<new_type>/...`)
 1. Create `lib/src/diagrams/<new_type>/` with 1:1 Dart counterparts for each `.ts` file (`model.dart`, `parser.dart`, `layout.dart`, `render.dart`, `index.dart`), each starting with `// Upstream: src/diagrams/<new_type>/<file>.ts`.
-2. Add the detector regex to [`lib/src/detect.dart`](../../../lib/src/detect.dart) matching `src/detect.ts`.
+2. Add the detector branch to [`lib/src/detect.dart`](../../../lib/src/detect.dart) matching `src/detect.ts`.
 3. Register the diagram in [`lib/src/diagrams/registry.dart`](../../../lib/src/diagrams/registry.dart) matching `src/diagrams/registry.ts`.
 4. Export the new diagram entrypoint if upstream exports it in `src/index.ts`.
 5. Add a canonical sample to `_sampleCorpus` in [`tool/verify_against_upstream.dart`](../../../tool/verify_against_upstream.dart).
@@ -90,9 +95,9 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 
 ---
 
-## 4. Regenerate Standalone Diagram Images & Verify 100% Parity
+## 4. Regenerate Standalone Diagram Images, Verify 100% Parity & Run Benchmark Gate
 
-Before cutting or pushing any release, regenerate all standalone diagram and style images and run the complete verification suite. **All gates must pass with 0 diffs and 0 issues**:
+Before cutting or pushing any release, regenerate all standalone diagram and style images, run the differential parity suite, and run the **Native AOT Benchmark & Regression Gate**. **All gates must pass with 0 diffs, 0 regressions, and 0 issues**:
 
 ```bash
 # 1. Regenerate clean standalone SVG renders of every diagram family (docs/images/diagrams/*.svg),
@@ -108,6 +113,9 @@ dart test
 
 # 4. 787+ diagram differential & flattened-SVG verification against .upstream
 dart run tool/verify_against_upstream.dart
+
+# 5. Native AOT benchmark report update & non-regression gate
+dart run tool/benchmark_suite.dart --update-docs --check-regressions
 ```
 
 Confirm that:
@@ -116,6 +124,7 @@ Confirm that:
   * `exactUpstreamMatches` == total canonical diagrams
   * `exactGalleryMatches` == `totalGallerySamples`
   * `exactCorpusMatches` == `totalCorpusSamples` (all 522+ `.upstream/tests/corpus/*.json` diagrams)
+* `tool/benchmark_suite.dart --update-docs --check-regressions` refreshes [`docs/BENCHMARKS.md`](../../../docs/BENCHMARKS.md) and prints `✅ BENCHMARK REGRESSION GATE PASSED`. If any diagram family or phase (`PARSE` or `RENDER`) regresses after syncing upstream changes, optimize the newly synced hot path (using `codeUnitAt` scanners or fast token matchers) and re-run before proceeding to release.
 
 ---
 

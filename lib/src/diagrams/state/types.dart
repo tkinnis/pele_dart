@@ -1,5 +1,7 @@
 // Upstream: src/diagrams/state/types.ts
 
+import '../../svg/root.dart';
+
 class StateNote {
   StateNote({this.position, required this.text});
 
@@ -151,7 +153,7 @@ class StateLink {
   final String tooltip;
 }
 
-abstract interface class StateModel {
+abstract interface class StateModel implements Accessible {
   String get type;
   String get direction;
   List<Stmt> get rootDoc;
@@ -160,6 +162,8 @@ abstract interface class StateModel {
   Map<String, StateClassDef> get classes;
   Map<String, StateLink> get links;
   String? get title;
+  @override
   String? get accTitle;
+  @override
   String? get accDescr;
 }

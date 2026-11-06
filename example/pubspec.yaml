@@ -28,3 +28,4 @@ flutter:
   assets:
     - assets/pele.bundle.js
     - assets/mermaid.min.js
+    - assets/app_icon.png
