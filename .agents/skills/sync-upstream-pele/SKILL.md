@@ -66,15 +66,9 @@ Read `.upstream/diff_report.md` (or run `dart run tool/sync_upstream.dart --diff
 
 ### A. Bug Fixes & Modified Files (`M src/<path>.ts`)
 * Locate the mapped Dart file listed in `.upstream/diff_report.md` (every Dart file under `lib/src/` begins with `// Upstream: src/<path>.ts`).
-* Apply the exact algorithmic and structural change in Dart 3 while respecting the TypeScript-to-Dart semantic and **Dart AOT Hot-Path** rules in [`AGENTS.md`](../../../AGENTS.md):
-  - 32-bit signed/unsigned bitwise math (`.toSigned(32)` / `.toUnsigned(32)`).
-  - Out-of-bounds-safe slicing (`jsSlice` / `jsSubstr`).
-  - Trailing-zero-stripped number formatting (`num()`).
-  - **Preserve Dart AOT Hot-Path Optimizations**:
-    - In [`lib/src/detect.dart`](../../../lib/src/detect.dart), maintain the leading-whitespace skip + first-character `switch` dispatch returning `const Detected` instances (never replace with a sequential `RegExp` array scan).
-    - In [`lib/src/diagrams/common/tokens.dart`](../../../lib/src/diagrams/common/tokens.dart), keep the `re: RegExp(...)` definition on each `TokenType` for 1:1 diffing alongside fast `match` closures and `_compileFastMatcher` / `_inferFirstChars` in `_prepare()`. If an upstream diff modifies a token rule that has a manual `match` closure, update both `re:` and `match:` in lockstep.
-    - In [`lib/src/diagrams/common/outline.dart`](../../../lib/src/diagrams/common/outline.dart), [`lib/src/text/label.dart`](../../../lib/src/text/label.dart), [`lib/src/preprocess.dart`](../../../lib/src/preprocess.dart), and [`lib/src/util/yaml.dart`](../../../lib/src/util/yaml.dart), preserve `codeUnitAt` scanning and slice-based `StringBuffer.write(source.substring(start, end))` instead of per-character `String` indexing (`s[i]`) or backtracking regexes in inner loops.
-    - In [`lib/src/diagrams/gantt/dates.dart`](../../../lib/src/diagrams/gantt/dates.dart), keep `_MDate._w` lazy so `DateTime.timeZoneOffset` (`localtime_r` OS syscall) is only queried when local wall-clock fields are read.
+* Apply the exact algorithmic and structural change in Dart 3 while respecting the TypeScript-to-Dart semantic rules in [`AGENTS.md`](../../../AGENTS.md) and the 5 Dart AOT hot-path invariants in [`doc/ARCHITECTURE.md` (§5)](../../../doc/ARCHITECTURE.md#5-native-dart-aot-performance-architecture):
+  - 32-bit signed/unsigned bitwise math (`.toSigned(32)` / `.toUnsigned(32)`), out-of-bounds-safe slicing (`jsSlice` / `jsSubstr`), and trailing-zero-stripped number formatting (`fmtNum()`).
+  - Preserve `O(1)` first-character `switch` dispatch in [`lib/src/detect.dart`](../../../lib/src/detect.dart), paired `re:` + fast `match` closures in [`lib/src/diagrams/common/tokens.dart`](../../../lib/src/diagrams/common/tokens.dart), `codeUnitAt` slice scanning in `outline.dart` / `label.dart` / `preprocess.dart` / `yaml.dart`, and lazy `_MDate._w` evaluation in [`lib/src/diagrams/gantt/dates.dart`](../../../lib/src/diagrams/gantt/dates.dart).
   - If `src/svg/theme.ts` or `src/svg/root.ts` changes CSS variables or `SERIES` colors, update both `lib/src/svg/theme.dart` / `lib/src/svg/root.dart` **and** `lib/src/svg/flattener.dart` + `lib/src/types.dart` (`PelePalette`) so `SvgOutputMode.flattened` stays 100% aligned with `SvgOutputMode.cssVariables`.
 
 ### B. Beta-to-Stable Diagram Promotions or Detector Changes (`M src/detect.ts`)
@@ -106,7 +100,7 @@ dart run tool/generate_doc_images.dart
 
 # 2. Format and static analysis (0 warnings/errors/infos)
 dart format lib test tool studio/lib example/main.dart
-dart analyze --fatal-infos lib test tool example
+dart analyze --fatal-infos lib test tool studio example
 
 # 3. Full unit, gallery corpus, and upstream differential test suite
 dart test

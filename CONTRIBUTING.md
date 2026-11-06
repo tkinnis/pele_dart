@@ -53,7 +53,7 @@ dart format --output=none --set-exit-if-changed lib test tool studio/lib example
 
 ### 2. Static Analysis (Zero Warnings / Infos)
 ```bash
-dart analyze --fatal-infos lib test tool
+dart analyze --fatal-infos lib test tool studio example
 ```
 
 ### 3. Test Suite
@@ -61,11 +61,12 @@ dart analyze --fatal-infos lib test tool
 dart test
 ```
 
-### 4. Upstream 1:1 Parity Verification *(when `.upstream/` is present)*
-To check for upstream `obsidianmd/pele` updates or verify byte-for-byte SVG parity across all canonical, gallery, and test corpus diagrams:
+### 4. Upstream 1:1 Parity & Native AOT Benchmark Gates *(when `.upstream/` is present)*
+To check for upstream `obsidianmd/pele` updates, verify 100% byte-for-byte SVG parity across all canonical, gallery, and test corpus diagrams, and verify zero native Dart AOT performance regressions:
 ```bash
 dart run tool/sync_upstream.dart --check
 dart run tool/verify_against_upstream.dart
+dart run tool/benchmark_suite.dart --check-regressions
 ```
 
 ### 5. Documentation & SVG Gallery Regeneration

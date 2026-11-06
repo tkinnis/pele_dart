@@ -20,17 +20,27 @@ flowchart LR
   C -->|cssVariables| E[Web / Themeable --pele-* CSS SVG]
 ''';
 
-  // 1. Default flattened SVG (ready for vector_graphics_compiler):
-  final RenderResult lightResult = render(
+  // 1. Render to flattened static SVG 1.1 (default) with PelePalette.light:
+  final RenderResult result = render(
     source,
     const RenderOptions(
       outputMode: SvgOutputMode.flattened,
       palette: PelePalette.light,
     ),
   );
-  print('Rendered ${lightResult.type} (${lightResult.width}x${lightResult.height})');
+  print(
+    'Rendered ${result.type} (${result.mermaidType}): '
+    '${result.width}x${result.height} px (${result.svg.length} chars)',
+  );
 
-  // 2. Supplying a custom PelePalette:
+  // 2. Parse once and re-render across light, dark, and custom palettes:
+  final Object model = parse(source);
+  final RenderResult darkResult = render(
+    model,
+    const RenderOptions(palette: PelePalette.dark),
+  );
+  print('Dark mode SVG: ${darkResult.svg.length} chars');
+
   const customPalette = PelePalette(
     bg: '#1e1e2e',
     fg: '#cdd6f4',
@@ -40,26 +50,30 @@ flowchart LR
     accent: '#89b4fa',
     radius: 8,
   );
-  final String customSvg = renderMermaid(
-    source,
-    options: const RenderOptions(palette: customPalette),
+  final RenderResult customResult = render(
+    model,
+    const RenderOptions(palette: customPalette),
   );
-  print('Custom palette SVG length: ${customSvg.length} chars');
+  print('Custom palette SVG: ${customResult.svg.length} chars');
 
-  // 3. Two-phase parse() + render() for fast theme switching:
-  final ParsedDiagram parsed = parse(
-    'sequenceDiagram\n  Alice->>Bob: Ping\n  Bob-->>Alice: Pong',
+  // 3. Emit upstream obsidianmd/pele CSS-variable SVG for web/DOM hosts:
+  final RenderResult cssVarResult = render(
+    model,
+    const RenderOptions(outputMode: SvgOutputMode.cssVariables),
   );
-  final String darkSeq = render(
-    parsed,
-    const RenderOptions(palette: PelePalette.dark),
-  ).svg;
-  print('Parsed ${parsed.type} -> ${darkSeq.length} chars');
+  print('CSS-variable SVG: ${cssVarResult.svg.length} chars');
+
+  // 4. Structured error handling with line/column/caret snippet:
+  try {
+    render('flowchart LR\n  A -->');
+  } on PeleError catch (e) {
+    print('Caught expected ${e.code} error on line ${e.line}:\n${e.snippet}');
+  }
 }
 ```
 
 ## Additional Guides & macOS Workbench
 
-* **[API User Manual](https://github.com/tkinnis/pele_dart/blob/main/doc/API_MANUAL.md)** — Complete API reference and Flutter `vector_graphics` widget guide.
-* **[Visual Diagram Gallery](https://github.com/tkinnis/pele_dart/blob/main/doc/DIAGRAM_GALLERY.md)** — Rendered SVG outputs and Mermaid source for all supported diagram families.
-* **[Pele Studio User Guide](https://github.com/tkinnis/pele_dart/blob/main/doc/STUDIO_GUIDE.md)** — Native macOS 3-way comparison workbench (`cd studio && flutter run -d macos --release`).
+* **[API User Manual](../doc/API_MANUAL.md)** — Complete API reference and Flutter `vector_graphics` widget guide.
+* **[Visual Diagram Gallery](../doc/DIAGRAM_GALLERY.md)** — Rendered SVG outputs and Mermaid source for all supported diagram families.
+* **[Pele Studio User Guide](../doc/STUDIO_GUIDE.md)** — Native macOS 3-way comparison workbench (`cd studio && flutter run -d macos --release`).

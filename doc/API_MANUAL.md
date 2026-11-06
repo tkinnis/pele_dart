@@ -358,8 +358,8 @@ flowchart LR
 
 ![In-Diagram Mermaid classDef Styling](images/styles/style_mermaid_classdef.svg)
 
-> **Interactive Style Playground in the Example App:**
-> Launch the macOS showcase app (`cd example && flutter run -d macos`) to switch between canned style presets in the top toolbar or open the **`Style (CSS)`** tab in the Playground Editor to type in your own `--pele-*` variables and preview them live across `pele_dart` and `obsidianmd/pele`.
+> **Interactive Style Playground in Pele Studio:**
+> Launch the macOS comparison workbench (`cd studio && flutter run -d macos --release` — see the [Pele Studio User Guide](STUDIO_GUIDE.md)) to switch between canned style presets in the top toolbar or open the **`Style (CSS)`** tab in the Playground Editor to type in your own `--pele-*` variables and preview them live across `pele_dart` and `obsidianmd/pele`.
 
 ---
 

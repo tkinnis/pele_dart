@@ -140,9 +140,9 @@ The agent will:
 
 When Mermaid or upstream `obsidianmd/pele` promotes a diagram out of beta (for example, changing `^\s*radar-beta` to `^\s*radar(-beta)?` or renaming a `MermaidType` identifier):
 
-1. **`lib/src/detect.dart`**: Update the `_detectors` table regex, ordering, and `(DiagramType, MermaidType, RegExp)` tuple to match `.upstream/src/detect.ts` 1:1.
+1. **`lib/src/detect.dart`**: Update the first-character `switch` branch in `detectDiagram()` and the returned `const Detected(...)` metadata to match `.upstream/src/detect.ts` 1:1.
 2. **`lib/src/diagrams/<type>/parser.dart`**: Update the header-stripping regex in the diagram's parser so both the stable keyword (e.g., `radar`) and legacy beta keyword (`radar-beta`) are accepted if upstream supports both.
-3. **`test/detect_test.dart` & `test/diagrams/<type>_test.dart`**: Add test cases verifying that both the promoted keyword and any backward-compatible `-beta` alias detect and render identically.
+3. **`test/core_test.dart`, `test/doc_examples_test.dart` & `test/diagrams/<type>_test.dart`**: Add test cases verifying that both the promoted keyword and any backward-compatible `-beta` alias detect and render identically.
 4. **`doc/API_MANUAL.md`**: Update the Supported Diagram Families table in Section 10.
 
 ### C. New Diagram Families
@@ -151,7 +151,7 @@ When `.upstream/diff_report.md` lists a new directory `src/diagrams/<new_type>/`
 
 1. Create `lib/src/diagrams/<new_type>/` containing the 1:1 Dart files (`model.dart`, `parser.dart`, `layout.dart`, `render.dart`, etc.), each starting with `// Upstream: src/diagrams/<new_type>/<file>.ts`.
 2. Register the diagram in:
-   - `lib/src/detect.dart` (`_detectors` list, in the exact order of `.upstream/src/detect.ts`).
+   - `lib/src/detect.dart` (`detectDiagram()` first-character `switch` dispatch, matching `.upstream/src/detect.ts`).
    - `lib/src/diagrams/registry.dart` (`all` list).
 3. Add a canonical sample for `<new_type>` to `tool/verify_against_upstream.dart` (`_sampleCorpus`).
 4. Create `test/diagrams/<new_type>_test.dart` covering parsing, layout, `SvgOutputMode.cssVariables`, and `SvgOutputMode.flattened` compilation with `vector_graphics_compiler` (`encodeSvg`).
@@ -184,7 +184,7 @@ This tool verifies:
 Then run the standard Dart quality gates and the **Native AOT Benchmark Regression Gate**:
 
 ```bash
-dart analyze --fatal-infos lib test tool example
+dart analyze --fatal-infos lib test tool studio example
 dart test
 dart format --output=none --set-exit-if-changed lib test tool studio/lib example/main.dart
 dart run tool/benchmark_suite.dart --update-docs --check-regressions

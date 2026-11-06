@@ -35,7 +35,7 @@ import 'venn/index.dart';
 import 'wardley/index.dart';
 import 'xychart/index.dart';
 
-/// Every implemented diagram type.
+/// Read-only list of all built-in [AnyDiagram] plugins registered by default.
 final List<AnyDiagram> all = <AnyDiagram>[
   flowchart,
   pie,

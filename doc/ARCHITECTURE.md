@@ -23,7 +23,7 @@ Traditional Mermaid diagram rendering in Dart and Flutter applications requires 
 4. **Dual SVG Output Modes (`SvgOutputMode`)**:
    * **`SvgOutputMode.flattened`** *(Default)*: Emits static SVG 1.1 primitives compatible with `vector_graphics_compiler` (`encodeSvg`).
    * **`SvgOutputMode.cssVariables`** *(Upstream Parity)*: Emits byte-for-byte identical SVG to upstream `obsidianmd/pele` (`var(--pele-*)` CSS custom properties and `color-mix(in srgb, ...)`).
-5. **Defense-in-Depth Resource Budgets**: Enforces pre-parse and post-parse DoS safety limits (source byte length, node/edge counts, subgraph recursion depth, output element budget, and dash segment caps).
+5. **Defense-in-Depth Resource Budgets**: Enforces pre-parse and post-render DoS safety limits (`limit` source characters, `maxEdges` graph edge cap, `outputLimit` SVG characters, and `StackOverflowError` catching for deeply nested diagrams).
 
 ---
 
@@ -36,7 +36,7 @@ flowchart LR
   C --> D["Deterministic Layout Engine\n(layout/layered, compound, lanes)"]
   D --> E["Diagram SVG Renderer\n(diagrams/<type>/render.dart)"]
   E --> F{"SvgOutputMode"}
-  F -->|"flattened"| G["SVG 1.1 Flattener (svg/flattener.dart)\n• Resolve --pele-* & --_* variables\n• Evaluate color-mix() & calc()\n• Convert dominant-baseline & baseline-shift to dy\n• Promote inline style attributes"]
+  F -->|"flattened"| G["SVG 1.1 Flattener (svg/flattener.dart)\n• Resolve --pele-* & --_* variables\n• Evaluate color-mix() & calc()\n• Normalize multi-tspan text & baseline-shift\n• Promote inline style attributes"]
   F -->|"cssVariables"| H["Upstream CSS-Variable SVG\n• 100% byte-for-byte parity\n• var(--pele-*) & color-mix()"]
   G --> I["vector_graphics_compiler\n(Native Vector Rendering)"]
   H --> J["Differential Parity Tests\n& Web SVG Export"]
@@ -139,7 +139,7 @@ Upstream `obsidianmd/pele` emits clean, self-contained SVG geometry without `<ma
 * CSS Color 5 `color-mix(in srgb, ...)` expressions
 * `calc(...)` length expressions and `currentColor`
 * Inline `style="..."` geometry/presentation properties (`rx`, `ry`, `fill`, `stroke`, `stroke-dasharray`)
-* SVG text baseline alignment attributes (`dominant-baseline="central|hanging|ideographic"`) and `<tspan baseline-shift="sub|super" font-size="smaller">`
+* Multi-`<tspan>` `<text>` blocks and `<tspan baseline-shift="sub|super" font-size="smaller">`
 
 [`lib/src/svg/flattener.dart`](../lib/src/svg/flattener.dart) (`flattenPeleSvg`) resolves all of these deterministically in pure Dart while keeping the diagram renderers 100% 1:1 with upstream `obsidianmd/pele`:
 
@@ -148,7 +148,7 @@ Upstream `obsidianmd/pele` emits clean, self-contained SVG geometry without `<ma
 | **`var(--pele-*)`, `var(--_*)` & `color-mix(in srgb, ...)`** | Compiler only parses literal hex (`#rrggbb`), `rgb(...)`, or named SVG colors. | Evaluates all `--pele-*` and scope-inherited `--_*` variable bindings plus nested `color-mix(in srgb, ...)` sRGB blends against `PelePalette`, emitting concrete `#rrggbb` / `rgba(...)` values and `fill-opacity` / `stroke-opacity`. |
 | **`calc(...)` & `currentColor`** | Compiler requires numeric length attributes and explicit color values. | Evaluates `calc(...)` arithmetic expressions to numbers and replaces `currentColor` with the resolved foreground color (`--_fg`). |
 | **Inline `style="..."` presentation & geometry properties** | Compiler ignores CSS geometry properties (`rx`, `ry`) and certain presentation properties when only specified inside `style="..."`. | Promotes inline `style="..."` properties (`rx`, `ry`, `fill`, `stroke`, `stroke-width`, `stroke-dasharray`, `opacity`, `font-size`, etc.) to native SVG 1.1 XML attributes and attaches `font-family` and `font-size` to the root `<svg>`. |
-| **`dominant-baseline="central\|hanging\|ideographic"`** | Compiler ignores `dominant-baseline` and always positions `<text>` at its alphabetic baseline. | Translates `central`/`middle` (`+0.35 * fontSize`), `hanging`/`text-before-edge` (`+0.80 * fontSize`), and `ideographic`/`text-after-edge` (`-0.20 * fontSize`) into concrete numeric `dy` offsets on `<text>` and propagates the baseline shift to child `<tspan>` elements that carry explicit `y="..."` coordinates. |
+| **Multi-`<tspan>` `<text>` layout coordinates** | Compiler misaligns sibling `<tspan>` elements inside a single `<text>` node when mixed relative/absolute offsets are used. | `_normalizeMultiSpanTextPositions` splits or normalizes multi-span `<text>` blocks with deterministic horizontal character advances (`metricsMeasurer`) and explicit `x`/`y` coordinates. |
 | **`<tspan baseline-shift="sub\|super" font-size="smaller">`** | Compiler ignores `baseline-shift` and relative keyword `font-size="smaller"`. | Converts `baseline-shift="sub\|super" font-size="smaller"` on `<tspan>` elements into explicit `dy="3"` / `dy="-4"` vertical offsets (with reset `dy` on following sibling `<tspan>`s) and numeric `font-size="10"`. |
 
 ---

@@ -16,7 +16,7 @@ A fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG ren
 
 * **Pure Dart 3 (`sdk: ^3.13.0`)**: Zero browser (`WKWebView` / `WebKitGTK` / `WebView2`), zero JavaScript runtime (`QuickJS` / `JavaScriptCore`), and zero Flutter SDK dependency in the core package. Runs synchronously in CLI tools, servers, background Dart isolates (`Isolate.run`), and Flutter apps.
 * **100% Byte-for-Byte Upstream Parity**: Version-locked 1:1 to upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (see [Upstream Tracking](UPSTREAM.md)) across all supported diagram families, showcase/playground samples, and upstream test corpus diagrams.
-* **Native Dart AOT Performance**: Renders the entire showcase gallery corpus in **~10.2 ms** (`43.8 µs` mean per diagram)—over **2.1x faster** overall (and up to **4.5x faster** on complex Class, Sequence, and Flowchart diagrams) than JavaScript (see [Performance Benchmarks](doc/BENCHMARKS.md)).
+* **Native Dart AOT Performance**: Renders the entire showcase gallery corpus in **~10.2 ms** (`43.8 µs` mean per diagram)—**~2.2x faster** overall (and up to **4.5x faster** on complex Class, Sequence, and Flowchart diagrams) than JavaScript (see [Performance Benchmarks](doc/BENCHMARKS.md)).
 * **Dual SVG Output Modes (`SvgOutputMode`)**:
   * **`SvgOutputMode.flattened`** *(Default)*: Resolves all `--pele-*` CSS custom properties, `color-mix(in srgb, ...)` blends, `calc(...)` expressions, `currentColor`, and `<tspan>` `baseline-shift` against a `PelePalette` into static SVG 1.1 attributes ready for `vector_graphics_compiler` (`encodeSvg`).
   * **`SvgOutputMode.cssVariables`** *(Upstream Parity)*: Emits upstream `obsidianmd/pele`'s exact theme-reactive `var(--pele-*)` SVG markup.

@@ -416,6 +416,9 @@ flowchart LR
       for (final docPath in <String>[
         'README.md',
         'example/README.md',
+        'studio/README.md',
+        'studio/diagrams/README.md',
+        'lib/pele_dart.dart',
         'doc/API_MANUAL.md',
         'doc/ARCHITECTURE.md',
         'doc/BENCHMARKS.md',
@@ -441,12 +444,27 @@ flowchart LR
               '$docPath should not hardcode moving-target diagram family counts ("33 diagram"); refer to UPSTREAM.md instead.',
         );
         expect(
+          docText.toLowerCase(),
+          isNot(contains('renders 33 ')),
+          reason:
+              '$docPath should not hardcode moving-target diagram family counts ("renders 33"); refer to UPSTREAM.md instead.',
+        );
+        expect(
           docText,
           isNot(contains('787')),
           reason:
               '$docPath should not hardcode moving-target corpus counts ("787").',
         );
       }
+
+      // Ensure example/README.md embeds the exact runnable code from example/main.dart.
+      final exampleMain = File('example/main.dart').readAsStringSync().trim();
+      final exampleReadme = File('example/README.md').readAsStringSync();
+      expect(
+        exampleReadme,
+        contains(exampleMain),
+        reason: 'example/README.md should embed the exact runnable Dart code from example/main.dart.',
+      );
     });
 
     test('Every relative file link and image path in markdown docs resolves to an existing file', () {
@@ -459,6 +477,8 @@ flowchart LR
         'AGENTS.md',
         'UPSTREAM.md',
         'example/README.md',
+        'studio/README.md',
+        'studio/diagrams/README.md',
         'doc/API_MANUAL.md',
         'doc/ARCHITECTURE.md',
         'doc/BENCHMARKS.md',

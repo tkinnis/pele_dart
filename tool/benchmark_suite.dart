@@ -1102,45 +1102,25 @@ String _buildBenchmarksMarkdown({
     )
     ..writeln()
     ..writeln(
-      'When syncing new upstream `obsidianmd/pele` commits (see [`doc/UPSTREAM_SYNC.md`](UPSTREAM_SYNC.md) and [`.agents/skills/sync-upstream-pele/SKILL.md`](../.agents/skills/sync-upstream-pele/SKILL.md)), newly ported TypeScript code can introduce Dart AOT regressions if JavaScript idioms (such as sticky/backtracking regex loops or per-character string allocations) are translated naively.',
+      'If `dart run tool/benchmark_suite.dart --check-regressions` flags a regression after porting upstream changes, inspect the reported phase (`PARSE` vs `RENDER`) against the 5 Dart AOT hot-path invariants documented in [**Architecture & Internals — §5. Native Dart AOT Performance Architecture**](ARCHITECTURE.md#5-native-dart-aot-performance-architecture):',
     )
     ..writeln()
+    ..writeln('| Phase / Subsystem | Hot-Path Module(s) | Core Invariant |')
+    ..writeln('| :--- | :--- | :--- |')
     ..writeln(
-      'If `dart run tool/benchmark_suite.dart --check-regressions` flags a regression after porting upstream changes, inspect the reported phase (`PARSE` vs `RENDER`) against these core invariants:',
-    )
-    ..writeln()
-    ..writeln(
-      '1. **Diagram Detection ([`lib/src/detect.dart`](../lib/src/detect.dart))**:',
+      '| **Header Detection** | [`lib/src/detect.dart`](../lib/src/detect.dart) | `O(1)` first-character `switch` dispatch returning `const Detected` (`< 0.50 µs`). |',
     )
     ..writeln(
-      '   - Must remain `< 0.50 µs` (`O(1)` leading-whitespace skip + first-character `switch` dispatch returning `const Detected`). Never replace with a linear loop over a list of `RegExp` patterns.',
+      '| **Lexer & Outline** | [`lib/src/diagrams/common/tokens.dart`](../lib/src/diagrams/common/tokens.dart), [`outline.dart`](../lib/src/diagrams/common/outline.dart) | Keep `re: RegExp(...)` paired with `_compileFastMatcher` / `_inferFirstChars` `codeUnitAt` dispatch. |',
     )
     ..writeln(
-      '2. **Lexer & Tokenization ([`lib/src/diagrams/common/tokens.dart`](../lib/src/diagrams/common/tokens.dart) & [`lib/src/diagrams/common/outline.dart`](../lib/src/diagrams/common/outline.dart))**:',
+      '| **Text & Wrapping** | [`lib/src/text/label.dart`](../lib/src/text/label.dart) | Fast ASCII wrap path (`_isSimpleWrapText`) and slice-based `StringBuffer.write(substring)`. |',
     )
     ..writeln(
-      '   - `TokenType` retains its upstream `re: RegExp(...)` for 1:1 diffing, while `_prepare()` auto-compiles simple patterns into zero-allocation `codeUnitAt` matchers (`_compileFastMatcher`) and a first-character dispatch bitmask (`_inferFirstChars`).',
+      '| **Date Math** | [`lib/src/diagrams/gantt/dates.dart`](../lib/src/diagrams/gantt/dates.dart) | Lazy `_MDate._w` evaluation so epoch math avoids `localtime_r` OS syscalls. |',
     )
     ..writeln(
-      '   - If a newly synced diagram grammar introduces a complex hot-loop `TokenType`, provide an inline `match: (String input, int pos)` closure alongside `re:` if `_compileFastMatcher` cannot auto-specialize it.',
-    )
-    ..writeln(
-      '3. **Text Measurement & Label Wrapping ([`lib/src/text/label.dart`](../lib/src/text/label.dart))**:',
-    )
-    ..writeln(
-      '   - Preserve `_isSimpleWrapText` and `_splitSimplePieces` so standard non-CJK labels bypass `_rePiece` / `_reCjk` / `_reHint` regex matching, and use slice-based `StringBuffer.write(source.substring(start, end))` in `_inline` rather than per-character string concatenation.',
-    )
-    ..writeln(
-      '4. **Date & Timezone Math ([`lib/src/diagrams/gantt/dates.dart`](../lib/src/diagrams/gantt/dates.dart))**:',
-    )
-    ..writeln(
-      '   - In Dart AOT, `DateTime.timeZoneOffset` invokes an OS `localtime_r` syscall. Keep `_MDate._w` lazy and compute sub-minute fields (`getMilliseconds()`, `getUTCSeconds()`) directly from `millisecondsSinceEpoch`.',
-    )
-    ..writeln(
-      '5. **YAML Frontmatter & Preprocessing ([`lib/src/preprocess.dart`](../lib/src/preprocess.dart) & [`lib/src/util/yaml.dart`](../lib/src/util/yaml.dart))**:',
-    )
-    ..writeln(
-      '   - Use `codeUnitAt` scanning (`_stripCommentLines`, `_splitKey`, `_unquoteDouble`) and pre-accumulate multiline quoted scalars before parsing rather than using control-flow exceptions.',
+      '| **Preprocessing** | [`lib/src/preprocess.dart`](../lib/src/preprocess.dart), [`lib/src/util/yaml.dart`](../lib/src/util/yaml.dart) | `codeUnitAt` comment/key scanning without per-line regex allocations. |',
     );
 
   return sb.toString();

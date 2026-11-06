@@ -968,7 +968,7 @@ class _ComparisonStudioScreenState extends State<ComparisonStudioScreen> {
             width: 19,
             height: 19,
             filterQuality: FilterQuality.medium,
-            errorBuilder: (_, __, ___) => const Icon(
+            errorBuilder: (_, _, _) => const Icon(
               Icons.auto_graph,
               color: Color(0xFF00B4D8),
               size: 17,

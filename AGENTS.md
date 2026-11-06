@@ -52,11 +52,7 @@ When translating upstream TypeScript to Dart 3, respect these critical rules:
 3. **Number Formatting**: SVG coordinate formatting must strip trailing zeros and never emit scientific notation (`1e-7`), matching upstream number formatting (`fmtNum()`).
 4. **RegExp Semantics & Dart AOT Hot Paths**:
    * Translate JS `/y` (sticky) or `/g` `lastIndex` loops using `RegExp.matchAsPrefix(input, pos)` or `allMatches(input, pos)`.
-   * **Preserve Dart AOT Hot-Path Optimizations**:
-     * In `lib/src/detect.dart`, maintain the leading-whitespace skip + first-character `switch` dispatch returning `const Detected` instances (never replace with a sequential `RegExp` list scan).
-     * In `lib/src/diagrams/common/tokens.dart`, keep `re: RegExp(...)` on each `TokenType` for 1:1 upstream diffing alongside fast `match` closures and `_compileFastMatcher` / `_inferFirstChars` in `_prepare()`. When an upstream sync changes a token regex that also has an explicit `match` closure, update both in lockstep.
-     * In `lib/src/diagrams/common/outline.dart`, `lib/src/text/label.dart`, `lib/src/preprocess.dart`, and `lib/src/util/yaml.dart`, preserve `codeUnitAt` scanning and slice-based `StringBuffer.write(source.substring(start, end))` instead of per-character `String` indexing (`s[i]`) or backtracking regexes in inner loops.
-     * In `lib/src/diagrams/gantt/dates.dart`, keep `_MDate._w` lazy so `DateTime.timeZoneOffset` (`localtime_r` OS syscall) is only queried when local wall-clock fields are read.
+   * Preserve the 5 Dart AOT hot-path optimizations documented in [`doc/ARCHITECTURE.md` (§5)](doc/ARCHITECTURE.md#5-native-dart-aot-performance-architecture): `O(1)` first-char dispatch in `lib/src/detect.dart`, paired `re:` + fast `codeUnitAt` matchers in `lib/src/diagrams/common/tokens.dart`, slice-based `codeUnitAt` scanning in `outline.dart` / `label.dart` / `preprocess.dart` / `yaml.dart`, and lazy `_MDate._w` timezone evaluation in `lib/src/diagrams/gantt/dates.dart`.
 
 ---
 
@@ -66,7 +62,7 @@ Before completing any task or committing changes, all quality gates must pass:
 
 1. **Static Analysis**:
    ```bash
-   dart analyze --fatal-infos
+   dart analyze --fatal-infos lib test tool studio example
    ```
    Must report **0** errors, warnings, or lints.
 
@@ -99,5 +95,5 @@ Before completing any task or committing changes, all quality gates must pass:
    * Keep [`doc/API_MANUAL.md`](doc/API_MANUAL.md) and [`doc/BENCHMARKS.md`](doc/BENCHMARKS.md) updated whenever public options, APIs, supported diagram families, or upstream releases change.
 
 7. **Commit Policy**:
-   * Follow **Conventional Commits** (`feat(flowchart): ...`, `fix(layout): ...`, `test(sequence): ...`, `docs(design): ...`).
+   * Follow **Conventional Commits** (`feat(flowchart): ...`, `fix(layout): ...`, `test(sequence): ...`, `docs(architecture): ...`).
    * **Strict NO AI References Policy**: Never include `Co-Authored-By`, AI tool names, or agent attributions in commit messages, PR descriptions, or comments.
