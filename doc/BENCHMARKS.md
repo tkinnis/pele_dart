@@ -1,8 +1,18 @@
 # Performance Benchmarks & Upstream Sync Regression Gate
 
-This document reports the native **Dart AOT** rendering performance of `pele_dart` across all **33 diagram families** (**232 diagrams** in the official `studio/diagrams/` gallery corpus) compared against upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (JavaScriptCore; see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned upstream release).
+This document reports the native **Dart AOT** rendering performance of `pele_dart` across all supported diagram families (`studio/diagrams/` gallery corpus) compared against upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (JavaScriptCore; see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned upstream release).
 
-> **Automated Release Gate:** This report and the baseline in [`tool/benchmark_baseline.json`](../tool/benchmark_baseline.json) are generated and verified by [`tool/benchmark_suite.dart`](../tool/benchmark_suite.dart). Every upstream sync must pass `dart run tool/benchmark_suite.dart --update-docs --check-regressions` before pinning [`UPSTREAM.md`](../UPSTREAM.md) or cutting a release.
+> **Automated Release Gate:** This report and the baseline in [`tool/benchmark_baseline.json`](../tool/benchmark_baseline.json) are generated and verified by [`tool/benchmark_suite.dart`](../tool/benchmark_suite.dart). Every upstream sync must pass `dart run tool/benchmark_suite.dart --update-docs --check-regressions` on a quiescent machine (`1m loadavg <= 50%` of cores) before pinning [`UPSTREAM.md`](../UPSTREAM.md) or cutting a release.
+
+### Benchmark Hardware & Runtime Environment
+
+| Property | Specification |
+| :--- | :--- |
+| **Processor** | Apple M4 (10 logical cores) |
+| **Memory & OS** | 32 GB RAM · macOS 15.6 (arm64) |
+| **Dart Compiler** | Dart 3.13.7 (Native AOT executable) (`dart compile exe`) |
+| **JavaScript Baseline** | WebKit JavaScriptCore (`jsc`) — `obsidianmd/pele` bundle |
+| **Machine Load Condition** | Quiescent / idle (`1m loadavg < 5.0`; enforced automatically by `--update-docs`) |
 
 ---
 
@@ -11,13 +21,13 @@ This document reports the native **Dart AOT** rendering performance of `pele_dar
 | Task | Command |
 | :--- | :--- |
 | **Run native AOT benchmark suite & print console table** | `dart run tool/benchmark_suite.dart` |
-| **Update `doc/BENCHMARKS.md` and check for regressions** | `dart run tool/benchmark_suite.dart --update-docs --check-regressions` |
-| **Update baseline after intentional optimizations** | `dart run tool/benchmark_suite.dart --update-docs --update-baseline` |
+| **Update `doc/BENCHMARKS.md` and check for regressions (quiescent machine)** | `dart run tool/benchmark_suite.dart --update-docs --check-regressions` |
+| **Update baseline after intentional optimizations (quiescent machine)** | `dart run tool/benchmark_suite.dart --update-docs --update-baseline` |
 | **Emit machine-readable JSON for CI / agents** | `dart run tool/benchmark_suite.dart --json --check-regressions` |
 
 ---
 
-## 2. Aggregate Corpus Summary (232 Diagrams)
+## 2. Aggregate Corpus Summary
 
 | Metric | `pele_dart` (Native Dart AOT) | `obsidianmd/pele` (JS) | Comparison |
 | :--- | ---: | ---: | :--- |
@@ -36,7 +46,7 @@ This document reports the native **Dart AOT** rendering performance of `pele_dar
 
 ```mermaid
 xychart-beta
-  title "Core Mermaid Families — Mean Render Time in µs (Lower is Faster)"
+  title "Mean Render Time (µs — Lower is Faster)"
   x-axis ["Class", "ER", "Flowchart", "Gantt", "Git", "Info", "Mindmap", "Pie", "Sequence", "State"]
   y-axis "Mean Render Time (µs)" 0 --> 300
   bar [200.4, 102.3, 237.3, 88.3, 87.2, 4.8, 44.4, 31.5, 84.5, 142.9]
@@ -48,7 +58,7 @@ xychart-beta
 
 ```mermaid
 xychart-beta
-  title "pele_dart Native AOT Speedup Multiplier vs obsidianmd/pele JS (Higher is Faster)"
+  title "AOT Speedup vs JS (Higher is Faster)"
   x-axis ["Class", "Info", "Sequence", "Arch", "Flowchart", "Venn", "Block", "ER", "XYChart", "Quadrant", "Treemap", "Pie"]
   y-axis "Speedup Multiplier (x)" 0 --> 6
   bar [4.56, 3.74, 3.45, 3.00, 2.97, 2.74, 2.67, 2.54, 2.43, 2.41, 2.40, 2.37]
@@ -58,7 +68,7 @@ xychart-beta
 
 ```mermaid
 pie showData
-  title "Full Corpus (232 Diagrams) Execution Time by Phase (ms)"
+  title "Execution Time by Phase (ms)"
   "Layout & SVG Emission (render)" : 7.60
   "Lexer & Parser (parse)" : 2.54
 ```
@@ -71,7 +81,7 @@ pie showData
 
 ---
 
-## 3. Per-Family Benchmark & Phase Breakdown (33 Diagram Families)
+## 3. Per-Family Benchmark & Phase Breakdown
 
 | Diagram Family | Category | Samples | `parse()` (µs) | `render()` (µs) | `pele_dart` AOT (µs) | Flattened SVG (µs) | `obsidianmd/pele` JS (µs) | Speedup vs JS |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

@@ -1,6 +1,6 @@
 # Upstream Sync, Differential Verification & Release Guide
 
-`pele_dart` maintains a strict 1:1 structural and behavioral correspondence with [`obsidianmd/pele`](https://github.com/obsidianmd/pele). This guide explains how developers and AI coding agents detect new upstream `obsidianmd/pele` releases, track target `mermaid.js` baseline updates, fold in bug fixes or new diagram types, verify 100% byte-for-byte SVG parity across 787+ diagrams, and publish a new release.
+`pele_dart` maintains a strict 1:1 structural and behavioral correspondence with [`obsidianmd/pele`](https://github.com/obsidianmd/pele). This guide explains how developers and AI coding agents detect new upstream `obsidianmd/pele` releases, track target `mermaid.js` baseline updates, fold in bug fixes or new diagram types, verify 100% byte-for-byte SVG parity across the full diagram corpus, and publish a new release.
 
 ---
 
@@ -16,7 +16,7 @@
    - [B. Beta-to-Stable Diagram Promotions (`-beta` Removal)](#b-beta-to-stable-diagram-promotions--beta-removal)
    - [C. New Diagram Families](#c-new-diagram-families)
    - [D. Target `mermaid.js` or `@mermaid-js/parser` Version Updates](#d-target-mermaidjs-or-mermaid-jsparser-version-updates)
-7. [787-Diagram Differential Verification Suite](#7-787-diagram-differential-verification-suite)
+7. [Differential Verification Suite](#7-differential-verification-suite)
 8. [Finalizing & Releasing a New Version](#8-finalizing--releasing-a-new-version)
 
 ---
@@ -31,7 +31,7 @@
 | **Stage a specific tag, branch, or commit SHA** | `dart run tool/sync_upstream.dart --update-to <tag_or_ref>` |
 | **Inspect categorized upstream->Dart diffs for any git range** | `dart run tool/sync_upstream.dart --diff <from_tag>..<to_tag>` |
 | **Re-bundle `pele.bundle.js`, sync `mermaid.min.js`, and regenerate `doc/images/` & `doc/DIAGRAM_GALLERY.md`** | `dart run tool/sync_upstream.dart --refresh-assets` |
-| **Run the 787-diagram 100% differential parity & Mermaid version check** | `dart run tool/verify_against_upstream.dart` |
+| **Run the full-corpus 100% differential parity & Mermaid version check** | `dart run tool/verify_against_upstream.dart` |
 | **Run the native AOT benchmark suite, update [`doc/BENCHMARKS.md`](BENCHMARKS.md) & verify zero regressions** | `dart run tool/benchmark_suite.dart --update-docs --check-regressions` |
 | **Finalize `UPSTREAM.md` pin after porting and verifying** | `dart run tool/sync_upstream.dart --pin <tag> <sha>` |
 
@@ -43,8 +43,8 @@
 
 - **Pinned Release Tag**: The exact `obsidianmd/pele` release tag (`v<X.Y.Z>`).
 - **Pinned Commit SHA**: The full 40-character commit hash corresponding to that release.
-- **Target Mermaid Version**: The `mermaid` npm version that upstream `obsidianmd/pele` benchmarks and matches against in `scripts/bench-mermaid.mjs` and `website/package.json` (e.g., `12.1.0`).
-- **Target Mermaid Parser**: The `@mermaid-js/parser` version in upstream `package.json` (e.g., `@mermaid-js/parser@2.0.1`).
+- **Target Mermaid Version**: The `mermaid` npm version that upstream `obsidianmd/pele` benchmarks and matches against in `scripts/bench-mermaid.mjs` and `website/package.json`.
+- **Target Mermaid Parser**: The `@mermaid-js/parser` version in upstream `package.json`.
 
 Every Dart file under `lib/src/` maps 1:1 to an upstream TypeScript file under `src/` and begins with a tracking header:
 
@@ -119,7 +119,7 @@ The agent will:
 2. Run `dart run tool/sync_upstream.dart --update-to-latest` to stage `.upstream/`, generate `.upstream/diff_report.md`, and refresh the JS/gallery/Mermaid assets.
 3. Port every TypeScript change in `.upstream/diff_report.md` 1:1 into `lib/src/` and `test/`, preserving the Dart AOT hot-path patterns documented in [`doc/BENCHMARKS.md`](BENCHMARKS.md).
 4. Run `dart run tool/verify_against_upstream.dart` until **100%** of canonical, gallery, and corpus diagrams match byte-for-byte.
-5. Run `dart run tool/benchmark_suite.dart --update-docs --check-regressions` to refresh [`doc/BENCHMARKS.md`](BENCHMARKS.md) and confirm zero performance regressions across all 33 diagram families (optimizing any newly synced regex or string hot path before proceeding).
+5. Run `dart run tool/benchmark_suite.dart --update-docs --check-regressions` to refresh [`doc/BENCHMARKS.md`](BENCHMARKS.md) and confirm zero performance regressions across all supported diagram families (optimizing any newly synced regex or string hot path before proceeding).
 6. Update `UPSTREAM.md` via `dart run tool/sync_upstream.dart --pin <tag> <sha>`, bump `pubspec.yaml` and `CHANGELOG.md`, and prepare the release commit.
 
 ---
@@ -167,7 +167,7 @@ When `dart run tool/sync_upstream.dart --check` reports `MERMAID VERSION UPDATE 
 
 ---
 
-## 7. 787-Diagram Differential Verification Suite
+## 7. Differential Verification Suite
 
 Before pinning an upstream update or cutting a release, run the comprehensive differential harness:
 
@@ -177,9 +177,9 @@ dart run tool/verify_against_upstream.dart
 
 This tool verifies:
 1. **Mermaid Version Consistency**: Confirms `UPSTREAM.md`, `.upstream/`, `studio/assets/mermaid.min.js`, and `studio/lib/engine_runner.dart` are aligned.
-2. **Canonical 33-Family Suite (`33/33`)**: Renders all 33 diagram families in both `pele_dart` (`SvgOutputMode.cssVariables`) and `obsidianmd/pele` (`studio/assets/pele.bundle.js` via Bun) and asserts 100% byte-for-byte SVG equality.
-3. **Full Showcase Gallery Suite (`232/232`)**: Renders all 232 gallery `.mmd` diagrams scanned from `studio/diagrams/` by `studio/lib/gallery_samples.dart` in both engines and asserts 100% byte-for-byte SVG equality.
-4. **Full Upstream Corpus Suite (`522/522`)**: Renders every diagram across all 30 `.upstream/tests/corpus/*.json` files in both engines and asserts 100% byte-for-byte SVG equality.
+2. **Canonical Family Suite**: Renders every canonical diagram family in both `pele_dart` (`SvgOutputMode.cssVariables`) and `obsidianmd/pele` (`studio/assets/pele.bundle.js` via Bun) and asserts 100% byte-for-byte SVG equality.
+3. **Full Showcase Gallery Suite**: Renders all gallery `.mmd` diagrams scanned from `studio/diagrams/` by `studio/lib/gallery_samples.dart` in both engines and asserts 100% byte-for-byte SVG equality.
+4. **Full Upstream Corpus Suite**: Renders every diagram across all `.upstream/tests/corpus/*.json` files in both engines and asserts 100% byte-for-byte SVG equality.
 
 Then run the standard Dart quality gates and the **Native AOT Benchmark Regression Gate**:
 
@@ -196,7 +196,7 @@ If `tool/benchmark_suite.dart --check-regressions` reports a regression in any d
 
 ## 8. Finalizing & Releasing a New Version
 
-Once all quality gates and the 787-diagram differential verification suite pass with 0 differences:
+Once all quality gates and the differential verification suite pass with 0 differences:
 
 1. **Regenerate Standalone Diagram & Style Images**:
    Ensure `doc/images/diagrams/*.svg`, `doc/images/styles/*.svg`, and [`doc/DIAGRAM_GALLERY.md`](DIAGRAM_GALLERY.md) reflect the latest pure-Dart renders of every diagram family (with zero host-app chrome):

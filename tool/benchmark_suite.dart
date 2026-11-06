@@ -92,7 +92,9 @@ Future<void> main(List<String> args) async {
   final updateDocs = args.contains('--update-docs');
   final updateBaseline = args.contains('--update-baseline');
   final checkRegressions = args.contains('--check-regressions');
+  final forceUpdate = args.contains('--force');
   final jsonOutput = args.contains('--json');
+  final envInfo = await _BenchmarkEnvInfo.detect();
 
   final families = gallerySamples;
   if (families.isEmpty) {
@@ -222,51 +224,64 @@ Future<void> main(List<String> args) async {
       familyResults.fold<double>(0, (a, b) => a + b.jsFtlUsSum) / 1000.0;
 
   final baselineFile = File('$root/tool/benchmark_baseline.json');
-  if (updateBaseline || (updateDocs && !baselineFile.existsSync())) {
-    final baselineJson = <String, Object>{
-      'totalSamples': totalSamples,
-      'totalAotCssMs': double.parse(totalAotCssMs.toStringAsFixed(3)),
-      'totalAotParseMs': double.parse(totalAotParseMs.toStringAsFixed(3)),
-      'totalAotRenderMs': double.parse(totalAotRenderMs.toStringAsFixed(3)),
-      'meanPureDetectUs': double.parse(meanPureDetectUs.toStringAsFixed(4)),
-      'families': <String, Object>{
-        for (final f in familyResults)
-          f.id: <String, Object>{
-            'sampleCount': f.sampleCount,
-            'meanCssUs': double.parse(f.meanCssUs.toStringAsFixed(2)),
-            'meanParseUs': double.parse(f.meanParseUs.toStringAsFixed(2)),
-            'meanRenderUs': double.parse(f.meanRenderUs.toStringAsFixed(2)),
-            'meanFlatUs': double.parse(f.meanFlatUs.toStringAsFixed(2)),
-          },
-      },
-    };
-    baselineFile.writeAsStringSync(
-      '${const JsonEncoder.withIndent('  ').convert(baselineJson)}\n',
-    );
-    if (!jsonOutput) {
-      stdout.writeln(
-        'Updated benchmark baseline: tool/benchmark_baseline.json',
-      );
-    }
-  }
+  final maxQuiescentLoad = envInfo.cores * 0.5;
+  final isMachineBusy = envInfo.loadAvg1m > maxQuiescentLoad;
 
-  if (updateDocs) {
-    final docsFile = File('$root/doc/BENCHMARKS.md');
-    docsFile.writeAsStringSync(
-      _buildBenchmarksMarkdown(
-        familyResults: familyResults,
-        totalSamples: totalSamples,
-        meanPureDetectUs: meanPureDetectUs,
-        totalAotCssMs: totalAotCssMs,
-        totalAotFlatMs: totalAotFlatMs,
-        totalAotParseMs: totalAotParseMs,
-        totalAotRenderMs: totalAotRenderMs,
-        totalJs7RunMs: totalJs7RunMs,
-        totalJsFtlMs: totalJsFtlMs,
-      ),
+  if ((updateBaseline || updateDocs) && isMachineBusy && !forceUpdate) {
+    stderr.writeln(
+      '⚠️  Skipping --update-docs / --update-baseline because system 1-minute load average '
+      '(${envInfo.loadAvg1m.toStringAsFixed(2)}) exceeds the quiescent threshold '
+      '(${maxQuiescentLoad.toStringAsFixed(1)} across ${envInfo.cores} cores). '
+      'Wait for background load to subside so microsecond timings are not skewed, or pass --force to override.',
     );
-    if (!jsonOutput) {
-      stdout.writeln('Updated benchmark documentation: doc/BENCHMARKS.md');
+  } else {
+    if (updateBaseline || (updateDocs && !baselineFile.existsSync())) {
+      final baselineJson = <String, Object>{
+        'totalSamples': totalSamples,
+        'totalAotCssMs': double.parse(totalAotCssMs.toStringAsFixed(3)),
+        'totalAotParseMs': double.parse(totalAotParseMs.toStringAsFixed(3)),
+        'totalAotRenderMs': double.parse(totalAotRenderMs.toStringAsFixed(3)),
+        'meanPureDetectUs': double.parse(meanPureDetectUs.toStringAsFixed(4)),
+        'families': <String, Object>{
+          for (final f in familyResults)
+            f.id: <String, Object>{
+              'sampleCount': f.sampleCount,
+              'meanCssUs': double.parse(f.meanCssUs.toStringAsFixed(2)),
+              'meanParseUs': double.parse(f.meanParseUs.toStringAsFixed(2)),
+              'meanRenderUs': double.parse(f.meanRenderUs.toStringAsFixed(2)),
+              'meanFlatUs': double.parse(f.meanFlatUs.toStringAsFixed(2)),
+            },
+        },
+      };
+      baselineFile.writeAsStringSync(
+        '${const JsonEncoder.withIndent('  ').convert(baselineJson)}\n',
+      );
+      if (!jsonOutput) {
+        stdout.writeln(
+          'Updated benchmark baseline: tool/benchmark_baseline.json',
+        );
+      }
+    }
+
+    if (updateDocs) {
+      final docsFile = File('$root/doc/BENCHMARKS.md');
+      docsFile.writeAsStringSync(
+        _buildBenchmarksMarkdown(
+          envInfo: envInfo,
+          familyResults: familyResults,
+          totalSamples: totalSamples,
+          meanPureDetectUs: meanPureDetectUs,
+          totalAotCssMs: totalAotCssMs,
+          totalAotFlatMs: totalAotFlatMs,
+          totalAotParseMs: totalAotParseMs,
+          totalAotRenderMs: totalAotRenderMs,
+          totalJs7RunMs: totalJs7RunMs,
+          totalJsFtlMs: totalJsFtlMs,
+        ),
+      );
+      if (!jsonOutput) {
+        stdout.writeln('Updated benchmark documentation: doc/BENCHMARKS.md');
+      }
     }
   }
 
@@ -378,10 +393,88 @@ Usage:
 Options:
   --update-docs        Regenerate doc/BENCHMARKS.md with current native AOT benchmark results.
   --update-baseline    Update tool/benchmark_baseline.json with current per-family AOT baselines.
+  --force              Allow --update-docs / --update-baseline even when machine load average is high.
   --check-regressions  Fail with exit code 1 if any diagram family or corpus total regresses.
   --json               Emit machine-readable JSON output.
   -h, --help           Show this help message.
 ''');
+}
+
+class _BenchmarkEnvInfo {
+  final String cpuModel;
+  final int cores;
+  final int memoryGb;
+  final String osVersion;
+  final String dartRuntime;
+  final double loadAvg1m;
+  final double loadAvg5m;
+
+  const _BenchmarkEnvInfo({
+    required this.cpuModel,
+    required this.cores,
+    required this.memoryGb,
+    required this.osVersion,
+    required this.dartRuntime,
+    required this.loadAvg1m,
+    required this.loadAvg5m,
+  });
+
+  static Future<_BenchmarkEnvInfo> detect() async {
+    final cores = Platform.numberOfProcessors;
+    var cpuModel = Platform.operatingSystem;
+    var memoryGb = 0;
+    var osVersion = Platform.operatingSystem;
+    var load1m = 0.0;
+    var load5m = 0.0;
+
+    if (Platform.isMacOS) {
+      try {
+        final cpuRes = await Process.run('sysctl', <String>[
+          '-n',
+          'machdep.cpu.brand_string',
+        ]);
+        if (cpuRes.exitCode == 0) {
+          final s = (cpuRes.stdout as String).trim();
+          if (s.isNotEmpty) cpuModel = s;
+        }
+        final memRes = await Process.run('sysctl', <String>[
+          '-n',
+          'hw.memsize',
+        ]);
+        if (memRes.exitCode == 0) {
+          final bytes = int.tryParse((memRes.stdout as String).trim()) ?? 0;
+          if (bytes > 0) memoryGb = (bytes / (1024 * 1024 * 1024)).round();
+        }
+        final loadRes = await Process.run('sysctl', <String>[
+          '-n',
+          'vm.loadavg',
+        ]);
+        if (loadRes.exitCode == 0) {
+          final nums = RegExp(r'[0-9]+(?:\.[0-9]+)?')
+              .allMatches(loadRes.stdout as String)
+              .map((m) => double.tryParse(m.group(0)!) ?? 0.0)
+              .toList();
+          if (nums.isNotEmpty) load1m = nums[0];
+          if (nums.length > 1) load5m = nums[1];
+        }
+        final swRes = await Process.run('sw_vers', <String>['-productVersion']);
+        if (swRes.exitCode == 0) {
+          osVersion = 'macOS ${(swRes.stdout as String).trim()} (arm64)';
+        }
+      } catch (_) {}
+    }
+
+    final dartVer = Platform.version.split(' ').first;
+    return _BenchmarkEnvInfo(
+      cpuModel: cpuModel,
+      cores: cores,
+      memoryGb: memoryGb,
+      osVersion: osVersion,
+      dartRuntime: 'Dart $dartVer (Native AOT executable)',
+      loadAvg1m: load1m,
+      loadAvg5m: load5m,
+    );
+  }
 }
 
 double _measureMedianUs(void Function() fn) {
@@ -730,7 +823,7 @@ void _printConsoleReport({
 
   if (regressions.isEmpty) {
     stdout.writeln(
-      '✅ BENCHMARK REGRESSION GATE PASSED: All 33 families and corpus totals within threshold.',
+      '✅ BENCHMARK REGRESSION GATE PASSED: All diagram families and corpus totals within threshold.',
     );
   } else {
     stderr.writeln(
@@ -792,6 +885,7 @@ String _shortChartLabel(String id) {
 }
 
 String _buildBenchmarksMarkdown({
+  required _BenchmarkEnvInfo envInfo,
   required List<_FamilyBenchResult> familyResults,
   required int totalSamples,
   required double meanPureDetectUs,
@@ -843,11 +937,31 @@ String _buildBenchmarksMarkdown({
     ..writeln('# Performance Benchmarks & Upstream Sync Regression Gate')
     ..writeln()
     ..writeln(
-      'This document reports the native **Dart AOT** rendering performance of `pele_dart` across all **${familyResults.length} diagram families** (**$totalSamples diagrams** in the official `studio/diagrams/` gallery corpus) compared against upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (JavaScriptCore; see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned upstream release).',
+      'This document reports the native **Dart AOT** rendering performance of `pele_dart` across all supported diagram families (`studio/diagrams/` gallery corpus) compared against upstream [`obsidianmd/pele`](https://github.com/obsidianmd/pele) (JavaScriptCore; see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned upstream release).',
     )
     ..writeln()
     ..writeln(
-      '> **Automated Release Gate:** This report and the baseline in [`tool/benchmark_baseline.json`](../tool/benchmark_baseline.json) are generated and verified by [`tool/benchmark_suite.dart`](../tool/benchmark_suite.dart). Every upstream sync must pass `dart run tool/benchmark_suite.dart --update-docs --check-regressions` before pinning [`UPSTREAM.md`](../UPSTREAM.md) or cutting a release.',
+      '> **Automated Release Gate:** This report and the baseline in [`tool/benchmark_baseline.json`](../tool/benchmark_baseline.json) are generated and verified by [`tool/benchmark_suite.dart`](../tool/benchmark_suite.dart). Every upstream sync must pass `dart run tool/benchmark_suite.dart --update-docs --check-regressions` on a quiescent machine (`1m loadavg <= 50%` of cores) before pinning [`UPSTREAM.md`](../UPSTREAM.md) or cutting a release.',
+    )
+    ..writeln()
+    ..writeln('### Benchmark Hardware & Runtime Environment')
+    ..writeln()
+    ..writeln('| Property | Specification |')
+    ..writeln('| :--- | :--- |')
+    ..writeln(
+      '| **Processor** | ${envInfo.cpuModel} (${envInfo.cores} logical cores) |',
+    )
+    ..writeln(
+      '| **Memory & OS** | ${envInfo.memoryGb > 0 ? '${envInfo.memoryGb} GB RAM · ' : ''}${envInfo.osVersion} |',
+    )
+    ..writeln(
+      '| **Dart Compiler** | ${envInfo.dartRuntime} (`dart compile exe`) |',
+    )
+    ..writeln(
+      '| **JavaScript Baseline** | WebKit JavaScriptCore (`jsc`) — `obsidianmd/pele` bundle |',
+    )
+    ..writeln(
+      '| **Machine Load Condition** | Quiescent / idle (`1m loadavg < ${(envInfo.cores * 0.5).toStringAsFixed(1)}`; enforced automatically by `--update-docs`) |',
     )
     ..writeln()
     ..writeln('---')
@@ -860,10 +974,10 @@ String _buildBenchmarksMarkdown({
       '| **Run native AOT benchmark suite & print console table** | `dart run tool/benchmark_suite.dart` |',
     )
     ..writeln(
-      '| **Update `doc/BENCHMARKS.md` and check for regressions** | `dart run tool/benchmark_suite.dart --update-docs --check-regressions` |',
+      '| **Update `doc/BENCHMARKS.md` and check for regressions (quiescent machine)** | `dart run tool/benchmark_suite.dart --update-docs --check-regressions` |',
     )
     ..writeln(
-      '| **Update baseline after intentional optimizations** | `dart run tool/benchmark_suite.dart --update-docs --update-baseline` |',
+      '| **Update baseline after intentional optimizations (quiescent machine)** | `dart run tool/benchmark_suite.dart --update-docs --update-baseline` |',
     )
     ..writeln(
       '| **Emit machine-readable JSON for CI / agents** | `dart run tool/benchmark_suite.dart --json --check-regressions` |',
@@ -871,7 +985,7 @@ String _buildBenchmarksMarkdown({
     ..writeln()
     ..writeln('---')
     ..writeln()
-    ..writeln('## 2. Aggregate Corpus Summary ($totalSamples Diagrams)')
+    ..writeln('## 2. Aggregate Corpus Summary')
     ..writeln()
     ..writeln(
       '| Metric | `pele_dart` (Native Dart AOT) | `obsidianmd/pele` (JS) | Comparison |',
@@ -908,9 +1022,7 @@ String _buildBenchmarksMarkdown({
     ..writeln()
     ..writeln('```mermaid')
     ..writeln('xychart-beta')
-    ..writeln(
-      '  title "Core Mermaid Families — Mean Render Time in µs (Lower is Faster)"',
-    )
+    ..writeln('  title "Mean Render Time (µs — Lower is Faster)"')
     ..writeln('  x-axis [$coreLabels]')
     ..writeln('  y-axis "Mean Render Time (µs)" 0 --> $coreYMax')
     ..writeln('  bar [$coreJsBars]')
@@ -924,9 +1036,7 @@ String _buildBenchmarksMarkdown({
     ..writeln()
     ..writeln('```mermaid')
     ..writeln('xychart-beta')
-    ..writeln(
-      '  title "pele_dart Native AOT Speedup Multiplier vs obsidianmd/pele JS (Higher is Faster)"',
-    )
+    ..writeln('  title "AOT Speedup vs JS (Higher is Faster)"')
     ..writeln('  x-axis [$top12Labels]')
     ..writeln('  y-axis "Speedup Multiplier (x)" 0 --> $maxSpeedup')
     ..writeln('  bar [$top12Bars]')
@@ -936,9 +1046,7 @@ String _buildBenchmarksMarkdown({
     ..writeln()
     ..writeln('```mermaid')
     ..writeln('pie showData')
-    ..writeln(
-      '  title "Full Corpus ($totalSamples Diagrams) Execution Time by Phase (ms)"',
-    )
+    ..writeln('  title "Execution Time by Phase (ms)"')
     ..writeln(
       '  "Layout & SVG Emission (render)" : ${totalAotRenderMs.toStringAsFixed(2)}',
     )
@@ -961,9 +1069,7 @@ String _buildBenchmarksMarkdown({
     ..writeln()
     ..writeln('---')
     ..writeln()
-    ..writeln(
-      '## 3. Per-Family Benchmark & Phase Breakdown (33 Diagram Families)',
-    )
+    ..writeln('## 3. Per-Family Benchmark & Phase Breakdown')
     ..writeln()
     ..writeln(
       '| Diagram Family | Category | Samples | `parse()` (µs) | `render()` (µs) | `pele_dart` AOT (µs) | Flattened SVG (µs) | `obsidianmd/pele` JS (µs) | Speedup vs JS |',

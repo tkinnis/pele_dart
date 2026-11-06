@@ -81,17 +81,17 @@ Before completing any task or committing changes, all quality gates must pass:
    dart format --output=none --set-exit-if-changed lib test tool studio/lib example/main.dart
    ```
 
-4. **787-Diagram Upstream Differential Parity & Mermaid Version Check**:
+4. **Upstream Differential Parity & Mermaid Version Check**:
    ```bash
    dart run tool/verify_against_upstream.dart
    ```
-   Verifies Mermaid version consistency across `UPSTREAM.md`, `.upstream/`, and `studio/assets/mermaid.min.js`, and asserts 100% byte-for-byte SVG equality between `pele_dart` and `obsidianmd/pele (JS)` across all 33 canonical diagram families, 232 gallery diagrams, and 522 upstream corpus diagrams (`787/787`).
+   Verifies Mermaid version consistency across `UPSTREAM.md`, `.upstream/`, and `studio/assets/mermaid.min.js`, and asserts 100% byte-for-byte SVG equality between `pele_dart` and `obsidianmd/pele (JS)` across all canonical diagram families, gallery diagrams, and upstream corpus diagrams.
 
 5. **Native AOT Benchmark Report & Regression Gate**:
    ```bash
    dart run tool/benchmark_suite.dart --update-docs --check-regressions
    ```
-   Compiles `pele_dart` to native AOT (`dart compile exe`), benchmarks all 33 diagram families (232 gallery diagrams) against `obsidianmd/pele (JS)`, updates [`doc/BENCHMARKS.md`](doc/BENCHMARKS.md), and enforces non-regression against [`tool/benchmark_baseline.json`](tool/benchmark_baseline.json).
+   Compiles `pele_dart` to native AOT (`dart compile exe`), benchmarks all supported diagram families in the gallery corpus against `obsidianmd/pele (JS)`, updates [`doc/BENCHMARKS.md`](doc/BENCHMARKS.md), and enforces non-regression against [`tool/benchmark_baseline.json`](tool/benchmark_baseline.json).
 
 6. **Upstream Sync & Release Workflow**:
    * Check for new `obsidianmd/pele` releases, commits, or target `mermaid.js` updates with `dart run tool/sync_upstream.dart` (`--check`).

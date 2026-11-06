@@ -1,6 +1,6 @@
 # Pele Studio — macOS 3-Way Comparison & Visual Diff Workbench
 
-**Pele Studio** (`studio/`) is a native macOS desktop companion application for `pele_dart`. It provides an interactive workbench for comparing **`pele_dart` (Pure Dart)**, **`obsidianmd/pele` (JS)**, and **`mermaid.js` (v12.1.0)** side-by-side across all **33 diagram families (232+ `.mmd` diagrams)**.
+**Pele Studio** (`studio/`) is a native macOS desktop companion application for `pele_dart`. It provides an interactive workbench for comparing **`pele_dart` (Pure Dart)**, **`obsidianmd/pele` (JS)**, and **`mermaid.js`** side-by-side across all supported diagram families and `.mmd` gallery samples (see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned upstream and `mermaid.js` baseline).
 
 ![Pele Studio — 3-Way Visual Render Workbench](images/studio/studio_3way_render.png)
 
@@ -68,7 +68,7 @@ Select any two engines (`Engine A` and `Engine B`, or click `⇄` to swap them) 
 
 ## 4. Keyboard Navigation Shortcuts
 
-When browsing diagrams (with focus outside the text editors), you can step rapidly through all 232+ diagrams and 33 folders using the keyboard:
+When browsing diagrams (with focus outside the text editors), you can step rapidly through all diagrams and diagram family folders using the keyboard:
 
 | Shortcut | Action |
 | :--- | :--- |

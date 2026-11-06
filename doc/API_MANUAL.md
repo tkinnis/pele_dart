@@ -2,7 +2,7 @@
 
 `pele_dart` is a fast, deterministic, zero-DOM **pure Dart** Mermaid diagram layout and SVG rendering engine. It is a 1:1 pure-Dart port of [`obsidianmd/pele`](https://github.com/obsidianmd/pele) ([`pele.run`](https://pele.run)), created by Steph Ango (`kepano`) and the Obsidian team.
 
-`pele_dart` renders all 33 Mermaid and extended diagram families synchronously into clean SVG with zero browser (`WKWebView`), zero JavaScript engine (`QuickJS` / `JavaScriptCore`), and zero Flutter SDK dependency in the core package.
+`pele_dart` renders all supported Mermaid and extended diagram families synchronously into clean SVG with zero browser (`WKWebView`), zero JavaScript engine (`QuickJS` / `JavaScriptCore`), and zero Flutter SDK dependency in the core package.
 
 ---
 
@@ -17,7 +17,7 @@
 7. [Return Types (`RenderResult` & `LinkInfo`)](#7-return-types-renderresult--linkinfo)
 8. [Error Handling (`PeleError`)](#8-error-handling-peleerror)
 9. [Custom Text Measurement, Icons & Math (`TextMeasurer`, `IconResolver`, `MathResolver`)](#9-custom-text-measurement-icons--math-textmeasurer-iconresolver-mathresolver)
-10. [Supported Diagram Families (33 Types)](#10-supported-diagram-families-33-types)
+10. [Supported Diagram Families](#10-supported-diagram-families)
 11. [Integration Guides](#11-integration-guides)
     - [Flutter Vector Graphics (`vector_graphics_compiler`)](#a-flutter-vector-graphics-vector_graphics_compiler)
     - [Web / HTML / Markdown CSS-Variable SVG](#b-web--html--markdown-css-variable-svg)
@@ -144,7 +144,7 @@ Converts an upstream-style CSS-variable SVG (`SvgOutputMode.cssVariables`) into 
 
 ### `register(Iterable<AnyDiagram> list)` & `registered(DiagramType type) → bool`
 
-All 33 built-in diagram families (`all`) are registered automatically on first use of `render()`, `parse()`, `supports()`, or `registered()`. You can inspect whether a diagram family is registered with `registered('flowchart')` or register custom `Diagram<Model>` implementations via `register([...])`.
+All built-in diagram families (`all`) are registered automatically on first use of `render()`, `parse()`, `supports()`, or `registered()`. You can inspect whether a diagram family is registered with `registered('flowchart')` or register custom `Diagram<Model>` implementations via `register([...])`.
 
 ### `forgetTextWidths()`
 
@@ -167,7 +167,7 @@ Clears any cached text width measurements (no-op for the stateless built-in `met
 
 `pele_dart` is designed so library consumers can either use the clean built-in defaults (`PelePalette.light` / `PelePalette.dark`) or supply their own custom palette, CSS custom properties, or in-diagram Mermaid styles.
 
-> **Want to see all 33 diagram types rendered by `pele_dart`?**
+> **Want to see every diagram family rendered by `pele_dart`?**
 > Browse the [**Visual Diagram Gallery**](DIAGRAM_GALLERY.md) for clean, standalone SVG renders of every supported diagram family.
 
 ### 5.1 Built-in Default Palettes (`PelePalette.light` & `PelePalette.dark`)
@@ -528,9 +528,9 @@ final result = render(
 
 ---
 
-## 10. Supported Diagram Families (33 Types)
+## 10. Supported Diagram Families
 
-`pele_dart` supports all **33** diagram families from `obsidianmd/pele` (see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned release):
+`pele_dart` supports all diagram families from `obsidianmd/pele` (see [`UPSTREAM.md`](../UPSTREAM.md) for the pinned release):
 
 | # | `DiagramType` | `MermaidType` Variant(s) | Mermaid Header Keyword(s) | Description |
 | :- | :--- | :--- | :--- | :--- |

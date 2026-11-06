@@ -1,6 +1,6 @@
 # `pele_dart` Architecture & Internals
 
-* **Upstream Parity**: Version-locked 1:1 to [`obsidianmd/pele`](https://github.com/obsidianmd/pele) across all **33 diagram families** (`787/787` byte-for-byte SVG parity tests; see [Upstream Tracking](../UPSTREAM.md))
+* **Upstream Parity**: Version-locked 1:1 to [`obsidianmd/pele`](https://github.com/obsidianmd/pele) across all supported diagram families (`100%` byte-for-byte SVG parity tests; see [Upstream Tracking](../UPSTREAM.md))
 * **Public API Reference**: [API User Manual](API_MANUAL.md)
 * **Performance & AOT Benchmarks**: [Performance Benchmarks](BENCHMARKS.md)
 * **Pele Studio Workbench Guide**: [Pele Studio User Guide](STUDIO_GUIDE.md)
@@ -19,7 +19,7 @@ Traditional Mermaid diagram rendering in Dart and Flutter applications requires 
 
 1. **Zero Browser & Zero JS Runtime**: Renders Mermaid diagrams into SVG synchronously in pure Dart (`sdk: ^3.13.0`), depending only on standard Dart core libraries and `package:meta`. Safe to run on the main isolate, inside `Isolate.run()`, in CLI tools, or on backend servers.
 2. **Strict 1:1 Upstream Module & Symbol Parity**: Every file in `obsidianmd/pele/src/` maps directly to `lib/src/` in `pele_dart`, with [`UPSTREAM.md`](../UPSTREAM.md) serving as the single source of truth for the pinned upstream release and commit SHA.
-3. **Hermetic Diagram Isolation**: Each of the 33 diagram families under `lib/src/diagrams/<type>/` (`parser.dart`, `model.dart`, `layout.dart`, `render.dart`) is hermetically isolated from other diagram directories, importing only shared infrastructure (`lib/src/layout/`, `lib/src/svg/`, `lib/src/text/`, `lib/src/util/`, `lib/src/diagrams/common/`).
+3. **Hermetic Diagram Isolation**: Each diagram family under `lib/src/diagrams/<type>/` (`parser.dart`, `model.dart`, `layout.dart`, `render.dart`) is hermetically isolated from other diagram directories, importing only shared infrastructure (`lib/src/layout/`, `lib/src/svg/`, `lib/src/text/`, `lib/src/util/`, `lib/src/diagrams/common/`).
 4. **Dual SVG Output Modes (`SvgOutputMode`)**:
    * **`SvgOutputMode.flattened`** *(Default)*: Emits static SVG 1.1 primitives compatible with `vector_graphics_compiler` (`encodeSvg`).
    * **`SvgOutputMode.cssVariables`** *(Upstream Parity)*: Emits byte-for-byte identical SVG to upstream `obsidianmd/pele` (`var(--pele-*)` CSS custom properties and `color-mix(in srgb, ...)`).
@@ -54,7 +54,7 @@ pele_dart/
 │   ├── API_MANUAL.md                # Public API reference & Flutter integration manual
 │   ├── ARCHITECTURE.md              # System architecture & internals (this document)
 │   ├── BENCHMARKS.md                # Native Dart AOT vs JS performance benchmarks & regression gate
-│   ├── DIAGRAM_GALLERY.md           # Standalone pure-Dart SVG gallery for all 33 diagram families
+│   ├── DIAGRAM_GALLERY.md           # Standalone pure-Dart SVG gallery for all supported diagram families
 │   ├── STUDIO_GUIDE.md              # Pele Studio macOS 3-way workbench user guide
 │   ├── UPSTREAM_SYNC.md             # Upstream release detection, sync & verification runbook
 │   └── images/                      # Standalone SVG renders (diagrams/*.svg, styles/*.svg, studio/*.png)
@@ -101,16 +101,16 @@ pele_dart/
 │           ├── common/              # <- src/diagrams/common/ (lexer tokens, outline, curves)
 │           ├── flowchart/           # <- src/diagrams/flowchart/
 │           ├── sequence/            # <- src/diagrams/sequence/
-│           └── ... (all 33 diagram directories)
+│           └── ... (all supported diagram directories)
 ├── test/
 │   ├── core_test.dart               # Core detection, preprocessing, layout & API tests
 │   ├── flattener_test.dart          # SVG 1.1 flattener, CSS variable, color-mix & tspan tests
-│   ├── gallery_corpus_test.dart     # 232 gallery & 522 upstream corpus parity + encodeSvg tests
+│   ├── gallery_corpus_test.dart     # Gallery & upstream corpus parity + encodeSvg tests
 │   ├── doc_examples_test.dart       # Documentation code snippets, links & lockstep version gate
 │   └── diagrams/                    # Per-diagram unit & vector_graphics_compiler tests
 ├── tool/
 │   ├── sync_upstream.dart           # Reads UPSTREAM.md, diffs obsidianmd/pele & refreshes assets
-│   ├── verify_against_upstream.dart # 787-diagram differential test runner (Bun Pele vs. pele_dart)
+│   ├── verify_against_upstream.dart # Differential test runner (Bun Pele vs. pele_dart)
 │   ├── benchmark_suite.dart         # Native AOT vs JS benchmark runner & regression gate
 │   ├── benchmark_baseline.json      # Per-family AOT timing baseline for regression checks
 │   └── generate_doc_images.dart     # Generates doc/images/**/*.svg and doc/DIAGRAM_GALLERY.md
@@ -141,7 +141,7 @@ Upstream `obsidianmd/pele` emits clean, self-contained SVG geometry without `<ma
 * Inline `style="..."` geometry/presentation properties (`rx`, `ry`, `fill`, `stroke`, `stroke-dasharray`)
 * SVG text baseline alignment attributes (`dominant-baseline="central|hanging|ideographic"`) and `<tspan baseline-shift="sub|super" font-size="smaller">`
 
-[`lib/src/svg/flattener.dart`](../lib/src/svg/flattener.dart) (`flattenPeleSvg`) resolves all of these deterministically in pure Dart while keeping the 33 diagram renderers 100% 1:1 with upstream `obsidianmd/pele`:
+[`lib/src/svg/flattener.dart`](../lib/src/svg/flattener.dart) (`flattenPeleSvg`) resolves all of these deterministically in pure Dart while keeping the diagram renderers 100% 1:1 with upstream `obsidianmd/pele`:
 
 | Upstream Pele Construct | Why `vector_graphics_compiler` Rejects It | How `flattenPeleSvg` Resolves It in Pure Dart |
 | :--- | :--- | :--- |
@@ -185,15 +185,15 @@ In JavaScript engines (`V8` / `JavaScriptCore`), regex state machines and substr
 4. **Lazy Wall-Clock Timezone Evaluation (`lib/src/diagrams/gantt/dates.dart`)**:
    * Querying `DateTime.timeZoneOffset` in Dart invokes an OS `localtime_r` syscall. `_MDate._w` is computed lazily only when local wall-clock fields (`year`, `month`, `day`, `hour`) are accessed, keeping pure epoch arithmetic in Gantt chart layout syscall-free.
 5. **Automated AOT Benchmark & Regression Gate (`tool/benchmark_suite.dart`)**:
-   * Compiles the benchmark runner to a native AOT executable (`dart compile exe`), measures `PARSE`, `RENDER`, `AOT_CSS`, and `AOT_FLAT` across all 33 diagram families (232 diagrams), regenerates [`doc/BENCHMARKS.md`](BENCHMARKS.md), and enforces non-regression against [`tool/benchmark_baseline.json`](../tool/benchmark_baseline.json).
+   * Compiles the benchmark runner to a native AOT executable (`dart compile exe`), measures `PARSE`, `RENDER`, `AOT_CSS`, and `AOT_FLAT` across all supported diagram families in the gallery corpus, regenerates [`doc/BENCHMARKS.md`](BENCHMARKS.md), and enforces non-regression against [`tool/benchmark_baseline.json`](../tool/benchmark_baseline.json).
 
 ---
 
 ## 6. Verification & Upstream Sync Architecture
 
-* **787-Diagram Differential Parity Gate (`tool/verify_against_upstream.dart`)**:
+* **Upstream Differential Parity Gate (`tool/verify_against_upstream.dart`)**:
   * Verifies 1:1 version lockstep across [`UPSTREAM.md`](../UPSTREAM.md), [`pubspec.yaml`](../pubspec.yaml), [`CHANGELOG.md`](../CHANGELOG.md), and [`lib/src/diagrams/info/render.dart`](../lib/src/diagrams/info/render.dart).
-  * Runs all 33 canonical diagrams, 232 gallery samples, and 522 upstream test corpus diagrams through both upstream `obsidianmd/pele` (in `.upstream/`) and `pele_dart` (`SvgOutputMode.cssVariables`), asserting 100% byte-for-byte SVG equality (`787/787`).
+  * Runs every canonical diagram, gallery sample, and upstream test corpus diagram through both upstream `obsidianmd/pele` (in `.upstream/`) and `pele_dart` (`SvgOutputMode.cssVariables`), asserting 100% byte-for-byte SVG equality.
   * Compiles every rendered diagram in `SvgOutputMode.flattened` through `vector_graphics_compiler` (`encodeSvg`) in [`test/gallery_corpus_test.dart`](../test/gallery_corpus_test.dart).
 * **Automated Upstream Sync (`tool/sync_upstream.dart`)**:
   * Diffs `.upstream/` between the SHA in [`UPSTREAM.md`](../UPSTREAM.md) and new `obsidianmd/pele` releases, maps every changed `src/<path>.ts` to `lib/src/<path>.dart`, refreshes `studio/assets/pele.bundle.js` and `studio/assets/mermaid.min.js`, and regenerates `doc/images/` and [`doc/DIAGRAM_GALLERY.md`](DIAGRAM_GALLERY.md). See [`doc/UPSTREAM_SYNC.md`](UPSTREAM_SYNC.md) for the complete runbook.

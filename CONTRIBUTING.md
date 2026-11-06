@@ -62,7 +62,7 @@ dart test
 ```
 
 ### 4. Upstream 1:1 Parity Verification *(when `.upstream/` is present)*
-To check for upstream `obsidianmd/pele` updates or verify byte-for-byte SVG parity across all 787 canonical, gallery, and test corpus diagrams:
+To check for upstream `obsidianmd/pele` updates or verify byte-for-byte SVG parity across all canonical, gallery, and test corpus diagrams:
 ```bash
 dart run tool/sync_upstream.dart --check
 dart run tool/verify_against_upstream.dart

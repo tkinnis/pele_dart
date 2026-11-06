@@ -1,7 +1,7 @@
 name: pele_dart_comparison_demo
 description: >-
   macOS 3-way comparison and visual/SVG text diff demo application comparing
-  pele_dart, obsidianmd/pele (JS), and mermaid.js across all 33 diagram families.
+  pele_dart, obsidianmd/pele (JS), and mermaid.js across all supported diagram families.
 publish_to: none
 version: 0.1.0
 

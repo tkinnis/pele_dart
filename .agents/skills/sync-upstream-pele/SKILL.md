@@ -1,6 +1,6 @@
 ---
 name: sync-upstream-pele
-description: Detects new upstream obsidianmd/pele releases, commits, and target Mermaid.js version changes, ports TypeScript changes 1:1 into pele_dart (bug fixes, new diagram families, beta-to-stable promotions) while preserving Dart AOT hot-path optimizations, refreshes showcase app bundles and galleries, runs the 787-diagram differential verification suite and native AOT benchmark regression gate, and cuts an updated release.
+description: Detects new upstream obsidianmd/pele releases, commits, and target Mermaid.js version changes, ports TypeScript changes 1:1 into pele_dart (bug fixes, new diagram families, beta-to-stable promotions) while preserving Dart AOT hot-path optimizations, refreshes showcase app bundles and galleries, runs the upstream differential verification suite and native AOT benchmark regression gate, and cuts an updated release.
 ---
 
 # Sync Upstream `obsidianmd/pele` Skill (`sync-upstream-pele`)
@@ -111,7 +111,7 @@ dart analyze --fatal-infos lib test tool example
 # 3. Full unit, gallery corpus, and upstream differential test suite
 dart test
 
-# 4. 787+ diagram differential & flattened-SVG verification against .upstream
+# 4. Upstream differential & flattened-SVG verification against .upstream
 dart run tool/verify_against_upstream.dart
 
 # 5. Native AOT benchmark report update & non-regression gate
@@ -123,7 +123,7 @@ Confirm that:
 * `tool/verify_against_upstream.dart` outputs `"status":"ok"` with:
   * `exactUpstreamMatches` == total canonical diagrams
   * `exactGalleryMatches` == `totalGallerySamples`
-  * `exactCorpusMatches` == `totalCorpusSamples` (all 522+ `.upstream/tests/corpus/*.json` diagrams)
+  * `exactCorpusMatches` == `totalCorpusSamples` (all `.upstream/tests/corpus/*.json` diagrams)
 * `tool/benchmark_suite.dart --update-docs --check-regressions` refreshes [`doc/BENCHMARKS.md`](../../../doc/BENCHMARKS.md) and prints `✅ BENCHMARK REGRESSION GATE PASSED`. If any diagram family or phase (`PARSE` or `RENDER`) regresses after syncing upstream changes, optimize the newly synced hot path (using `codeUnitAt` scanners or fast token matchers) and re-run before proceeding to release.
 
 ---

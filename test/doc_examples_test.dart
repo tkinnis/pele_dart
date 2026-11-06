@@ -411,18 +411,21 @@ flowchart LR
             'CHANGELOG.md top version ($topChangelogVersion) must match pubspec.yaml ($pubspecVersion)',
       );
 
-      // Ensure documentation prose does not hardcode or duplicate the release version number.
+      // Ensure documentation prose does not hardcode or duplicate the release version number
+      // or moving-target diagram/corpus counts.
       for (final docPath in <String>[
         'README.md',
         'example/README.md',
         'doc/API_MANUAL.md',
         'doc/ARCHITECTURE.md',
         'doc/BENCHMARKS.md',
+        'doc/STUDIO_GUIDE.md',
         'SECURITY.md',
         'CONTRIBUTING.md',
         'CODE_OF_CONDUCT.md',
         'AGENTS.md',
         'doc/UPSTREAM_SYNC.md',
+        '.agents/skills/sync-upstream-pele/SKILL.md',
       ]) {
         final docText = File(docPath).readAsStringSync();
         expect(
@@ -430,6 +433,18 @@ flowchart LR
           isNot(contains(expectedBaseVersion)),
           reason:
               '$docPath should not hardcode release version $expectedBaseVersion; reference UPSTREAM.md or pubspec.yaml instead.',
+        );
+        expect(
+          docText.toLowerCase(),
+          isNot(contains('33 diagram')),
+          reason:
+              '$docPath should not hardcode moving-target diagram family counts ("33 diagram"); refer to UPSTREAM.md instead.',
+        );
+        expect(
+          docText,
+          isNot(contains('787')),
+          reason:
+              '$docPath should not hardcode moving-target corpus counts ("787").',
         );
       }
     });
