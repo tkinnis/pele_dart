@@ -90,6 +90,6 @@ When browsing diagrams (with focus outside the text editors), you can step rapid
 - Click the **Style Preset** popup button (`Default Dark`, `Default Light`, `Flexoki Paper`, `Catppuccin Mocha`, `Nord Blueprint`, `Solarized Dark`) in the top toolbar to restyle all engines immediately.
 - Switch the bottom Playground Editor from **`Mermaid`** to **`Style (CSS)`** to edit `--pele-*` CSS custom properties (`--pele-bg`, `--pele-fg`, `--pele-accent`, `--pele-radius`, `--pele-series-1..8`) live.
 
-### Dynamic `.mmd` / `.mermaid` Folder Browser (`studio/diagrams/`)
+### Dynamic `.mmd` / `.mermaid` Folder Browser
 - The left sidebar dynamically scans [`studio/diagrams/`](../studio/diagrams/README.md) (`01_core/<family>/*.mmd`, `02_extended/<family>/*.mmd`, and `03_custom/`).
 - **Add your own diagrams**: Drop any `.mmd` or `.mermaid` file into [`studio/diagrams/03_custom/`](../studio/diagrams/README.md) (or click **Save (`⬇`)** in the Playground Editor toolbar) and click **Rescan (`↻`)** in the sidebar header to browse it immediately.

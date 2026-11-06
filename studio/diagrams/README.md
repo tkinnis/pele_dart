@@ -1,4 +1,4 @@
-# Mermaid Diagram Gallery (`studio/diagrams/`)
+# Mermaid Diagram Gallery
 
 This folder contains all Mermaid diagram files loaded dynamically by
 **Pele Studio** (`studio/`), the test suite, and documentation tools.

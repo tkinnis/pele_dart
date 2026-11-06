@@ -7,10 +7,10 @@
 ## Table of Contents
 
 1. [Quick Reference Commands](#1-quick-reference-commands)
-2. [How Upstream Tracking Works (`UPSTREAM.md`)](#2-how-upstream-tracking-works-upstreammd)
+2. [How Upstream Tracking Works](#2-how-upstream-tracking-works)
 3. [Checking for Upstream Releases & Mermaid Version Changes](#3-checking-for-upstream-releases--mermaid-version-changes)
 4. [Staging an Upstream Update (`--update-to-latest`)](#4-staging-an-upstream-update---update-to-latest)
-5. [Agentic Sync Workflow (`.agents/skills/sync-upstream-pele`)](#5-agentic-sync-workflow-agentsskillssync-upstream-pele)
+5. [Agentic Sync Workflow](#5-agentic-sync-workflow)
 6. [Playbooks by Upstream Change Category](#6-playbooks-by-upstream-change-category)
    - [A. Bug Fixes & Layout Tweaks](#a-bug-fixes--layout-tweaks)
    - [B. Beta-to-Stable Diagram Promotions (`-beta` Removal)](#b-beta-to-stable-diagram-promotions--beta-removal)
@@ -37,7 +37,7 @@
 
 ---
 
-## 2. How Upstream Tracking Works (`UPSTREAM.md`)
+## 2. How Upstream Tracking Works
 
 [`UPSTREAM.md`](../UPSTREAM.md) is the single source of truth for the upstream baseline that `pele_dart` is synchronized against:
 
@@ -106,7 +106,7 @@ dart run tool/sync_upstream.dart --update-to v1.14.0
 
 ---
 
-## 5. Agentic Sync Workflow (`.agents/skills/sync-upstream-pele`)
+## 5. Agentic Sync Workflow
 
 This repository includes a dedicated Agent Skill at [`.agents/skills/sync-upstream-pele/SKILL.md`](../.agents/skills/sync-upstream-pele/SKILL.md).
 

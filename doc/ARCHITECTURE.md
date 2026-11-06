@@ -132,7 +132,7 @@ pele_dart/
 
 ---
 
-## 3. Bridging CSS-Variable SVG to `vector_graphics_compiler` (`svg/flattener.dart`)
+## 3. Bridging CSS-Variable SVG to `vector_graphics_compiler`
 
 Upstream `obsidianmd/pele` emits clean, self-contained SVG geometry without `<marker>` arrowheads or HTML `<foreignObject>` layout tables. However, it styles its SVG output using modern CSS features that static SVG 1.1 compilers (`vector_graphics_compiler` / `flutter_svg`) do not support:
 * CSS custom properties (`var(--pele-*)` and scoped `var(--_*)` variables)

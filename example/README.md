@@ -6,7 +6,7 @@ Run the standalone pure-Dart CLI example from the repository root:
 dart run example/main.dart
 ```
 
-## Pure-Dart Usage (`example/main.dart`)
+## Pure-Dart Usage
 
 ```dart
 import 'package:pele_dart/pele_dart.dart';

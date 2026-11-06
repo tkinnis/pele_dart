@@ -487,7 +487,10 @@ flowchart LR
         'doc/UPSTREAM_SYNC.md',
         '.agents/skills/sync-upstream-pele/SKILL.md',
       ];
-      final linkRe = RegExp(r'!?\[[^\]]*\]\(([^)]+)\)');
+      final linkRe = RegExp(r'!?\[([^\]]*)\]\(([^)]+)\)');
+      final parenPathInLabelRe = RegExp(
+        r'\(`?[A-Za-z0-9_./-]+(?:/|\.(?:md|dart|ts|json))`?\)',
+      );
 
       for (final mdRelPath in mdFiles) {
         final mdFile = File(mdRelPath);
@@ -496,7 +499,14 @@ flowchart LR
         final baseDir = mdFile.parent.path;
 
         for (final m in linkRe.allMatches(text)) {
-          final rawTarget = m.group(1)!.trim();
+          final label = m.group(1)!.trim();
+          final rawTarget = m.group(2)!.trim();
+          expect(
+            parenPathInLabelRe.hasMatch(label),
+            isFalse,
+            reason:
+                'Link label [$label]($rawTarget) in $mdRelPath should not embed a file/directory path in parentheses.',
+          );
           if (rawTarget.startsWith('http://') ||
               rawTarget.startsWith('https://') ||
               rawTarget.startsWith('mailto:') ||
