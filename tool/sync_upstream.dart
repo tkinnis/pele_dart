@@ -511,7 +511,7 @@ Future<bool> _ensureUpstreamClone(
   String pinnedSha,
 ) async {
   if (!upstreamDir.existsSync()) {
-    stdout.writeln('Cloning obsidianmd/pele into .upstream...');
+    stderr.writeln('Cloning obsidianmd/pele into .upstream...');
     final clone = await Process.run('git', <String>[
       'clone',
       'https://github.com/obsidianmd/pele.git',
