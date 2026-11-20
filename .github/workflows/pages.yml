@@ -35,6 +35,7 @@ jobs:
           cp studio/diagrams/README.md _site/studio/diagrams/
           cp lib/pele_dart.dart _site/lib/
           cp doc/index.html _site/index.html
+          cp doc/images/pele_favicon.png _site/favicon.png
           cp doc/_sidebar.md _site/_sidebar.md
           cp doc/pele_diagrams.js _site/pele_diagrams.js
 
