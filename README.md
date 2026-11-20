@@ -1,7 +1,7 @@
 # ![Pele](doc/images/pele_logo.svg) pele_dart
 
 [![pub package](https://img.shields.io/pub/v/pele_dart.svg)](https://pub.dev/packages/pele_dart)
-[![CI](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml/badge.svg)](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/tkinnis/pele_dart/ci.yml?branch=main&label=CI&logo=github)](https://github.com/tkinnis/pele_dart/actions/workflows/ci.yml)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-2.2x%20faster%20(AOT)-00b4d8)](doc/BENCHMARKS.md)
 [![Upstream obsidianmd/pele](https://img.shields.io/badge/upstream-obsidianmd%2Fpele-7c3aed)](UPSTREAM.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
